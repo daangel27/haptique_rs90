@@ -1,8 +1,5 @@
 {
-  "name": "Haptique RS90 Remote",
-  "content_in_root": false,
-  "filename": "haptique_rs90",
+  "name": "Haptique RS90",
   "render_readme": true,
-  "country": ["FR"],
-  "homeassistant": "2024.1.0"
+  "domains": ["sensor", "binary_sensor", "switch"]
 }
