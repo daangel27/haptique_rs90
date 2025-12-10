@@ -14,11 +14,11 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 
 <table>
 <tr>
-<td width="50%">
+<td width="30%">
 <img src="documentation/screenshots/device_info.png" alt="Informations appareil" />
 <p align="center"><em>Informations et Contrôles</em></p>
 </td>
-<td width="50%">
+<td width="30%">
 <img src="documentation/screenshots/device_list.png" alt="Liste appareils" />
 <p align="center"><em>Liste des appareils</em></p>
 </td>
