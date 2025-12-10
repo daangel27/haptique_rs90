@@ -6,7 +6,8 @@ from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -24,40 +25,74 @@ async def async_setup_entry(
     """Set up Haptique RS90 switch platform."""
     coordinator: HaptiqueRS90Coordinator = hass.data[DOMAIN][entry.entry_id]
     
-    entities: list[SwitchEntity] = []
+    entities: dict[str, HaptiqueRS90MacroSwitch] = {}
     
     # Create switches for macros
     for macro in coordinator.data.get("macros", []):
         macro_id = macro.get("id")
         macro_name = macro.get("name")
         if macro_id and macro_name:
-            entities.append(HaptiqueRS90MacroSwitch(coordinator, entry, macro_id, macro_name))
+            entity = HaptiqueRS90MacroSwitch(coordinator, entry, macro_id, macro_name)
+            entities[macro_id] = entity
     
-    async_add_entities(entities)
+    async_add_entities(entities.values())
     
-    # Setup dynamic entity addition for future discoveries
-    @coordinator.async_add_listener
+    @callback
     def _async_update_entities() -> None:
-        """Add new entities when discovered."""
-        new_entities: list[SwitchEntity] = []
+        """Add new entities and remove obsolete ones when macros change."""
+        _LOGGER.debug("=== SWITCH: Entity update triggered ===")
+        entity_registry = er.async_get(hass)
+        current_macro_ids = {macro.get("id") for macro in coordinator.data.get("macros", []) if macro.get("id")}
+        existing_macro_ids = set(entities.keys())
         
-        # Check for new macros
-        existing_macro_ids = {
-            entity.unique_id.split("_macro_")[1]
-            for entity in entities
-            if isinstance(entity, HaptiqueRS90MacroSwitch)
-        }
+        _LOGGER.debug("Current macro IDs from MQTT: %s", current_macro_ids)
+        _LOGGER.debug("Existing macro IDs in HA: %s", existing_macro_ids)
+        
+        # Find macros to add
+        macros_to_add = current_macro_ids - existing_macro_ids
+        new_entities = []
+        
+        if macros_to_add:
+            _LOGGER.info("Macros to add: %s", macros_to_add)
         
         for macro in coordinator.data.get("macros", []):
             macro_id = macro.get("id")
             macro_name = macro.get("name")
-            if macro_id and macro_name and macro_id not in existing_macro_ids:
-                new_entity = HaptiqueRS90MacroSwitch(coordinator, entry, macro_id, macro_name)
-                new_entities.append(new_entity)
-                entities.append(new_entity)
+            if macro_id in macros_to_add and macro_name:
+                entity = HaptiqueRS90MacroSwitch(coordinator, entry, macro_id, macro_name)
+                entities[macro_id] = entity
+                new_entities.append(entity)
+                _LOGGER.info("✓ Adding new macro switch: %s (id: %s)", macro_name, macro_id)
         
         if new_entities:
             async_add_entities(new_entities)
+        
+        # Find macros to remove
+        macros_to_remove = existing_macro_ids - current_macro_ids
+        
+        if macros_to_remove:
+            _LOGGER.info("Macros to remove: %s", macros_to_remove)
+        
+        for macro_id in macros_to_remove:
+            entity = entities.pop(macro_id, None)
+            if entity:
+                _LOGGER.debug("Processing removal of macro: %s (unique_id: %s)", entity.name, entity.unique_id)
+                # Remove from entity registry
+                entity_id = entity_registry.async_get_entity_id(
+                    "switch",
+                    DOMAIN,
+                    entity.unique_id
+                )
+                if entity_id:
+                    entity_registry.async_remove(entity_id)
+                    _LOGGER.info("✓ Removed obsolete macro switch: %s (entity_id: %s)", entity.name, entity_id)
+                else:
+                    _LOGGER.warning("Could not find entity_id for unique_id: %s", entity.unique_id)
+            else:
+                _LOGGER.warning("Could not find entity for macro_id: %s", macro_id)
+    
+    # Setup dynamic entity management
+    entry.async_on_unload(coordinator.async_add_listener(_async_update_entities))
 
 
 class HaptiqueRS90SwitchBase(CoordinatorEntity, SwitchEntity):
@@ -107,6 +142,7 @@ class HaptiqueRS90MacroSwitch(HaptiqueRS90SwitchBase):
         self._macro_name = macro_name
         self._attr_name = f"Macro: {macro_name}"
         self._attr_icon = "mdi:play-circle"
+        self._attr_device_class = "switch"  # Pour avoir la couleur bleu quand ON
 
     @property
     def is_on(self) -> bool:

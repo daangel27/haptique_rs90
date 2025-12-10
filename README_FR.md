@@ -1,12 +1,31 @@
 # Haptique RS90 - Intégration Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
+[![Version](https://img.shields.io/badge/version-1.2.5-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Intégration Home Assistant pour la télécommande universelle **Haptique RS90** via MQTT.
 
-[English](README_EN.md) | **Français**
+[English](README.md) | **Français**
+
+---
+
+## 📸 Captures d'écran
+
+<table>
+<tr>
+<td width="50%">
+<img src="documentation/screenshots/device_info.png" alt="Informations appareil" />
+<p align="center"><em>Informations et Contrôles</em></p>
+</td>
+<td width="50%">
+<img src="documentation/screenshots/device_commands.png" alt="Commandes appareil" />
+<p align="center"><em>Liste des commandes</em></p>
+</td>
+</tr>
+</table>
+
+---
 
 ## ✨ Fonctionnalités
 
@@ -15,15 +34,17 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 - 🔌 **État de connexion** : Détection en temps réel de l'état online/offline
 - 🎮 **Détection des touches** : Capteur des dernières touches pressées
 - 📱 **Liste des appareils** : Visualisation de tous les appareils configurés
-- 💾 **États persistants** : Conservation des états après redémarrage de Home Assistant
-- 🔄 **MQTT retained** : États disponibles immédiatement lors de la reconnexion
+- 📋 **Commandes des appareils** : Capteurs affichant les commandes disponibles pour chaque appareil
+- 🔄 **100% piloté par MQTT** : Pas de polling, mises à jour événementielles pures
+- 🎯 **QoS optimisé** : QoS 0 pour la surveillance, QoS 1 pour les commandes de contrôle
 - 🚀 **Auto-découverte** : Détection automatique du Remote ID
+- 🌍 **Multi-langue** : Anglais et Français
 
 ## 📋 Prérequis
 
 - Home Assistant 2024.1.0 ou supérieur
-- Broker MQTT configuré (Mosquitto recommandé)
-- Télécommande Haptique RS90 connectée au même réseau MQTT
+- **Broker MQTT configuré** (Mosquitto recommandé)
+- **Télécommande Haptique RS90 configurée et connectée à MQTT**
 
 ## 🚀 Installation
 
@@ -48,26 +69,38 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 
 ## ⚙️ Configuration
 
-### 1. Ajouter l'intégration
+### Prérequis
+
+Avant d'ajouter l'intégration, assurez-vous que :
+1. ✅ **Le broker MQTT est configuré** dans Home Assistant
+2. ✅ **Le RS90 est configuré** pour se connecter à votre broker MQTT (via l'application Haptique Config)
+3. ✅ **Le RS90 est en ligne** et publie sur MQTT
+
+### Auto-découverte
+
+Une fois les prérequis remplis :
 
 1. Allez dans **Paramètres** → **Appareils et services**
 2. Cliquez sur **Ajouter une intégration**
 3. Recherchez **Haptique RS90**
-4. L'intégration détectera automatiquement votre télécommande
-5. Donnez un nom (optionnel, par défaut : "Haptique RS90")
+4. **L'intégration découvrira automatiquement votre télécommande** 🎉
+5. Donnez-lui un nom (optionnel, par défaut : "RS90 {ID}")
 6. Cliquez sur **Valider**
 
-### 2. Configuration MQTT
+C'est tout ! L'intégration créera automatiquement toutes les entités.
 
-Assurez-vous que votre télécommande Haptique RS90 publie sur les topics suivants :
+### Topics MQTT
+
+L'intégration s'abonne à ces topics (tous avec messages retained) :
 
 ```
-Haptique/{RemoteID}/status          # État online/offline
-Haptique/{RemoteID}/battery_level   # Niveau de batterie (0-100)
-Haptique/{RemoteID}/keys            # Touches pressées
-Haptique/{RemoteID}/macro/list      # Liste des macros
-Haptique/{RemoteID}/device/list     # Liste des appareils
-Haptique/{RemoteID}/macro/{name}/trigger  # État macro (on/off)
+Haptique/{RemoteID}/status                    # État online/offline
+Haptique/{RemoteID}/battery_level             # Niveau de batterie (0-100)
+Haptique/{RemoteID}/keys                      # Touches pressées
+Haptique/{RemoteID}/macro/list                # Liste des macros (JSON)
+Haptique/{RemoteID}/device/list               # Liste des appareils (JSON)
+Haptique/{RemoteID}/device/{device}/commands  # Commandes de l'appareil (JSON)
+Haptique/{RemoteID}/macro/{name}/trigger      # État de la macro (on/off)
 ```
 
 ## 📊 Entités créées
@@ -80,6 +113,7 @@ Haptique/{RemoteID}/macro/{name}/trigger  # État macro (on/off)
 | `sensor.{name}_last_key_pressed` | Dernière touche pressée | Nom de la touche |
 | `sensor.{name}_running_macro` | Macro en cours | Nom de la macro ou "Idle" |
 | `sensor.{name}_device_list` | Liste des appareils | Nombre d'appareils |
+| `sensor.commands_{device}` | Commandes disponibles | Liste des commandes (diagnostic) |
 
 ### Capteurs Binaires (Binary Sensors)
 
@@ -91,13 +125,13 @@ Haptique/{RemoteID}/macro/{name}/trigger  # État macro (on/off)
 
 | Entité | Description | Actions |
 |--------|-------------|---------|
-| `switch.{name}_macro_{macro_name}` | Contrôle de macro | ON / OFF / TOGGLE |
+| `switch.macro_{macro_name}` | Contrôle de macro | ON / OFF / TOGGLE |
 
 **Caractéristiques des switches :**
 - ✅ État visible (ON = macro active, OFF = macro inactive)
 - ✅ Toggle natif
 - ✅ Icône dynamique (▶️ / ⏹️)
-- ✅ États persistants après redémarrage
+- ✅ Coloration bleue (ON) / grise (OFF)
 
 ## 🎯 Exemples d'utilisation
 
@@ -111,9 +145,9 @@ entities:
     name: Connexion
   - entity: sensor.rs90_battery
     name: Batterie
-  - entity: switch.rs90_macro_watch_tv
+  - entity: switch.macro_watch_tv
     name: Regarder la TV
-  - entity: switch.rs90_macro_cinema_mode
+  - entity: switch.macro_cinema_mode
     name: Mode Cinéma
 ```
 
@@ -131,12 +165,12 @@ automation:
         entity_id: binary_sensor.rs90_connection
         state: "on"
       - condition: state
-        entity_id: switch.rs90_macro_watch_tv
+        entity_id: switch.macro_watch_tv
         state: "off"
     action:
       - service: switch.turn_on
         target:
-          entity_id: switch.rs90_macro_watch_tv
+          entity_id: switch.macro_watch_tv
 ```
 
 ### Script
@@ -148,7 +182,7 @@ script:
     sequence:
       - service: switch.turn_on
         target:
-          entity_id: switch.rs90_macro_cinema_mode
+          entity_id: switch.macro_cinema_mode
       - service: light.turn_off
         target:
           entity_id: light.salon
@@ -168,9 +202,8 @@ Déclenche une macro manuellement.
 ```yaml
 service: haptique_rs90.trigger_macro
 data:
-  device_id: "votre_device_id"
-  macro_name: "Watch TV"
-  action: "on"  # ou "off"
+  device_id: "6e99751e77b5a07de72d549143e2875a"  # ID de votre RS90
+  macro_name: "Watch Movie"
 ```
 
 ### `haptique_rs90.trigger_device_command`
@@ -180,39 +213,22 @@ Envoie une commande à un appareil.
 ```yaml
 service: haptique_rs90.trigger_device_command
 data:
-  device_id: "votre_device_id"
-  device_name: "TV Samsung"
-  command_name: "power_on"
+  device_id: "6e99751e77b5a07de72d549143e2875a"
+  device_name: "Samsung TV"
+  command_name: "POWER"
 ```
 
-### `haptique_rs90.refresh_data`
+**Astuce :** Utilisez l'entité `sensor.commands_{device}` pour voir les commandes disponibles pour chaque appareil.
 
-Actualise manuellement les données.
-
-```yaml
-service: haptique_rs90.refresh_data
-data:
-  device_id: "votre_device_id"
-```
-
-### `haptique_rs90.get_diagnostics`
-
-Affiche les diagnostics dans les logs.
-
-```yaml
-service: haptique_rs90.get_diagnostics
-data:
-  device_id: "votre_device_id"
-```
-
-## 🐛 Dépannage
+## 🛠️ Dépannage
 
 ### La télécommande n'est pas détectée
 
-1. Vérifiez que MQTT est configuré et fonctionne
-2. Vérifiez que la télécommande publie sur les topics MQTT
-3. Utilisez MQTT Explorer pour voir les messages
-4. Activez les logs de debug :
+1. Vérifiez que **le broker MQTT est configuré** dans Home Assistant (Paramètres > Appareils et services > MQTT)
+2. Vérifiez que **le RS90 est configuré** pour se connecter à MQTT (application Haptique Config)
+3. Vérifiez que **le RS90 est en ligne** (vérifiez dans l'application Haptique Config)
+4. Utilisez **MQTT Explorer** pour vérifier que les messages sont publiés
+5. Activez les logs de debug :
 
 ```yaml
 logger:
@@ -222,20 +238,13 @@ logger:
 
 ### Les switches ne reflètent pas l'état correct
 
-1. Vérifiez que les topics `macro/{name}/trigger` publient avec `retained=True`
-2. Vérifiez le fichier `.storage/haptique_rs90_*_states.json`
+1. Vérifiez que la macro est correctement configurée dans le RS90
+2. Vérifiez MQTT Explorer pour les topics `macro/{name}/trigger`
 3. Redémarrez Home Assistant
 
 ### La batterie affiche toujours 0
 
-1. Vérifiez que la télécommande répond au topic `battery/status`
-2. Activez les logs debug et cherchez "Battery level updated"
-3. Testez manuellement :
-
-```bash
-mosquitto_pub -h localhost -t "Haptique/YOUR_ID/battery/status" -m ""
-mosquitto_sub -h localhost -t "Haptique/YOUR_ID/battery_level"
-```
+Le niveau de batterie est mis à jour à la demande. Déclenchez une mise à jour manuellement ou attendez la prochaine mise à jour automatique.
 
 ## 📁 Structure des fichiers
 
@@ -245,14 +254,16 @@ custom_components/haptique_rs90/
 ├── manifest.json         # Métadonnées de l'intégration
 ├── config_flow.py        # Interface de configuration
 ├── coordinator.py        # Coordinateur MQTT
-├── const.py             # Constantes
-├── sensor.py            # Capteurs
-├── binary_sensor.py     # Capteurs binaires
-├── switch.py            # Switches pour macros
-├── services.yaml        # Définition des services
-├── strings.json         # Traductions anglaises
+├── const.py              # Constantes
+├── sensor.py             # Capteurs
+├── binary_sensor.py      # Capteurs binaires
+├── switch.py             # Switches pour macros
+├── services.yaml         # Définition des services
+├── strings.json          # Traductions anglaises
+├── icon.png              # Icône de l'intégration
 └── translations/
-    └── fr.json          # Traductions françaises
+    ├── en.json           # Traductions anglaises
+    └── fr.json           # Traductions françaises
 ```
 
 ## 🤝 Contribuer
@@ -271,6 +282,7 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 🙏 Remerciements
 
+- [Cantata Communication Solutions](https://github.com/Cantata-Communication-Solutions) pour la création de la télécommande **Haptique RS90**
 - L'équipe Home Assistant pour l'excellente plateforme
 - La communauté Haptique pour le support
 
@@ -282,6 +294,7 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ---
 
-**Version:** 1.1.5  
-**Auteur:** daangel27  
-**Dernière mise à jour:** Décembre 2025
+**Version :** 1.2.5  
+**Auteur :** daangel27  
+**Dernière mise à jour :** Décembre 2025  
+**Langues :** English, Français

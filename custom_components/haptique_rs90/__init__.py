@@ -69,58 +69,6 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         
         _LOGGER.error("Coordinator not found for device: %s", device_id)
     
-    async def handle_get_diagnostics(call):
-        """Handle the get_diagnostics service call."""
-        device_id = call.data.get("device_id")
-        
-        # Find the coordinator for this device
-        device_registry = dr.async_get(hass)
-        device_entry = device_registry.async_get(device_id)
-        
-        if not device_entry:
-            _LOGGER.error("Device not found: %s", device_id)
-            return
-        
-        # Find the config entry
-        for entry_id in device_entry.config_entries:
-            if entry_id in hass.data.get(DOMAIN, {}):
-                coordinator = hass.data[DOMAIN][entry_id]
-                diagnostics = coordinator.get_diagnostics()
-                _LOGGER.info("=== DIAGNOSTICS for %s ===", coordinator.remote_id)
-                _LOGGER.info("Status: %s", diagnostics["status"])
-                _LOGGER.info("Devices found: %s", diagnostics["devices_count"])
-                _LOGGER.info("Devices: %s", diagnostics["devices"])
-                _LOGGER.info("Macros found: %s", diagnostics["macros_count"])
-                _LOGGER.info("Macros: %s", diagnostics["macros"])
-                _LOGGER.info("Device commands: %s", diagnostics["device_commands"])
-                _LOGGER.info("Active subscriptions: %s", diagnostics["subscriptions_count"])
-                _LOGGER.info("=== END DIAGNOSTICS ===")
-                return
-        
-        _LOGGER.error("Coordinator not found for device: %s", device_id)
-    
-    async def handle_refresh_data(call):
-        """Handle the refresh_data service call."""
-        device_id = call.data.get("device_id")
-        
-        # Find the coordinator for this device
-        device_registry = dr.async_get(hass)
-        device_entry = device_registry.async_get(device_id)
-        
-        if not device_entry:
-            _LOGGER.error("Device not found: %s", device_id)
-            return
-        
-        # Find the config entry
-        for entry_id in device_entry.config_entries:
-            if entry_id in hass.data.get(DOMAIN, {}):
-                coordinator = hass.data[DOMAIN][entry_id]
-                _LOGGER.info("Manual refresh requested for %s", coordinator.remote_id)
-                await coordinator.async_request_refresh()
-                return
-        
-        _LOGGER.error("Coordinator not found for device: %s", device_id)
-    
     # Register services only once
     if not hass.services.has_service(DOMAIN, "trigger_macro"):
         hass.services.async_register(
@@ -134,20 +82,6 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             DOMAIN,
             "trigger_device_command",
             handle_trigger_device_command,
-        )
-    
-    if not hass.services.has_service(DOMAIN, "get_diagnostics"):
-        hass.services.async_register(
-            DOMAIN,
-            "get_diagnostics",
-            handle_get_diagnostics,
-        )
-    
-    if not hass.services.has_service(DOMAIN, "refresh_data"):
-        hass.services.async_register(
-            DOMAIN,
-            "refresh_data",
-            handle_refresh_data,
         )
 
 

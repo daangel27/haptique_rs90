@@ -1,29 +1,50 @@
 # Haptique RS90 - Home Assistant Integration
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
+[![Version](https://img.shields.io/badge/version-1.2.5-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Home Assistant integration for the **Haptique RS90** universal remote via MQTT.
 
-**English** | [Français](README.md)
+**English** | [Français](README_FR.md)
+
+---
+
+## 📸 Screenshots
+
+<table>
+<tr>
+<td width="50%">
+<img src="documentation/screenshots/device_info.png" alt="Device Info" />
+<p align="center"><em>Device Information & Controls</em></p>
+</td>
+<td width="50%">
+<img src="documentation/screenshots/device_commands.png" alt="Device Commands" />
+<p align="center"><em>Device Commands List</em></p>
+</td>
+</tr>
+</table>
+
+---
 
 ## ✨ Features
 
 - 🎛️ **Macro switches**: Control your macros with visible ON/OFF state
-- 🔋 **Battery sensor**: Monitor remote battery level
+- 🔋 **Battery sensor**: Monitor remote battery level  
 - 🔌 **Connection status**: Real-time online/offline detection
 - 🎮 **Key detection**: Last pressed key sensor
 - 📱 **Device list**: View all configured devices
-- 💾 **Persistent states**: States preserved after Home Assistant restart
-- 🔄 **MQTT retained**: States available immediately on reconnection
+- 📋 **Device commands**: Sensors showing available commands for each device
+- 🔄 **100% MQTT-driven**: No polling, pure event-driven updates
+- 🎯 **QoS optimized**: QoS 0 for monitoring, QoS 1 for control commands
 - 🚀 **Auto-discovery**: Automatic Remote ID detection
+- 🌍 **Multi-language**: English and French
 
 ## 📋 Requirements
 
 - Home Assistant 2024.1.0 or higher
-- Configured MQTT broker (Mosquitto recommended)
-- Haptique RS90 remote connected to the same MQTT network
+- **Configured MQTT broker** (Mosquitto recommended)
+- **Haptique RS90 remote configured and connected to MQTT**
 
 ## 🚀 Installation
 
@@ -48,26 +69,38 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT.
 
 ## ⚙️ Configuration
 
-### 1. Add Integration
+### Prerequisites
+
+Before adding the integration, make sure:
+1. ✅ **MQTT broker is configured** in Home Assistant
+2. ✅ **RS90 is configured** to connect to your MQTT broker (via Haptique Config app)
+3. ✅ **RS90 is online** and publishing to MQTT
+
+### Auto-discovery
+
+Once the prerequisites are met:
 
 1. Go to **Settings** → **Devices & Services**
 2. Click **Add Integration**
 3. Search for **Haptique RS90**
-4. Integration will automatically detect your remote
-5. Give it a name (optional, default: "Haptique RS90")
+4. **The integration will automatically discover your remote** 🎉
+5. Give it a name (optional, default: "RS90 {ID}")
 6. Click **Submit**
 
-### 2. MQTT Configuration
+That's it! The integration will automatically create all entities.
 
-Ensure your Haptique RS90 remote publishes to the following topics:
+### MQTT Topics
+
+The integration subscribes to these topics (all with retained messages):
 
 ```
-Haptique/{RemoteID}/status          # Online/offline status
-Haptique/{RemoteID}/battery_level   # Battery level (0-100)
-Haptique/{RemoteID}/keys            # Pressed keys
-Haptique/{RemoteID}/macro/list      # Macro list
-Haptique/{RemoteID}/device/list     # Device list
-Haptique/{RemoteID}/macro/{name}/trigger  # Macro state (on/off)
+Haptique/{RemoteID}/status                    # Online/offline status
+Haptique/{RemoteID}/battery_level             # Battery level (0-100)
+Haptique/{RemoteID}/keys                      # Pressed keys
+Haptique/{RemoteID}/macro/list                # Macro list (JSON)
+Haptique/{RemoteID}/device/list               # Device list (JSON)
+Haptique/{RemoteID}/device/{device}/commands  # Device commands (JSON)
+Haptique/{RemoteID}/macro/{name}/trigger      # Macro state (on/off)
 ```
 
 ## 📊 Created Entities
@@ -80,6 +113,7 @@ Haptique/{RemoteID}/macro/{name}/trigger  # Macro state (on/off)
 | `sensor.{name}_last_key_pressed` | Last pressed key | Key name |
 | `sensor.{name}_running_macro` | Running macro | Macro name or "Idle" |
 | `sensor.{name}_device_list` | Device list | Number of devices |
+| `sensor.commands_{device}` | Available commands | Command list (diagnostic) |
 
 ### Binary Sensors
 
@@ -91,13 +125,13 @@ Haptique/{RemoteID}/macro/{name}/trigger  # Macro state (on/off)
 
 | Entity | Description | Actions |
 |--------|-------------|---------|
-| `switch.{name}_macro_{macro_name}` | Macro control | ON / OFF / TOGGLE |
+| `switch.macro_{macro_name}` | Macro control | ON / OFF / TOGGLE |
 
 **Switch features:**
 - ✅ Visible state (ON = macro active, OFF = macro inactive)
 - ✅ Native toggle
 - ✅ Dynamic icon (▶️ / ⏹️)
-- ✅ Persistent states after restart
+- ✅ Blue (ON) / Gray (OFF) coloring
 
 ## 🎯 Usage Examples
 
@@ -111,9 +145,9 @@ entities:
     name: Connection
   - entity: sensor.rs90_battery
     name: Battery
-  - entity: switch.rs90_macro_watch_tv
+  - entity: switch.macro_watch_tv
     name: Watch TV
-  - entity: switch.rs90_macro_cinema_mode
+  - entity: switch.macro_cinema_mode
     name: Cinema Mode
 ```
 
@@ -131,12 +165,12 @@ automation:
         entity_id: binary_sensor.rs90_connection
         state: "on"
       - condition: state
-        entity_id: switch.rs90_macro_watch_tv
+        entity_id: switch.macro_watch_tv
         state: "off"
     action:
       - service: switch.turn_on
         target:
-          entity_id: switch.rs90_macro_watch_tv
+          entity_id: switch.macro_watch_tv
 ```
 
 ### Script
@@ -148,7 +182,7 @@ script:
     sequence:
       - service: switch.turn_on
         target:
-          entity_id: switch.rs90_macro_cinema_mode
+          entity_id: switch.macro_cinema_mode
       - service: light.turn_off
         target:
           entity_id: light.living_room
@@ -168,9 +202,8 @@ Manually trigger a macro.
 ```yaml
 service: haptique_rs90.trigger_macro
 data:
-  device_id: "your_device_id"
-  macro_name: "Watch TV"
-  action: "on"  # or "off"
+  device_id: "6e99751e77b5a07de72d549143e2875a"  # Your RS90 device ID
+  macro_name: "Watch Movie"
 ```
 
 ### `haptique_rs90.trigger_device_command`
@@ -180,39 +213,22 @@ Send a command to a device.
 ```yaml
 service: haptique_rs90.trigger_device_command
 data:
-  device_id: "your_device_id"
+  device_id: "6e99751e77b5a07de72d549143e2875a"
   device_name: "Samsung TV"
-  command_name: "power_on"
+  command_name: "POWER"
 ```
 
-### `haptique_rs90.refresh_data`
+**Tip:** Use the `sensor.commands_{device}` entity to see available commands for each device.
 
-Manually refresh data.
-
-```yaml
-service: haptique_rs90.refresh_data
-data:
-  device_id: "your_device_id"
-```
-
-### `haptique_rs90.get_diagnostics`
-
-Display diagnostics in logs.
-
-```yaml
-service: haptique_rs90.get_diagnostics
-data:
-  device_id: "your_device_id"
-```
-
-## 🐛 Troubleshooting
+## 🛠️ Troubleshooting
 
 ### Remote not detected
 
-1. Verify MQTT is configured and working
-2. Check that remote is publishing to MQTT topics
-3. Use MQTT Explorer to view messages
-4. Enable debug logs:
+1. Verify **MQTT broker is configured** in Home Assistant (Settings > Devices & Services > MQTT)
+2. Check that **RS90 is configured** to connect to MQTT (Haptique Config app)
+3. Verify **RS90 is online** (check in Haptique Config app)
+4. Use **MQTT Explorer** to verify messages are published
+5. Enable debug logs:
 
 ```yaml
 logger:
@@ -222,20 +238,13 @@ logger:
 
 ### Switches don't reflect correct state
 
-1. Verify `macro/{name}/trigger` topics publish with `retained=True`
-2. Check `.storage/haptique_rs90_*_states.json` file
+1. Verify the macro is properly configured in RS90
+2. Check MQTT Explorer for `macro/{name}/trigger` topics
 3. Restart Home Assistant
 
 ### Battery always shows 0
 
-1. Verify remote responds to `battery/status` topic
-2. Enable debug logs and search for "Battery level updated"
-3. Test manually:
-
-```bash
-mosquitto_pub -h localhost -t "Haptique/YOUR_ID/battery/status" -m ""
-mosquitto_sub -h localhost -t "Haptique/YOUR_ID/battery_level"
-```
+The battery level is updated on demand. Trigger an update manually or wait for the next automatic update.
 
 ## 📁 File Structure
 
@@ -245,14 +254,16 @@ custom_components/haptique_rs90/
 ├── manifest.json         # Integration metadata
 ├── config_flow.py        # Configuration interface
 ├── coordinator.py        # MQTT coordinator
-├── const.py             # Constants
-├── sensor.py            # Sensors
-├── binary_sensor.py     # Binary sensors
-├── switch.py            # Macro switches
-├── services.yaml        # Service definitions
-├── strings.json         # English translations
+├── const.py              # Constants
+├── sensor.py             # Sensors
+├── binary_sensor.py      # Binary sensors
+├── switch.py             # Macro switches
+├── services.yaml         # Service definitions
+├── strings.json          # English translations
+├── icon.png              # Integration icon
 └── translations/
-    └── fr.json          # French translations
+    ├── en.json           # English translations
+    └── fr.json           # French translations
 ```
 
 ## 🤝 Contributing
@@ -271,6 +282,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## 🙏 Acknowledgments
 
+- [Cantata Communication Solutions](https://github.com/Cantata-Communication-Solutions) for creating the **Haptique RS90** remote
 - Home Assistant team for the excellent platform
 - Haptique community for support
 
@@ -282,6 +294,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ---
 
-**Version:** 1.1.5  
+**Version:** 1.2.5  
 **Author:** daangel27  
-**Last updated:** December 2025
+**Last updated:** December 2025 
+**Languages:** English, Français

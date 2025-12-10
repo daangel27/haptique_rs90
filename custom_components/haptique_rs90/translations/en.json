@@ -28,5 +28,39 @@
         }
       }
     }
+  },
+  "services": {
+    "trigger_macro": {
+      "name": "Trigger macro",
+      "description": "Triggers a specific macro on the Haptique RS90 remote.",
+      "fields": {
+        "device_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
+        },
+        "macro_name": {
+          "name": "Macro name",
+          "description": "The exact name of the macro to trigger (case-sensitive)"
+        }
+      }
+    },
+    "trigger_device_command": {
+      "name": "Trigger device command",
+      "description": "Sends a specific command to a device via the RS90 remote.",
+      "fields": {
+        "device_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
+        },
+        "device_name": {
+          "name": "Device name",
+          "description": "The exact name of the device configured in RS90 (case-sensitive)"
+        },
+        "command_name": {
+          "name": "Command name",
+          "description": "The exact command name to send (use sensor 'Commands - {device}' to see available commands)"
+        }
+      }
+    }
   }
 }
