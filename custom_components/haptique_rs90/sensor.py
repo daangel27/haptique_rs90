@@ -11,7 +11,9 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -37,43 +39,79 @@ async def async_setup_entry(
         HaptiqueRS90DeviceListSensor(coordinator, entry),
     ]
     
-    # Create a sensor for each device with its commands
+    # Track device command sensors by device name
+    device_sensors: dict[str, HaptiqueRS90DeviceCommandsSensor] = {}
+    
+    # Create a sensor for each device with its commands (sorted alphabetically)
     devices = coordinator.data.get("devices", [])
-    for device in devices:
+    # Trier les devices par nom pour un ordre alphabétique
+    sorted_devices = sorted(devices, key=lambda d: d.get("name", "").lower())
+    
+    for device in sorted_devices:
         device_name = device.get("name")
         if device_name:
-            entities.append(HaptiqueRS90DeviceCommandsSensor(coordinator, entry, device_name))
+            sensor = HaptiqueRS90DeviceCommandsSensor(coordinator, entry, device_name)
+            device_sensors[device_name] = sensor
+            entities.append(sensor)
             _LOGGER.debug("Created commands sensor for device: %s", device_name)
     
     async_add_entities(entities)
     
-    # Set up listener to add new device sensors when devices are added
-    def add_device_sensors() -> None:
-        """Add sensors for newly detected devices (sync callback)."""
-        current_devices = coordinator.data.get("devices", [])
+    @callback
+    def manage_device_sensors() -> None:
+        """Add new device sensors and remove obsolete ones."""
+        _LOGGER.debug("=== SENSOR: Entity update triggered ===")
+        entity_registry = er.async_get(hass)
+        current_device_names = {device.get("name") for device in coordinator.data.get("devices", []) if device.get("name")}
+        existing_device_names = set(device_sensors.keys())
+        
+        _LOGGER.debug("Current device names from MQTT: %s", current_device_names)
+        _LOGGER.debug("Existing device names in HA: %s", existing_device_names)
+        
+        # Find devices to add
+        devices_to_add = current_device_names - existing_device_names
         new_entities = []
         
-        # Track which devices already have sensors
-        existing_device_names = hass.data.get(DOMAIN, {}).get(f"{entry.entry_id}_device_sensors", set())
+        if devices_to_add:
+            _LOGGER.info("Devices to add: %s", devices_to_add)
         
-        for device in current_devices:
+        for device in coordinator.data.get("devices", []):
             device_name = device.get("name")
-            if device_name and device_name not in existing_device_names:
-                new_entities.append(HaptiqueRS90DeviceCommandsSensor(coordinator, entry, device_name))
-                existing_device_names.add(device_name)
-                _LOGGER.info("Adding commands sensor for new device: %s", device_name)
+            if device_name in devices_to_add:
+                sensor = HaptiqueRS90DeviceCommandsSensor(coordinator, entry, device_name)
+                device_sensors[device_name] = sensor
+                new_entities.append(sensor)
+                _LOGGER.info("✓ Adding commands sensor for new device: %s", device_name)
         
         if new_entities:
             async_add_entities(new_entities)
-            # Update tracking
-            hass.data.setdefault(DOMAIN, {})[f"{entry.entry_id}_device_sensors"] = existing_device_names
+        
+        # Find devices to remove
+        devices_to_remove = existing_device_names - current_device_names
+        
+        if devices_to_remove:
+            _LOGGER.info("Devices to remove: %s", devices_to_remove)
+        
+        for device_name in devices_to_remove:
+            sensor = device_sensors.pop(device_name, None)
+            if sensor:
+                _LOGGER.debug("Processing removal of device: %s (unique_id: %s)", device_name, sensor.unique_id)
+                # Remove from entity registry
+                entity_id = entity_registry.async_get_entity_id(
+                    "sensor",
+                    DOMAIN,
+                    sensor.unique_id
+                )
+                if entity_id:
+                    entity_registry.async_remove(entity_id)
+                    _LOGGER.info("✓ Removed obsolete device commands sensor: %s (entity_id: %s)", device_name, entity_id)
+                else:
+                    _LOGGER.warning("Could not find entity_id for device sensor: %s (unique_id: %s)", device_name, sensor.unique_id)
+            else:
+                _LOGGER.warning("Could not find sensor for device: %s", device_name)
     
-    # Register listener for coordinator updates (sync function)
-    entry.async_on_unload(coordinator.async_add_listener(add_device_sensors))
-    
-    # Initialize tracking
-    initial_device_names = {device.get("name") for device in devices if device.get("name")}
-    hass.data.setdefault(DOMAIN, {})[f"{entry.entry_id}_device_sensors"] = initial_device_names
+    # Register listener for coordinator updates
+    entry.async_on_unload(coordinator.async_add_listener(manage_device_sensors))
 
 
 class HaptiqueRS90SensorBase(CoordinatorEntity, SensorEntity):
@@ -210,8 +248,8 @@ class HaptiqueRS90RunningMacroSensor(HaptiqueRS90SensorBase):
     def icon(self) -> str:
         """Return icon based on state."""
         if self.native_value and self.native_value != "Idle":
-            return "mdi:play-circle"
-        return "mdi:stop-circle"
+            return "mdi:play-circle"  # Icône play quand actif (sera coloré par HA)
+        return "mdi:circle-outline"  # Icône vide quand idle
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -282,8 +320,11 @@ class HaptiqueRS90DeviceCommandsSensor(HaptiqueRS90SensorBase):
         sensor_type = f"commands_{sanitized_name}"
         super().__init__(coordinator, entry, sensor_type)
         self._device_name = device_name
-        self._attr_name = f"{device_name} Commands"
+        # Préfixer avec "Commands - " pour un tri cohérent
+        self._attr_name = f"Commands - {device_name}"
         self._attr_icon = "mdi:remote"
+        # Catégorie diagnostic pour grouper séparément dans l'interface
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self) -> int:
@@ -293,19 +334,19 @@ class HaptiqueRS90DeviceCommandsSensor(HaptiqueRS90SensorBase):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """Return command names as attributes."""
+        """Return command IDs as attributes."""
         commands = self.coordinator.data.get("device_commands", {}).get(self._device_name, [])
-        command_names = [cmd.get("name") for cmd in commands if cmd.get("name")]
+        command_ids = [cmd.get("id") for cmd in commands if cmd.get("id")]
         
         attributes = {
             "device_name": self._device_name,
             "command_count": len(commands),
-            "commands": command_names,  # List of all command names
+            "commands": command_ids,  # List of all command IDs
         }
         
         # Add each command as a separate attribute for easy access
-        for idx, name in enumerate(command_names, 1):
-            attributes[f"command_{idx}"] = name
+        for idx, cmd_id in enumerate(command_ids, 1):
+            attributes[f"command_{idx}"] = cmd_id
         
         return attributes
 

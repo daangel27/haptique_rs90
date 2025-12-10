@@ -30,5 +30,3 @@ CONF_NAME = "name"
 STATE_ONLINE = "online"
 STATE_OFFLINE = "offline"
 
-# Update intervals
-SCAN_INTERVAL = 60  # 1 minute for periodic checks

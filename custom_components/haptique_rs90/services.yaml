@@ -1,70 +1,48 @@
-# Services disponibles pour l'intégration Haptique RS90
+# Available services for Haptique RS90 integration
 
 trigger_macro:
-  name: Déclencher une macro
-  description: Déclenche une macro spécifique sur la télécommande Haptique RS90
+  name: Trigger macro
+  description: Triggers a specific macro on the Haptique RS90 remote
   fields:
     device_id:
-      name: Appareil
-      description: L'appareil Haptique RS90 à contrôler
+      name: RS90 Remote
+      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)
       required: true
+      example: "6e99751e77b5a07de72d549143e2875a"
       selector:
         device:
           integration: haptique_rs90
     macro_name:
-      name: Nom de la macro
-      description: Le nom exact de la macro à déclencher
+      name: Macro name
+      description: The exact name of the macro to trigger (case-sensitive)
       required: true
-      example: "Watch TV 1"
+      example: "Watch Movie"
       selector:
         text:
 
 trigger_device_command:
-  name: Déclencher une commande d'appareil
-  description: Déclenche une commande spécifique pour un appareil sur la télécommande
+  name: Trigger device command
+  description: Sends a specific command to a device via the RS90 remote
   fields:
     device_id:
-      name: Appareil
-      description: L'appareil Haptique RS90 à contrôler
+      name: RS90 Remote
+      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)
       required: true
+      example: "6e99751e77b5a07de72d549143e2875a"
       selector:
         device:
           integration: haptique_rs90
     device_name:
-      name: Nom de l'appareil
-      description: Le nom exact de l'appareil (ex. "Canal - G9 4K")
+      name: Device name
+      description: The exact name of the device configured in RS90 (case-sensitive)
       required: true
       example: "Canal - G9 4K"
       selector:
         text:
     command_name:
-      name: Nom de la commande
-      description: Le nom exact de la commande à envoyer (ex. "POWER")
+      name: Command name
+      description: The exact command name to send (use sensor 'Commands - {device}' to see available commands)
       required: true
       example: "POWER"
       selector:
         text:
-
-get_diagnostics:
-  name: Obtenir les diagnostics
-  description: Affiche les informations de diagnostic dans les logs (devices, macros, subscriptions)
-  fields:
-    device_id:
-      name: Appareil
-      description: L'appareil Haptique RS90 à diagnostiquer
-      required: true
-      selector:
-        device:
-          integration: haptique_rs90
-
-refresh_data:
-  name: Actualiser les données
-  description: Force la mise à jour des données (devices, macros, batterie)
-  fields:
-    device_id:
-      name: Appareil
-      description: L'appareil Haptique RS90 à actualiser
-      required: true
-      selector:
-        device:
-          integration: haptique_rs90

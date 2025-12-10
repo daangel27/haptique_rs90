@@ -2,29 +2,63 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configurer Haptique RS90",
-        "description": "Télécommande détectée : {remote_id}\n\nDonnez un nom à votre télécommande (optionnel).",
+        "title": "Configure Haptique RS90",
+        "description": "Remote detected: {remote_id}\n\nGive your remote a name (optional).",
         "data": {
-          "name": "Nom de la télécommande (optionnel)"
+          "name": "Remote name (optional)"
         }
       }
     },
     "error": {
-      "mqtt_not_configured": "MQTT n'est pas configuré. Veuillez configurer MQTT avant d'ajouter cette intégration.",
-      "no_remote_found": "Aucune télécommande Haptique RS90 trouvée. Assurez-vous qu'elle est connectée et publie sur MQTT."
+      "mqtt_not_configured": "MQTT is not configured. Please configure MQTT before adding this integration.",
+      "no_remote_found": "No Haptique RS90 remote found. Make sure it is connected and publishing to MQTT."
     },
     "abort": {
-      "already_configured": "Cette télécommande est déjà configurée",
-      "mqtt_not_configured": "MQTT n'est pas configuré"
+      "already_configured": "This remote is already configured",
+      "mqtt_not_configured": "MQTT is not configured"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Options Haptique RS90",
-        "description": "Modifier les paramètres de la télécommande",
+        "title": "Haptique RS90 Options",
+        "description": "Modify remote settings",
         "data": {
-          "name": "Nom de la télécommande"
+          "name": "Remote name"
+        }
+      }
+    }
+  },
+  "services": {
+    "trigger_macro": {
+      "name": "Trigger macro",
+      "description": "Triggers a specific macro on the Haptique RS90 remote.",
+      "fields": {
+        "device_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
+        },
+        "macro_name": {
+          "name": "Macro name",
+          "description": "The exact name of the macro to trigger (case-sensitive)"
+        }
+      }
+    },
+    "trigger_device_command": {
+      "name": "Trigger device command",
+      "description": "Sends a specific command to a device via the RS90 remote.",
+      "fields": {
+        "device_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
+        },
+        "device_name": {
+          "name": "Device name",
+          "description": "The exact name of the device configured in RS90 (case-sensitive)"
+        },
+        "command_name": {
+          "name": "Command name",
+          "description": "The exact command name to send (use sensor 'Commands - {device}' to see available commands)"
         }
       }
     }

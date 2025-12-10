@@ -67,6 +67,13 @@ class HaptiqueRS90ConnectionSensor(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data.get("status") == STATE_ONLINE
 
     @property
+    def icon(self) -> str:
+        """Return icon based on connection state."""
+        if self.is_on:
+            return "mdi:connection"  # Connecté - icône sera colorée en vert par HA
+        return "mdi:close-network-outline"  # Déconnecté - icône sera colorée en rouge par HA
+
+    @property
     def available(self) -> bool:
         """Return True if entity is available."""
         # This sensor is always available as it tracks connection status

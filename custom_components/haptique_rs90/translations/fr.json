@@ -28,5 +28,39 @@
         }
       }
     }
+  },
+  "services": {
+    "trigger_macro": {
+      "name": "Déclencher une macro",
+      "description": "Déclenche une macro spécifique sur la télécommande Haptique RS90.",
+      "fields": {
+        "device_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90)"
+        },
+        "macro_name": {
+          "name": "Nom de la macro",
+          "description": "Le nom exact de la macro à déclencher (sensible à la casse)"
+        }
+      }
+    },
+    "trigger_device_command": {
+      "name": "Déclencher une commande",
+      "description": "Envoie une commande spécifique à un appareil via la télécommande RS90.",
+      "fields": {
+        "device_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90)"
+        },
+        "device_name": {
+          "name": "Nom de l'appareil",
+          "description": "Le nom exact de l'appareil configuré dans RS90 (sensible à la casse)"
+        },
+        "command_name": {
+          "name": "Nom de la commande",
+          "description": "Le nom exact de la commande à envoyer (utilisez le capteur 'Commands - {device}' pour voir les commandes disponibles)"
+        }
+      }
+    }
   }
 }
