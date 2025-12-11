@@ -12,7 +12,7 @@ Welcome to the documentation for the Haptique RS90 Home Assistant integration.
 - **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in v1.2.6
 
 ### Français
-- **[README_FR.md](../README_FR.md)** - Documentation complète de l'intégration
+- **[README_FR.md](README_FR.md)** - Documentation complète de l'intégration
 - **[CHANGELOG_FR.md](CHANGELOG_FR.md)** - Journal complet avec toutes les versions
 - **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la v1.2.6
 
