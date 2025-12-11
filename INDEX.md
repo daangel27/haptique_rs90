@@ -41,17 +41,17 @@ Welcome to the documentation for the Haptique RS90 Home Assistant integration.
 
 ## 📸 Screenshots
 
-All screenshots are located in the [screenshots/](screenshots/) folder:
+All screenshots are located in the [/documentation/screenshots/](documentation/screenshots/) folder:
 
 <table>
 <tr>
 <td width="50%">
-<img src="screenshots/device_info.png" alt="Device Info" width="100%" />
+<img src="documentation/screenshots/device_info.png" alt="Device Info" width="100%" />
 <p align="center"><strong>Device Information</strong><br/>
 Shows device info, controls (macro switches), sensors (battery, connection, etc.), and diagnostic sensors (device commands)</p>
 </td>
 <td width="50%">
-<img src="screenshots/device_commands.png" alt="Device Commands" width="100%" />
+<img src="documentation/screenshots/device_commands.png" alt="Device Commands" width="100%" />
 <p align="center"><strong>Device Commands Details</strong><br/>
 Detailed view of available commands for a device (example: Canal - G9 4K with 31 commands)</p>
 </td>
