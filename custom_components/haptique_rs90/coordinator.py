@@ -528,7 +528,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         The RS90 doesn't automatically push battery updates, so we need to
         periodically request them by publishing to battery/status topic.
         """
-        async def _refresh_battery():
+        async def _refresh_battery(_now=None):
             """Request battery level update."""
             battery_trigger_topic = f"{self.base_topic}/{TOPIC_BATTERY_STATUS}"
             _LOGGER.debug("Periodic battery refresh - publishing to %s", battery_trigger_topic)
@@ -547,10 +547,10 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         from homeassistant.helpers.event import async_track_time_interval
         from datetime import timedelta
         
-        # Schedule periodic refresh
+        # Schedule periodic refresh - async_track_time_interval handles thread safety
         self._battery_refresh_timer = async_track_time_interval(
             self.hass,
-            lambda _: self.hass.async_create_task(_refresh_battery()),
+            _refresh_battery,  # Pass async function directly
             timedelta(seconds=self._battery_refresh_interval)
         )
         _LOGGER.info("Started battery refresh timer (interval: %d seconds)", self._battery_refresh_interval)
