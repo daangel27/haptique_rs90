@@ -1,0 +1,52 @@
+name: Issue Notifications
+
+on:
+  issues:
+    types: [opened, labeled, closed]
+  issue_comment:
+    types: [created]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email notification on new issue
+        if: github.event.action == 'opened'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "[Haptique RS90] New Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
+          to: ${{ secrets.EMAIL_TO }}
+          from: GitHub Issues <noreply@github.com>
+          html_body: |
+            <h2>New Issue Opened</h2>
+            <p><strong>Issue #${{ github.event.issue.number }}:</strong> ${{ github.event.issue.title }}</p>
+            <p><strong>Author:</strong> @${{ github.event.issue.user.login }}</p>
+            <p><strong>Labels:</strong> ${{ join(github.event.issue.labels.*.name, ', ') }}</p>
+            <p><strong>Link:</strong> <a href="${{ github.event.issue.html_url }}">${{ github.event.issue.html_url }}</a></p>
+            <hr>
+            <h3>Description:</h3>
+            <pre>${{ github.event.issue.body }}</pre>
+
+      - name: Send email on issue comment
+        if: github.event.action == 'created'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "[Haptique RS90] Comment on Issue #${{ github.event.issue.number }}"
+          to: ${{ secrets.EMAIL_TO }}
+          from: GitHub Issues <noreply@github.com>
+          html_body: |
+            <h2>New Comment</h2>
+            <p><strong>Issue #${{ github.event.issue.number }}:</strong> ${{ github.event.issue.title }}</p>
+            <p><strong>Commented by:</strong> @${{ github.event.comment.user.login }}</p>
+            <p><strong>Link:</strong> <a href="${{ github.event.comment.html_url }}">${{ github.event.comment.html_url }}</a></p>
+            <hr>
+            <h3>Comment:</h3>
+            <pre>${{ github.event.comment.body }}</pre>

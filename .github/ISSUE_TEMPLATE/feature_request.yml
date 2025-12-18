@@ -1,0 +1,70 @@
+---
+name: ✨ Feature Request
+about: Suggest a new feature or enhancement
+title: '[FEATURE] '
+labels: enhancement, needs-triage
+assignees: ''
+
+---
+
+## ✨ Feature Description
+<!-- A clear and concise description of the feature you'd like -->
+
+
+
+## 🎯 Problem / Use Case
+<!-- Describe the problem this feature would solve or the use case it addresses -->
+
+
+
+## 💡 Proposed Solution
+<!-- How do you envision this working? -->
+
+
+
+## 🔄 Alternative Solutions
+<!-- Have you considered any alternative solutions or workarounds? -->
+
+
+
+## 📋 Implementation Details (if applicable)
+
+**Affected Components:**
+- [ ] Services
+- [ ] Sensors
+- [ ] Switches
+- [ ] Configuration
+- [ ] Documentation
+- [ ] Other: _____
+
+**Example Service Call** (if applicable):
+```yaml
+service: haptique_rs90.new_feature
+data:
+  # Your proposed parameters
+```
+
+## 📸 Mockups / Examples
+<!-- Screenshots, mockups, or examples from other integrations -->
+
+
+
+## 🌍 Compatibility
+
+**Would this feature:**
+- [ ] Be compatible with existing configurations
+- [ ] Require migration / breaking changes
+- [ ] Work with all RS90 firmware versions
+- [ ] Need new dependencies
+
+## 📝 Additional Context
+<!-- Any other information, links, or references -->
+
+
+
+## ✅ Checklist
+
+- [ ] I have searched existing feature requests
+- [ ] This feature doesn't already exist in the integration
+- [ ] I have read the [documentation](https://github.com/daangel27/haptique_rs90)
+- [ ] I am willing to test this feature if implemented

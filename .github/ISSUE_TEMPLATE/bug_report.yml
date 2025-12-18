@@ -1,0 +1,87 @@
+---
+name: 🐛 Bug Report
+about: Report a bug or issue with the Haptique RS90 integration
+title: '[BUG] '
+labels: bug, needs-triage
+assignees: ''
+
+---
+
+## 🐛 Bug Description
+<!-- A clear and concise description of the bug -->
+
+
+
+## 📋 Environment Information
+
+**Required Information:**
+- **Home Assistant Version:** <!-- e.g., 2024.12.3 -->
+- **Haptique RS90 Integration Version:** <!-- e.g., 1.5.0 -->
+- **Installation Method:** <!-- HACS / Manual -->
+- **RS90 Remote Name in HA:** <!-- e.g., "Salon" (used in sensor names) -->
+- **Haptique RS90 Firmware Version:** <!-- Check in Haptique Config app -->
+
+## 🔄 Steps to Reproduce
+
+**Please provide detailed steps:**
+
+1. Go to '...'
+2. Click on '...'
+3. Execute service '...'
+4. See error
+
+## ✅ Expected Behavior
+<!-- What should happen -->
+
+
+
+## ❌ Actual Behavior
+<!-- What actually happens -->
+
+
+
+## 📸 Screenshots / Logs
+
+**Home Assistant Logs** (REQUIRED):
+<!-- Go to Settings > System > Logs, filter by "haptique_rs90" -->
+```
+Paste relevant logs here
+```
+
+**Screenshots** (if applicable):
+<!-- Drag and drop images here -->
+
+## 🔧 Configuration
+
+**Service call that fails** (if applicable):
+```yaml
+service: haptique_rs90.trigger_macro
+data:
+  rs90_id: "..."
+  rs90_macro_id: "..."
+```
+
+**Automation excerpt** (if applicable):
+```yaml
+# Your automation code here
+```
+
+## 📱 RS90 Configuration
+
+- **Number of devices configured:** <!-- e.g., 5 -->
+- **Number of macros configured:** <!-- e.g., 3 -->
+- **MQTT Broker:** <!-- e.g., Mosquitto, Home Assistant built-in -->
+- **MQTT QoS:** <!-- Default is 1 -->
+
+## ✅ Checklist
+
+Please confirm you have:
+- [ ] Updated to the latest version of the integration
+- [ ] Restarted Home Assistant after updating
+- [ ] Checked the [documentation](https://github.com/daangel27/haptique_rs90)
+- [ ] Searched existing issues for similar problems
+- [ ] Included relevant logs (with sensitive data removed)
+- [ ] Migrated to v1.5.0 parameters if coming from older version
+
+## 📝 Additional Context
+<!-- Any other information that might help -->
