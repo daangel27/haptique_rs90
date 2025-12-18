@@ -1,70 +1,113 @@
----
 name: ✨ Feature Request
-about: Suggest a new feature or enhancement
-title: '[FEATURE] '
-labels: enhancement, needs-triage
-assignees: ''
+description: Suggest a new feature or enhancement for Haptique RS90
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thank you for your feature suggestion! ✨
+        Please describe the feature you'd like to see added.
 
----
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: ✨ Feature Description
+      description: A clear and concise description of the feature you'd like
+      placeholder: I would like to...
+    validations:
+      required: true
 
-## ✨ Feature Description
-<!-- A clear and concise description of the feature you'd like -->
+  - type: textarea
+    id: problem-use-case
+    attributes:
+      label: 🎯 Problem / Use Case
+      description: Describe the problem this feature would solve or the use case it addresses
+      placeholder: |
+        Currently, I can't...
+        This would help me to...
+    validations:
+      required: true
 
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: How do you envision this working?
+      placeholder: |
+        I think it could work like this...
+        The service could accept...
+    validations:
+      required: true
 
+  - type: textarea
+    id: alternative-solutions
+    attributes:
+      label: 🔄 Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: I've tried... but...
 
-## 🎯 Problem / Use Case
-<!-- Describe the problem this feature would solve or the use case it addresses -->
+  - type: checkboxes
+    id: affected-components
+    attributes:
+      label: 📋 Affected Components
+      description: Which parts of the integration would this affect?
+      options:
+        - label: Services (trigger_macro, trigger_device_command, etc.)
+        - label: Sensors
+        - label: Switches
+        - label: Configuration
+        - label: Documentation
+        - label: Dashboard templates
+        - label: Other
 
+  - type: textarea
+    id: example-service
+    attributes:
+      label: 🔧 Example Service Call (if applicable)
+      description: Show how you'd like to use this feature
+      placeholder: |
+        service: haptique_rs90.new_feature
+        data:
+          # Your proposed parameters
+      render: yaml
 
+  - type: checkboxes
+    id: compatibility
+    attributes:
+      label: 🌍 Compatibility
+      description: Would this feature...
+      options:
+        - label: Be compatible with existing configurations
+        - label: Require migration / breaking changes
+        - label: Work with all RS90 firmware versions
+        - label: Need new dependencies
 
-## 💡 Proposed Solution
-<!-- How do you envision this working? -->
+  - type: textarea
+    id: mockups
+    attributes:
+      label: 📸 Mockups / Examples
+      description: |
+        Screenshots, mockups, or examples from other integrations
+        Drag and drop images here
 
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      options:
+        - label: I have searched existing feature requests
+          required: true
+        - label: This feature doesn't already exist in the integration
+          required: true
+        - label: I have read the documentation
+          required: true
+        - label: I am willing to test this feature if implemented
+          required: false
 
-
-## 🔄 Alternative Solutions
-<!-- Have you considered any alternative solutions or workarounds? -->
-
-
-
-## 📋 Implementation Details (if applicable)
-
-**Affected Components:**
-- [ ] Services
-- [ ] Sensors
-- [ ] Switches
-- [ ] Configuration
-- [ ] Documentation
-- [ ] Other: _____
-
-**Example Service Call** (if applicable):
-```yaml
-service: haptique_rs90.new_feature
-data:
-  # Your proposed parameters
-```
-
-## 📸 Mockups / Examples
-<!-- Screenshots, mockups, or examples from other integrations -->
-
-
-
-## 🌍 Compatibility
-
-**Would this feature:**
-- [ ] Be compatible with existing configurations
-- [ ] Require migration / breaking changes
-- [ ] Work with all RS90 firmware versions
-- [ ] Need new dependencies
-
-## 📝 Additional Context
-<!-- Any other information, links, or references -->
-
-
-
-## ✅ Checklist
-
-- [ ] I have searched existing feature requests
-- [ ] This feature doesn't already exist in the integration
-- [ ] I have read the [documentation](https://github.com/daangel27/haptique_rs90)
-- [ ] I am willing to test this feature if implemented
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 Additional Context
+      description: Any other information, links, or references
+      placeholder: Links to similar features, references, etc...
