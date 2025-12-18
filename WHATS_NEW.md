@@ -1,109 +1,226 @@
-# What's New in v1.2.6
+# What's New in v1.5.0
 
-## 🔧 Maintenance Release
+## ⚠️ Important: Breaking Changes
 
-Version 1.2.6 is a maintenance release focused on documentation updates and consistency improvements for 2025.
+**Version 1.5.0 requires updating your automations and scripts.** Service parameters have been renamed for clarity and stability.
 
----
-
-## 📚 Documentation Updates
-
-### Year Updates
-- All documentation dates updated from 2024 to 2025
-- Copyright year updated to 2025
-- Version badges refreshed across all files
-
-### Consistency Improvements
-- Enhanced formatting across documentation
-- Updated examples to reflect current year
-- Improved clarity in installation guides
-- Better consistency between English and French versions
+**Estimated migration time**: 15-30 minutes  
+**Migration guide**: [MIGRATION_GUIDE_v1.5.0.md](MIGRATION_GUIDE_v1.5.0.md)
 
 ---
 
-## 🎯 What Stays the Same
+## 🎯 Top 3 Improvements
 
-### Core Functionality
-- ✅ All features from v1.2.5 remain unchanged
-- ✅ 100% event-driven MQTT architecture
-- ✅ Device command sensors
-- ✅ Multi-language support (EN/FR)
-- ✅ QoS optimized communications
-- ✅ Auto-discovery functionality
+### 1. Ultra-Stable Entity IDs 🎉
 
-### No Breaking Changes
-- 🔄 No code changes
-- 🔄 No configuration changes required
-- 🔄 All automations and scripts continue to work
-- 🔄 All entities remain the same
+**Problem solved**: When you renamed a device or macro in Haptique Config, the entity ID changed in Home Assistant, breaking your automations.
 
----
+**Now**: Entity IDs are based on internal Haptique IDs and **never change**, even when you rename things.
 
-## 💡 Why This Update?
+**Example**:
+```
+Rename "Canal" → "Canal+" in Haptique Config
 
-This maintenance release ensures:
-1. **Accuracy**: Documentation reflects the current year (2025)
-2. **Consistency**: All files use the same version numbering
-3. **Clarity**: Examples and dates are up-to-date
-4. **Professionalism**: Clean, well-maintained documentation
+Before v1.5.0:
+❌ Entity ID changed → Automations broken
 
----
+After v1.5.0:
+✅ Entity ID stays same → Automations keep working
+✅ Friendly name updates automatically
+```
 
-## 🚀 Upgrading
+### 2. New Sensor for Easy ID Access 📊
 
-### For HACS Users
-The update will appear automatically in HACS. Simply:
-1. Go to HACS → Integrations
-2. Find "Haptique RS90"
-3. Click "Update"
-4. Restart Home Assistant
+**Created**: `sensor.macro_{name}_info` for each macro
 
-### For Manual Installation Users
-1. Download v1.2.6 from [Releases](https://github.com/daangel27/haptique_rs90/releases)
-2. Replace files in `/config/custom_components/haptique_rs90/`
-3. Restart Home Assistant
+**Why**: Makes it super easy to find the IDs you need for services!
 
-### No Action Required
-Since there are no functional changes, the update is optional. Your integration will continue working perfectly on v1.2.5.
+**Attributes**:
+- `rs90_macro_id`: The stable ID to use in services
+- `macro_name`: Current name
+- `current_state`: on/off
 
----
+**How to use**:
+1. Find `sensor.macro_watch_movie_info`
+2. Look at attributes
+3. Copy `rs90_macro_id`
+4. Use in your automations!
 
-## 📖 Full Feature Set
+### 3. Clearer Service Parameters 🔧
 
-Reminder of all features available in v1.2.6 (carried over from v1.2.5):
+**Old**: `device_id` (confusing - which device?)  
+**New**: `rs90_id` (clear - it's the RS90 remote!)
 
-### Sensors & Controls
-- 🔋 Battery level monitoring
-- 🔌 Real-time connection status
-- 🎮 Last key pressed detection
-- 📱 Device list management
-- 📋 Available commands per device
-- 🎛️ Macro switches with visual states
+**Old**: `macro_name` (breaks on rename)  
+**New**: `rs90_macro_id` (never breaks!)
 
-### Architecture
-- ⚡ 100% event-driven (no polling)
-- 🎯 QoS optimized (0 for monitoring, 1 for commands)
-- 🔄 Real-time MQTT updates
-- 🚀 Automatic remote discovery
-- 🌍 Multi-language (English, French)
-
-### Services
-- `haptique_rs90.trigger_macro` - Control macros
-- `haptique_rs90.trigger_device_command` - Send device commands
+**Result**: More intuitive names + rename-proof automations!
 
 ---
 
-## 📞 Support
+## 🔄 What You Need to Update
 
-Need help or found an issue?
-- 🐛 [Report a bug](https://github.com/daangel27/haptique_rs90/issues)
-- 💡 [Request a feature](https://github.com/daangel27/haptique_rs90/issues)
-- 💬 [Join discussions](https://github.com/daangel27/haptique_rs90/discussions)
+### Service Parameters (Breaking Changes)
+
+| Old | New | Why |
+|-----|-----|-----|
+| `device_id` | `rs90_id` | Clearer naming |
+| `macro_name` | `rs90_macro_id` | Stable (never changes) |
+| `device_name` | `rs90_device_id` | Stable (never changes) |
+
+### Quick Migration Example
+
+**Before (v1.2.8)**:
+```yaml
+service: haptique_rs90.trigger_macro
+data:
+  device_id: "abc123"
+  macro_name: "Watch Movie"
+```
+
+**After (v1.5.0)**:
+```yaml
+service: haptique_rs90.trigger_macro
+data:
+  rs90_id: "abc123"
+  rs90_macro_id: "692eb1561bddd5814022960c"
+```
+
+**Where to find the ID**:
+- Go to `sensor.macro_watch_movie_info`
+- Copy `rs90_macro_id` from attributes
 
 ---
 
-**Version**: 1.2.6  
-**Release Date**: December 11, 2025  
-**Type**: Maintenance Release  
-**Breaking Changes**: None  
-**Recommended**: Optional update
+## 📍 Finding Your IDs (Super Easy!)
+
+### For Macros (`rs90_macro_id`)
+
+**Method 1** - New sensor (easiest):
+1. Find `sensor.macro_{name}_info`
+2. Click it
+3. Look in **Attributes**
+4. Copy `rs90_macro_id`
+
+**Method 2** - Existing switch:
+1. Find `switch.macro_{name}`
+2. Look in **Attributes**
+3. Copy `rs90_macro_id`
+
+### For Devices (`rs90_device_id`)
+
+1. Find `sensor.{remote_name}_commands_{device_name}`
+2. Click it
+3. Look in **Attributes**
+4. Copy `rs90_device_id`
+
+### For RS90 Remote (`rs90_id`)
+
+1. Go to your RS90 device page
+2. Look at the URL
+3. Copy the ID at the end: `.../device/ABC123`
+
+---
+
+## 💡 Benefits
+
+### For You
+
+✅ **No more broken automations** when you rename things  
+✅ **Clearer parameter names** - easier to understand  
+✅ **Easy ID discovery** - new sensors show IDs  
+✅ **Future-proof** - IDs never change
+
+### Technical
+
+✅ **Stable entity IDs** - based on internal Haptique IDs  
+✅ **Auto-updating friendly names** - no manual refresh  
+✅ **Professional logging** - cleaner logs  
+✅ **Better error messages** - easier debugging
+
+---
+
+## 🛠️ Migration Steps
+
+### Step 1: Find Your IDs (5 min)
+
+Collect all the IDs you'll need:
+- Check each macro sensor for `rs90_macro_id`
+- Check each device sensor for `rs90_device_id`
+- Note your RS90 remote ID from device page
+
+### Step 2: Update Automations (10-20 min)
+
+For each automation using Haptique RS90:
+1. Replace `device_id` → `rs90_id`
+2. Replace `macro_name` → `rs90_macro_id`
+3. Replace `device_name` → `rs90_device_id`
+4. Save
+
+### Step 3: Update Lovelace Templates (5 min)
+
+If you have dashboard cards:
+1. Update service calls
+2. Use dynamic lookups for IDs
+3. Test buttons work
+
+### Step 4: Test Everything (5 min)
+
+1. Test each automation manually
+2. Check logs for errors
+3. Verify services work
+
+**Done!** 🎉
+
+---
+
+## ❓ FAQ
+
+**Q: Do I have to update?**  
+A: Yes, old parameters don't work anymore. But migration is quick and easy!
+
+**Q: Will my entities disappear?**  
+A: No! Entities stay, they just get more stable.
+
+**Q: What if I mess up?**  
+A: Backup your config first. If something breaks, check the logs for which ID is wrong.
+
+**Q: Can I keep using `macro_name`?**  
+A: No, it's completely removed in v1.5.0.
+
+**Q: Why breaking changes?**  
+A: To give you better names and rename-proof stability. Short-term pain for long-term gain!
+
+---
+
+## 🆘 Need Help?
+
+**Migration issues?**  
+→ See detailed guide: [MIGRATION_GUIDE_v1.5.0.md](MIGRATION_GUIDE_v1.5.0.md)
+
+**Something not working?**  
+→ Check logs in **Settings** → **System** → **Logs**
+
+**Still stuck?**  
+→ Open an issue: https://github.com/daangel27/haptique_rs90/issues
+
+---
+
+## ✅ Quick Checklist
+
+- [ ] Read this page
+- [ ] Backup your config
+- [ ] Find all your IDs
+- [ ] Update automations
+- [ ] Update scripts
+- [ ] Update Lovelace templates
+- [ ] Test everything
+- [ ] Celebrate! 🎉
+
+---
+
+**Version**: 1.5.0  
+**Release Date**: December 18, 2025  
+**Type**: Major Release (Breaking Changes)  
+**Migration Required**: Yes  
+**Time Required**: 15-30 minutes

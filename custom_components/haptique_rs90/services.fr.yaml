@@ -1,0 +1,72 @@
+# Services disponibles pour l'intégration Haptique RS90 - Traduction française
+
+trigger_macro:
+  name: Déclencher une macro
+  description: Déclenche une macro spécifique sur la télécommande Haptique RS90
+  fields:
+    rs90_id:
+      name: Télécommande RS90
+      description: Sélectionnez votre télécommande Haptique RS90 (dans Paramètres > Appareils et services > Haptique RS90)
+      required: true
+      example: "6f99751e78b5a07de72d549143e2975c"
+      selector:
+        device:
+          integration: haptique_rs90
+    rs90_macro_id:
+      name: ID de la macro
+      description: L'ID stable de la macro. Trouvez-le dans les attributs de sensor.macro_{nom}_info ou switch.macro_{nom}. Cet ID ne change jamais même si vous renommez la macro dans Haptique Config.
+      required: true
+      example: "692eb1561bddd5814022960c"
+      selector:
+        text:
+    action:
+      name: Action
+      description: Action à effectuer (on ou off)
+      required: false
+      default: "on"
+      example: "on"
+      selector:
+        select:
+          options:
+            - "on"
+            - "off"
+
+trigger_device_command:
+  name: Déclencher une commande appareil
+  description: Envoie une commande spécifique à un appareil via la télécommande RS90
+  fields:
+    rs90_id:
+      name: Télécommande RS90
+      description: Sélectionnez votre télécommande Haptique RS90 (dans Paramètres > Appareils et services > Haptique RS90)
+      required: true
+      example: "6f99751e78b5a07de72d549143e2975c"
+      selector:
+        device:
+          integration: haptique_rs90
+    rs90_device_id:
+      name: ID de l'appareil
+      description: L'ID stable de l'appareil. Trouvez-le dans les attributs de sensor.commands_{nom}. Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config.
+      required: true
+      example: "692ead781bddd58140228e33"
+      selector:
+        text:
+    command_name:
+      name: Nom de la commande
+      description: Le nom exact de la commande à envoyer (consultez le sensor de commandes de l'appareil pour voir les commandes disponibles)
+      required: true
+      example: "POWER"
+      selector:
+        text:
+
+refresh_lists:
+  name: Actualiser les listes
+  description: Force l'actualisation des listes d'appareils et de macros depuis la télécommande RS90. Utilisez ceci si les appareils ou macros n'apparaissent pas après les avoir ajoutés dans Haptique Config.
+  fields:
+    rs90_id:
+      name: Télécommande RS90
+      description: Sélectionnez votre télécommande Haptique RS90
+      required: true
+      example: "6f99751e78b5a07de72d549143e2975c"
+      selector:
+        device:
+          integration: haptique_rs90

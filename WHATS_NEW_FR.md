@@ -1,109 +1,92 @@
-# Nouveautés de la v1.2.6
+# Nouveautés v1.5.0
 
-## 🔧 Version de maintenance
+## ⚠️ Important : Changements incompatibles
 
-La version 1.2.6 est une version de maintenance axée sur les mises à jour de la documentation et les améliorations de cohérence pour 2025.
+**La version 1.5.0 nécessite de mettre à jour vos automations et scripts.** Les paramètres de service ont été renommés pour plus de clarté et de stabilité.
 
----
-
-## 📚 Mises à jour de la documentation
-
-### Mises à jour de l'année
-- Toutes les dates de documentation mises à jour de 2024 à 2025
-- Année de copyright mise à jour à 2025
-- Badges de version actualisés dans tous les fichiers
-
-### Améliorations de cohérence
-- Amélioration du formatage dans toute la documentation
-- Mise à jour des exemples pour refléter l'année actuelle
-- Meilleure clarté dans les guides d'installation
-- Meilleure cohérence entre les versions anglaise et française
+**Temps de migration estimé** : 15-30 minutes  
+**Guide de migration** : [MIGRATION_GUIDE_v1.5.0.md](MIGRATION_GUIDE_v1.5.0.md)
 
 ---
 
-## 🎯 Ce qui reste identique
+## 🎯 Top 3 améliorations
 
-### Fonctionnalités de base
-- ✅ Toutes les fonctionnalités de la v1.2.5 restent inchangées
-- ✅ Architecture MQTT 100% pilotée par événements
-- ✅ Capteurs de commandes d'appareils
-- ✅ Support multilingue (EN/FR)
-- ✅ Communications optimisées QoS
-- ✅ Fonctionnalité d'auto-découverte
+### 1. IDs d'entité ultra-stables 🎉
 
-### Aucun changement incompatible
-- 🔄 Aucun changement de code
-- 🔄 Aucune modification de configuration requise
-- 🔄 Toutes les automatisations et scripts continuent de fonctionner
-- 🔄 Toutes les entités restent identiques
+**Problème résolu** : Renommer un appareil/macro dans Haptique Config changeait l'entity ID dans Home Assistant, cassant les automations.
 
----
+**Maintenant** : Les entity IDs sont basés sur les IDs internes Haptique et **ne changent jamais**.
 
-## 💡 Pourquoi cette mise à jour ?
+### 2. Nouveau sensor pour accès facile aux IDs 📊
 
-Cette version de maintenance garantit :
-1. **Exactitude** : La documentation reflète l'année actuelle (2025)
-2. **Cohérence** : Tous les fichiers utilisent la même numérotation de version
-3. **Clarté** : Les exemples et les dates sont à jour
-4. **Professionnalisme** : Documentation propre et bien maintenue
+**Créé** : `sensor.macro_{nom}_info` pour chaque macro
+
+**Attributs** :
+- `rs90_macro_id` : L'ID stable à utiliser dans les services
+- `macro_name` : Nom actuel
+- `current_state` : État on/off
+
+### 3. Paramètres de service plus clairs 🔧
+
+**Ancien** : `device_id` (ambigu)  
+**Nouveau** : `rs90_id` (clair!)
 
 ---
 
-## 🚀 Mise à niveau
+## 🔄 Ce que vous devez mettre à jour
 
-### Pour les utilisateurs HACS
-La mise à jour apparaîtra automatiquement dans HACS. Il suffit de :
-1. Aller dans HACS → Intégrations
-2. Trouver "Haptique RS90"
-3. Cliquer sur "Mettre à jour"
-4. Redémarrer Home Assistant
+| Ancien | Nouveau |
+|--------|---------|
+| `device_id` | `rs90_id` |
+| `macro_name` | `rs90_macro_id` |
+| `device_name` | `rs90_device_id` |
 
-### Pour les utilisateurs d'installation manuelle
-1. Télécharger la v1.2.6 depuis [Releases](https://github.com/daangel27/haptique_rs90/releases)
-2. Remplacer les fichiers dans `/config/custom_components/haptique_rs90/`
-3. Redémarrer Home Assistant
+**Exemple rapide** :
+```yaml
+# Avant (v1.2.8)
+service: haptique_rs90.trigger_macro
+data:
+  device_id: "abc123"
+  macro_name: "Film"
 
-### Aucune action requise
-Comme il n'y a pas de changements fonctionnels, la mise à jour est optionnelle. Votre intégration continuera de fonctionner parfaitement sur la v1.2.5.
-
----
-
-## 📖 Ensemble complet de fonctionnalités
-
-Rappel de toutes les fonctionnalités disponibles dans la v1.2.6 (reprises de la v1.2.5) :
-
-### Capteurs & Contrôles
-- 🔋 Surveillance du niveau de batterie
-- 🔌 État de connexion en temps réel
-- 🎮 Détection de la dernière touche pressée
-- 📱 Gestion de la liste des appareils
-- 📋 Commandes disponibles par appareil
-- 🎛️ Switches de macro avec états visuels
-
-### Architecture
-- ⚡ 100% pilotée par événements (pas de polling)
-- 🎯 QoS optimisé (0 pour la surveillance, 1 pour les commandes)
-- 🔄 Mises à jour MQTT en temps réel
-- 🚀 Découverte automatique de la télécommande
-- 🌍 Multilingue (anglais, français)
-
-### Services
-- `haptique_rs90.trigger_macro` - Contrôler les macros
-- `haptique_rs90.trigger_device_command` - Envoyer des commandes aux appareils
+# Après (v1.5.0)
+service: haptique_rs90.trigger_macro
+data:
+  rs90_id: "abc123"
+  rs90_macro_id: "692eb1561bddd5814022960c"
+```
 
 ---
 
-## 📞 Support
+## 📍 Trouver vos IDs
 
-Besoin d'aide ou vous avez trouvé un problème ?
-- 🐛 [Signaler un bug](https://github.com/daangel27/haptique_rs90/issues)
-- 💡 [Demander une fonctionnalité](https://github.com/daangel27/haptique_rs90/issues)
-- 💬 [Rejoindre les discussions](https://github.com/daangel27/haptique_rs90/discussions)
+### rs90_macro_id
+1. Trouvez `sensor.macro_{nom}_info`
+2. Regardez les attributs
+3. Copiez `rs90_macro_id`
+
+### rs90_device_id
+1. Trouvez `sensor.{nom_telecommande}_commands_{nom}`
+2. Regardez les attributs
+3. Copiez `rs90_device_id`
+
+### rs90_id
+- URL de la page de l'appareil RS90
 
 ---
 
-**Version** : 1.2.6  
-**Date de sortie** : 11 décembre 2025  
-**Type** : Version de maintenance  
-**Changements incompatibles** : Aucun  
-**Recommandé** : Mise à jour optionnelle
+## 🛠️ Étapes de migration
+
+1. **Trouvez vos IDs** (5 min)
+2. **Mettez à jour les automations** (10-20 min)
+3. **Mettez à jour les templates Lovelace** (5 min)
+4. **Testez tout** (5 min)
+
+**Guide détaillé** : [MIGRATION_GUIDE_v1.5.0.md](MIGRATION_GUIDE_v1.5.0.md)
+
+---
+
+**Version** : 1.5.0  
+**Date de sortie** : 18 décembre 2025  
+**Type** : Version majeure (Changements incompatibles)  
+**Migration requise** : Oui

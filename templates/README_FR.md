@@ -1,9 +1,11 @@
-# Template de Carte Boutons pour Appareils
+# Template de carte boutons d'appareil
 
-Générez une magnifique carte télécommande avec toutes les commandes disponibles pour n'importe quel appareil contrôlé par votre Haptique RS90.
+Génère une magnifique carte de télécommande dans votre tableau de bord avec toutes les commandes disponibles pour n'importe quel appareil contrôlé par votre Haptique RS90.
 
 ![Exemple de carte boutons](../documentation/screenshots/device_buttons_card.png)
 *Exemple : Télécommande complète pour Canal Plus*
+
+**Mis à jour pour v1.5.0** - Utilise maintenant le paramètre stable `haptique_device_id` !
 
 ---
 
@@ -11,9 +13,9 @@ Générez une magnifique carte télécommande avec toutes les commandes disponib
 
 Ce template génère automatiquement une **carte en grille** contenant **un bouton pour chaque commande** disponible sur votre appareil. Quand vous appuyez sur un bouton :
 
-1. 🖱️ **Bouton pressé** dans le dashboard Home Assistant
+1. 🖱️ **Bouton pressé** dans le tableau de bord Home Assistant
 2. 📡 **Service appelé** : `haptique_rs90.trigger_device_command`
-3. 📤 **Message MQTT envoyé** vers votre télécommande Haptique RS90
+3. 📤 **Message MQTT envoyé** à votre télécommande Haptique RS90
 4. 📻 **Commande IR transmise** du RS90 vers votre appareil réel
 
 **Résultat** : Votre TV, ampli ou tout appareil IR répond instantanément !
@@ -22,30 +24,30 @@ Ce template génère automatiquement une **carte en grille** contenant **un bout
 
 ## 📋 Prérequis
 
-Avant d'utiliser ce template, vous devez avoir :
+Avant d'utiliser ce template, vous avez besoin de :
 
-1. ✅ **Intégration Haptique RS90** installée et configurée
-2. ✅ **Capteur de commandes** disponible (créé automatiquement par l'intégration)
-3. ✅ **card-mod** installé (pour le style 3D des boutons)
+1. ✅ **Intégration Haptique RS90 v1.5.0+** installée et configurée
+2. ✅ **Capteur de commandes d'appareil** disponible (créé automatiquement par l'intégration)
+3. ✅ **Plugin frontend card-mod** installé (pour le style 3D des boutons)
 
-### Installation de card-mod (Optionnel mais recommandé)
+### Installer card-mod (Optionnel mais recommandé)
 
-Le template utilise **card-mod** pour le bel effet 3D des boutons. Sans lui, les boutons fonctionneront mais auront un style basique.
+Le template utilise **card-mod** pour un magnifique style de boutons 3D. Sans lui, les boutons fonctionneront mais auront un aspect basique.
 
 Installation via HACS :
-1. Ouvrez HACS → Frontend
-2. Recherchez "card-mod"
-3. Installez et redémarrez Home Assistant
+1. Ouvrir HACS → Frontend
+2. Rechercher "card-mod"
+3. Installer et redémarrer Home Assistant
 
 **Note** : Le template fonctionne sans card-mod, mais les boutons n'auront pas l'effet 3D.
 
 ---
 
-## 🔍 Trouver les informations requises
+## 🔍 Trouver vos informations requises
 
-Vous avez besoin de **3 informations** pour utiliser ce template :
+Vous avez besoin de **2 informations** pour utiliser ce template :
 
-### 1. Capteur de commandes de l'appareil
+### 1. Nom du capteur de commandes d'appareil
 
 **Où le trouver** :
 - Allez dans **Paramètres** → **Appareils et services**
@@ -54,305 +56,231 @@ Vous avez besoin de **3 informations** pour utiliser ce template :
 - Regardez dans la section **Diagnostic**
 - Trouvez les capteurs nommés : `Commands - {Nom Appareil}`
 
-**Exemple** : `sensor.commands_canal_g9_4k`
+**Exemple** : `sensor.commands_canal`
 
 **Format** : `sensor.commands_{nom_appareil}` (espaces remplacés par underscores, minuscules)
 
-### 2. ID du RS90 (Home Assistant)
+### 2. ID d'appareil RS90 (Home Assistant)
 
 **Où le trouver** :
-- Même page appareil que ci-dessus
+- Même page d'appareil que ci-dessus
 - Regardez l'URL du navigateur : `http://homeassistant.local:8123/config/devices/device/6f99751e78b5a07de72d549143e2975c`
 - Copiez le long ID à la fin : `6f99751e78b5a07de72d549143e2975c`
 
-**Méthode alternative** : Utilisez le sélecteur UI dans Services (voir [GUIDE_DEVICE_ID.md](../documentation/GUIDE_DEVICE_ID.md))
-
-### 3. Nom de l'appareil (Exact)
-
-**Où le trouver** :
-- Allez sur le capteur de commandes (de l'étape 1)
-- Cliquez dessus pour voir les détails
-- Regardez la section **Attributs**
-- Trouvez **Device name** : `Canal - G9 4K`
-
-**Important** : Utilisez le **nom exact** incluant espaces, majuscules et caractères spéciaux !
+**Méthode alternative** : Utilisez le sélecteur UI dans Services (voir [GUIDE_DEVICE_ID_FR.md](../documentation/GUIDE_DEVICE_ID_FR.md))
 
 ---
 
-## 🚀 Guide étape par étape
+## 🚀 Démarrage rapide
 
 ### Étape 1 : Copier le template
 
-Copiez le code du template depuis [`templates/device_buttons_card.yaml`](device_buttons_card.yaml)
+Copiez le contenu de [`device_buttons_card.yaml`](device_buttons_card.yaml)
 
-### Étape 2 : Remplacer les valeurs
+### Étape 2 : Remplacer les espaces réservés
 
-Vous devez remplacer **3 valeurs** dans le template :
+Trouvez et remplacez ces espaces réservés :
 
 ```yaml
-{% for cmd in state_attr('sensor.commands_your_device_name', 'commands') %}
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                              1️⃣ Remplacez par VOTRE nom de capteur
+# REMPLACEZ CECI :
+sensor.commands_your_device_name
+
+# PAR LE NOM DE VOTRE CAPTEUR (exemple) :
+sensor.commands_canal
 ```
 
 ```yaml
+# REMPLACEZ CECI :
 device_id: "YOUR_RS90_DEVICE_ID_HERE"
-            ^^^^^^^^^^^^^^^^^^^^^^^^^
-            2️⃣ Remplacez par VOTRE ID d'appareil
+
+# PAR VOTRE ID D'APPAREIL RS90 (exemple) :
+device_id: "6f99751e78b5a07de72d549143e2975c"
 ```
 
-```yaml
-device_name: "Your Device Name"
-              ^^^^^^^^^^^^^^^^^
-              3️⃣ Remplacez par VOTRE nom exact d'appareil
-```
+**Note** : Le `haptique_device_id` est **récupéré automatiquement** depuis les attributs du capteur - aucune saisie manuelle nécessaire !
 
-**Exemple avec des vraies valeurs** :
+### Étape 3 : Ajouter au tableau de bord
 
-```yaml
-# Avant (template avec placeholders)
-{% for cmd in state_attr('sensor.commands_your_device_name', 'commands') %}
-  device_id: "YOUR_RS90_DEVICE_ID_HERE"
-  device_name: "Your Device Name"
-
-# Après (avec vos vraies valeurs)
-{% for cmd in state_attr('sensor.commands_canal_g9_4k', 'commands') %}
-  device_id: "6f99751e78b5a07de72d549143e2975c"
-  device_name: "Canal - G9 4K"
-```
-
-### Étape 3 : Générer le code de la carte
-
-1. Allez dans **Outils de développement** → **Template** (URL : `/developer-tools/template`)
-2. **Collez votre template modifié** dans l'éditeur de gauche
-3. Attendez que le résultat apparaisse dans le panneau **Result** à droite
-4. **Copiez tout le code résultat** (il sera beaucoup plus long que le template)
-
-![Éditeur de template](../documentation/screenshots/template_editor.png)
-*L'éditeur de template génère le code final de la carte*
-
-### Étape 4 : Ajouter à votre dashboard
-
-1. Allez sur n'importe quel dashboard
-2. Cliquez sur **Modifier le tableau de bord** (en haut à droite)
-3. Cliquez sur **Ajouter une carte**
-4. Descendez et sélectionnez **Manuel** (en bas)
-5. **Collez le code** que vous avez copié du Résultat du Template
-6. Cliquez sur **Enregistrer**
-
-Terminé ! 🎉 Vous avez maintenant une belle carte télécommande !
+1. Ouvrez votre tableau de bord Home Assistant en **mode édition**
+2. Cliquez sur **Ajouter une carte**
+3. Choisissez **Manuel** en bas
+4. Collez votre template modifié
+5. Cliquez sur **Enregistrer**
 
 ---
 
-## 🎨 Personnalisation
-
-### Changer la disposition de la grille
-
-Modifiez la valeur `columns` pour changer la disposition des boutons :
-
-```yaml
-columns: 4  # 4 colonnes (par défaut, bon pour mobile)
-columns: 5  # 5 colonnes (plus compact)
-columns: 3  # 3 colonnes (boutons plus grands)
-```
-
-### Changer les couleurs
-
-Modifiez les variables CSS :
-
-```yaml
---mdc-theme-primary: #1e3a8a;      # Couleur principale du bouton (bleu)
---mdc-theme-secondary: #0f172a;    # Fin du dégradé (bleu foncé)
-```
-
-**Schémas de couleurs populaires** :
-
-**Thème rouge** (pour appareils média/power) :
-```yaml
---mdc-theme-primary: #dc2626;
---mdc-theme-secondary: #7f1d1d;
-```
-
-**Thème vert** (pour appareils éco/maison) :
-```yaml
---mdc-theme-primary: #16a34a;
---mdc-theme-secondary: #14532d;
-```
-
-**Thème violet** (pour divertissement) :
-```yaml
---mdc-theme-primary: #9333ea;
---mdc-theme-secondary: #581c87;
-```
-
-### Supprimer l'effet 3D
-
-Si vous n'avez pas card-mod ou voulez des boutons plats, supprimez simplement toute la section `card_mod:` du template.
-
----
-
-## 🔧 Dépannage
-
-### Les boutons n'apparaissent pas
-
-**Problème** : Le template génère un résultat vide
-**Solution** :
-- Vérifiez que le nom du capteur est correct (doit commencer par `sensor.commands_`)
-- Vérifiez que le capteur existe dans **Outils de développement** → **États**
-
-### Les boutons ne fonctionnent pas
-
-**Problème** : Cliquer sur les boutons ne fait rien
-**Solution** :
-- Vérifiez que `device_id` est correct (vérifiez l'URL dans la page appareil)
-- Vérifiez que `device_name` est **exact** (sensible à la casse, incluez espaces/tirets)
-- Vérifiez que votre RS90 est en ligne (Capteur Connection = ON)
-
-### Les boutons ont un style basique (Pas d'effet 3D)
-
-**Problème** : Les boutons fonctionnent mais sont plats
-**Solution** : Installez **card-mod** via HACS → Frontend
-
-### Mauvaises commandes affichées
-
-**Problème** : Les boutons montrent les commandes d'un mauvais appareil
-**Solution** : Vous avez utilisé le mauvais nom de capteur. Chaque appareil a son propre `sensor.commands_{appareil}`.
-
----
-
-## 📸 Captures d'écran
-
-### Exemples de cartes générées
-
-<table>
-<tr>
-<td width="50%">
-<img src="../documentation/screenshots/device_buttons_card.png" alt="Télécommande Canal Plus" />
-<p align="center"><em>Canal Plus - Télécommande complète avec 31 boutons</em></p>
-</td>
-<td width="50%">
-<p><strong>Fonctionnalités :</strong></p>
-<ul>
-<li>✅ Grille 4 colonnes</li>
-<li>✅ Effet 3D des boutons</li>
-<li>✅ Animation de pression</li>
-<li>✅ Auto-généré depuis le capteur</li>
-<li>✅ Fonctionne avec n'importe quel appareil</li>
-</ul>
-</td>
-</tr>
-</table>
-
----
-
-## 💡 Conseils et bonnes pratiques
-
-### Organiser plusieurs appareils
-
-Créez **une carte par appareil** et organisez-les en **onglets** ou **piles verticales** :
-
-```yaml
-type: vertical-stack
-title: Divertissement Salon
-cards:
-  - type: markdown
-    content: "## Télécommande TV"
-  - # Votre carte boutons TV ici
-  
-  - type: markdown
-    content: "## Système Audio"
-  - # Votre carte boutons audio ici
-```
-
-### Ajouter un titre à la carte
-
-Enveloppez votre carte dans une pile verticale avec un titre :
-
-```yaml
-type: vertical-stack
-cards:
-  - type: markdown
-    content: "# 📺 Canal Plus"
-    card_mod:
-      style: |
-        ha-card {
-          background: none;
-          box-shadow: none;
-          text-align: center;
-        }
-  - # Votre carte boutons ici
-```
-
-### Utiliser des cartes conditionnelles
-
-Affichez différentes télécommandes selon ce qui est en cours de lecture :
-
-```yaml
-type: conditional
-conditions:
-  - entity: media_player.tv
-    state: "on"
-card:
-  # Votre carte télécommande TV ici
-```
-
----
-
-## 🎬 Exemple : Configuration complète
-
-Voici un exemple complet pour un appareil "Canal - G9 4K" :
-
-**1. Mes informations** :
-- Capteur : `sensor.commands_canal_g9_4k`
-- ID appareil : `6f99751e78b5a07de72d549143e2975c`
-- Nom appareil : `Canal - G9 4K`
-
-**2. Template avec mes valeurs** (coller dans l'Éditeur de Template) :
+## 📝 Structure du template (v1.5.0)
 
 ```yaml
 type: grid
+title: Votre appareil
 columns: 4
 square: false
 cards:
-  {% for cmd in state_attr('sensor.commands_canal_g9_4k', 'commands') %}
+  {% for cmd in state_attr('sensor.commands_votre_appareil', 'commands') %}
   - type: button
     name: "{{ cmd.replace('_', ' ') }}"
     tap_action:
       action: call-service
       service: haptique_rs90.trigger_device_command
       data:
-        device_id: "6f99751e78b5a07de72d549143e2975c"
-        device_name: "Canal - G9 4K"
+        device_id: "VOTRE_ID_APPAREIL_RS90_ICI"
+        haptique_device_id: "{{ state_attr('sensor.commands_votre_appareil', 'haptique_device_id') }}"
         command_name: "{{ cmd }}"
-    # ... reste du style ...
-  {% endfor %}
 ```
 
-**3. Résultat** : Copiez le code généré 
-
-**4. Ajoutez au dashboard** : Collez dans une carte Manuel
-
-**5. Terminé !** 🎉
-
----
-
-## 📦 Fichiers
-
-- **Template** : [`device_buttons_card.yaml`](device_buttons_card.yaml)
-- **Exemple** : [`example_canal_plus.yaml`](example_canal_plus.yaml) (avec vraies valeurs)
-- **Screenshot** : [device_buttons_card.png](../documentation/screenshots/device_buttons_card.png)
+**Nouveau dans v1.5.0** :
+- ✅ Utilise `haptique_device_id` (ID stable) au lieu de `device_name`
+- ✅ Récupère automatiquement l'ID d'appareil depuis les attributs du capteur
+- ✅ Résistant aux renommages : Fonctionne même si vous renommez l'appareil dans Haptique Config
 
 ---
 
-## 🆘 Besoin d'aide ?
+## 🎨 Personnalisation
 
-- 📖 [Documentation principale](../README_FR.md)
-- 🔍 [Comment trouver le Device ID](../documentation/GUIDE_DEVICE_ID.md)
-- 🐛 [Signaler un problème](https://github.com/daangel27/haptique_rs90/issues)
-- 💬 [Discussions](https://github.com/daangel27/haptique_rs90/discussions)
+### Changer la disposition en grille
+
+```yaml
+columns: 3  # Changer le nombre de colonnes (défaut : 4)
+square: true  # Rendre les boutons carrés (défaut : false)
+```
+
+### Changer les couleurs des boutons
+
+Trouvez ces lignes dans le template et modifiez les couleurs hexadécimales :
+
+```yaml
+--mdc-theme-primary: #1e3a8a;    # Couleur du bouton (défaut : bleu foncé)
+--mdc-theme-secondary: #0f172a;  # Dégradé du bouton (défaut : bleu plus foncé)
+```
+
+**Exemples de couleurs** :
+- Rouge : `#dc2626` / `#7f1d1d`
+- Vert : `#16a34a` / `#14532d`
+- Orange : `#ea580c` / `#7c2d12`
+- Violet : `#9333ea` / `#581c87`
+
+### Changer la taille des boutons
+
+```yaml
+height: 50px !important;      # Hauteur du bouton (défaut : 50px)
+min-height: 50px !important;  # Hauteur minimale
+font-size: 11px !important;   # Taille du texte (défaut : 11px)
+```
 
 ---
 
-**Version du Template** : 1.0  
-**Compatible avec** : Haptique RS90 Integration v1.2.5+  
-**Dernière mise à jour** : Décembre 2025
+## 📱 Exemple : Canal Plus
+
+Voir [`example_canal_plus.yaml`](example_canal_plus.yaml) pour un exemple complet fonctionnel.
+
+**Fonctionnalités** :
+- Grille à 4 colonnes
+- Style de boutons 3D avec ombres
+- Récupération automatique des commandes
+- Utilise `haptique_device_id` stable
+
+---
+
+## ❓ Dépannage
+
+### Les boutons ne fonctionnent pas
+
+**Vérifiez** :
+1. Le nom du service est-il correct ? `haptique_rs90.trigger_device_command`
+2. Votre télécommande RS90 est-elle en ligne ? (Vérifiez le capteur binaire : `binary_sensor.{nom}_connection`)
+3. Utilisez-vous le bon device_id ? (Vérifiez l'URL ou utilisez le sélecteur UI)
+
+### Erreur "Command not found"
+
+**Vérifiez** :
+1. Le nom de la commande est-il correct ? (Vérifiez les attributs du capteur pour les IDs de commandes exacts)
+2. L'appareil a-t-il cette commande ? (Liste des commandes dans les attributs du capteur)
+
+### Les boutons ont un aspect basique
+
+**Solution** : Installez **card-mod** depuis HACS (voir section Prérequis ci-dessus)
+
+### Appareil renommé - Les boutons ont cessé de fonctionner
+
+**Solution** : Avec v1.5.0, cela NE DEVRAIT PAS arriver ! Le template utilise `haptique_device_id` qui est stable.
+
+Si vous utilisez un ancien template (pré-v1.5.0 avec `device_name`), mettez à jour vers la nouvelle version.
+
+---
+
+## 🔄 Migration depuis l'ancien template (pré-v1.5.0)
+
+**L'ancien template utilisait** :
+```yaml
+device_name: "Nom de votre appareil"  # ← Casse au renommage
+```
+
+**Le nouveau template utilise** :
+```yaml
+haptique_device_id: "{{ state_attr('sensor.commands_votre_appareil', 'haptique_device_id') }}"  # ← Stable !
+```
+
+**Étapes de migration** :
+1. Remplacez votre ancien template par le nouveau
+2. Mettez à jour le nom du capteur
+3. Mettez à jour device_id
+4. Terminé ! Le `haptique_device_id` est automatique
+
+---
+
+## 💡 Conseils
+
+### Organiser par pièce
+
+Créez des vues de tableau de bord séparées pour chaque pièce :
+- **Salon** : TV, Barre de son, Décodeur
+- **Chambre** : TV, Ventilateur
+- **Bureau** : Projecteur, Système audio
+
+### Utiliser des titres de carte
+
+Ajoutez un titre pour identifier chaque télécommande :
+
+```yaml
+title: Télécommande Canal Plus  # ← Titre personnalisé
+type: grid
+```
+
+### Combiner avec d'autres cartes
+
+Ajoutez des switchs de macros au-dessus des boutons d'appareil :
+
+```yaml
+type: vertical-stack
+cards:
+  - type: entities
+    entities:
+      - switch.macro_watch_movie
+      - switch.macro_tv
+  - type: grid  # ← Votre template de boutons d'appareil
+    ...
+```
+
+---
+
+## 📚 Voir aussi
+
+- [GUIDE_DEVICE_ID_FR.md](../documentation/GUIDE_DEVICE_ID_FR.md) - Comment trouver les IDs d'appareil Home Assistant
+- [GUIDE_DEVICE_ID.md](../documentation/GUIDE_DEVICE_ID.md) - Version anglaise
+- [README_FR.md](../README_FR.md) - Documentation principale de l'intégration
+- [CHANGELOG_FR.md](../CHANGELOG_FR.md) - Changements v1.5.0
+
+---
+
+## 🙏 Crédits
+
+Template créé pour l'intégration Home Assistant **Haptique RS90**.
+
+- **Matériel** : Cantata Communication Solutions
+- **Logiciel** : Haptique
+- **Intégration** : [@daangel27](https://github.com/daangel27)
+
+---
+
+**Questions ?** Ouvrez un ticket sur [GitHub](https://github.com/daangel27/haptique_rs90/issues) !

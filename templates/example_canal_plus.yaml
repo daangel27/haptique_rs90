@@ -3,15 +3,15 @@ title: Canal - G9 4K
 columns: 4
 square: false
 cards:
-  {% for cmd in state_attr('sensor.rs90_salon_canal_g9_4k_commands', 'commands') %}
+  {% for cmd in state_attr('sensor.salon_commands_canal', 'commands') %}
   - type: button
     name: "{{ cmd.replace('_', ' ') }}"
     tap_action:
       action: call-service
       service: haptique_rs90.trigger_device_command
       data:
-        device_id: "6f99751e78b5a07de72d549143e2975c"
-        device_name: "Canal - G9 4K"
+        rs90_id: "6f99751e78b5a07de72d549143e2975c"
+        rs90_device_id: "{{ state_attr('sensor.salon_commands_canal', 'rs90_device_id') }}"
         command_name: "{{ cmd }}"
     card_mod:
       style: |

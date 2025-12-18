@@ -3,62 +3,84 @@
     "step": {
       "user": {
         "title": "Configurer Haptique RS90",
-        "description": "Télécommande détectée : {remote_id}\n\nDonnez un nom à votre télécommande (optionnel).",
+        "description": "Telecommande detectee : {remote_id}\n\nDonnez un nom a votre telecommande (optionnel).",
         "data": {
-          "name": "Nom de la télécommande (optionnel)"
+          "name": "Nom de la telecommande (optionnel)"
         }
       }
     },
     "error": {
-      "mqtt_not_configured": "MQTT n'est pas configuré. Veuillez configurer MQTT avant d'ajouter cette intégration.",
-      "no_remote_found": "Aucune télécommande Haptique RS90 trouvée. Assurez-vous qu'elle est connectée et publie sur MQTT."
+      "mqtt_not_configured": "MQTT n'est pas configure. Veuillez configurer MQTT avant d'ajouter cette integration.",
+      "no_remote_found": "Aucune telecommande Haptique RS90 trouvee. Assurez-vous qu'elle est connectee et publie sur MQTT."
     },
     "abort": {
-      "already_configured": "Cette télécommande est déjà configurée",
-      "mqtt_not_configured": "MQTT n'est pas configuré"
+      "already_configured": "Cette telecommande est deja configuree",
+      "mqtt_not_configured": "MQTT n'est pas configure"
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "Options Haptique RS90",
-        "description": "Modifier les paramètres de la télécommande",
+        "description": "Modifier les parametres de la telecommande",
         "data": {
-          "name": "Nom de la télécommande"
+          "name": "Nom de la telecommande"
         }
       }
     }
   },
   "services": {
     "trigger_macro": {
-      "name": "Déclencher une macro",
-      "description": "Déclenche une macro spécifique sur la télécommande Haptique RS90.",
+      "name": "Declencher une macro",
+      "description": "Declenche une macro specifique sur la telecommande Haptique RS90.",
       "fields": {
         "device_id": {
-          "name": "Télécommande RS90",
-          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90)"
+          "name": "Telecommande RS90",
+          "description": "Selectionnez votre telecommande Haptique RS90 (trouvez-la dans Parametres > Appareils et services > Haptique RS90)"
         },
         "macro_name": {
-          "name": "Nom de la macro",
-          "description": "Le nom exact de la macro à déclencher (sensible à la casse)"
+          "name": "Nom de la macro (OBSOLETE)",
+          "description": "OBSOLETE - Sera supprime dans une future version de l'integration. Ce parametre casse lors d'un renommage de macro dans Haptique Config! Utilisez macro_id a la place. Le nom exact de la macro a declencher (sensible a la casse)."
+        },
+        "macro_id": {
+          "name": "ID de la macro (RECOMMANDE)",
+          "description": "RECOMMANDE - L'ID stable de la macro (depuis les attributs du switch). Cet ID ne change jamais meme si vous renommez la macro dans Haptique Config."
+        },
+        "action": {
+          "name": "Action",
+          "description": "Action a effectuer (on ou off)"
         }
       }
     },
     "trigger_device_command": {
-      "name": "Déclencher une commande",
-      "description": "Envoie une commande spécifique à un appareil via la télécommande RS90.",
+      "name": "Declencher une commande",
+      "description": "Envoie une commande specifique a un appareil via la telecommande RS90.",
       "fields": {
         "device_id": {
-          "name": "Télécommande RS90",
-          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90)"
+          "name": "Telecommande RS90",
+          "description": "Selectionnez votre telecommande Haptique RS90 (trouvez-la dans Parametres > Appareils et services > Haptique RS90)"
         },
         "device_name": {
-          "name": "Nom de l'appareil",
-          "description": "Le nom exact de l'appareil configuré dans RS90 (sensible à la casse)"
+          "name": "Nom de l'appareil (OBSOLETE)",
+          "description": "OBSOLETE - Sera supprime dans une future version de l'integration. Ce parametre casse lors d'un renommage d'appareil dans Haptique Config! Utilisez haptique_device_id a la place. Le nom exact de l'appareil configure dans le RS90 (sensible a la casse)."
+        },
+        "haptique_device_id": {
+          "name": "ID de l'appareil Haptique (RECOMMANDE)",
+          "description": "RECOMMANDE - L'ID stable de l'appareil (depuis les attributs du sensor). Cet ID ne change jamais meme si vous renommez l'appareil dans Haptique Config. Trouvez-le dans les attributs du sensor: haptique_device_id"
         },
         "command_name": {
           "name": "Nom de la commande",
-          "description": "Le nom exact de la commande à envoyer (consultez le capteur de commandes pour voir les commandes disponibles)"
+          "description": "Le nom exact de la commande a envoyer (consultez le capteur de commandes pour voir les commandes disponibles)"
+        }
+      }
+    },
+    "refresh_lists": {
+      "name": "Actualiser les listes",
+      "description": "Force l'actualisation des listes d'appareils et de macros depuis la telecommande RS90. Utilisez ceci si les appareils ou macros n'apparaissent pas apres les avoir ajoutes dans Haptique Config.",
+      "fields": {
+        "device_id": {
+          "name": "Telecommande RS90",
+          "description": "Selectionnez votre telecommande Haptique RS90"
         }
       }
     }

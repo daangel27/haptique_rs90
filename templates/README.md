@@ -5,6 +5,8 @@ Generate a beautiful remote control dashboard card with all available commands f
 ![Device Buttons Card Example](../documentation/screenshots/device_buttons_card.png)
 *Example: Full remote control card for Canal Plus*
 
+**Updated for v1.5.0** - Now uses stable `haptique_device_id` parameter!
+
 ---
 
 ## 🎯 What This Template Does
@@ -24,7 +26,7 @@ This template automatically generates a **grid card** containing **one button fo
 
 Before using this template, you need:
 
-1. ✅ **Haptique RS90 integration** installed and configured
+1. ✅ **Haptique RS90 integration v1.5.0+** installed and configured
 2. ✅ **Device commands sensor** available (automatically created by the integration)
 3. ✅ **card-mod** frontend plugin installed (for the 3D button styling)
 
@@ -43,9 +45,9 @@ Install via HACS:
 
 ## 🔍 Finding Your Required Information
 
-You need **3 pieces of information** to use this template:
+You need **2 pieces of information** to use this template:
 
-### 1. Device Commands Sensor
+### 1. Device Commands Sensor Name
 
 **Where to find it**:
 - Go to **Settings** → **Devices & Services**
@@ -54,7 +56,7 @@ You need **3 pieces of information** to use this template:
 - Look in the **Diagnostic** section
 - Find sensors named: `Commands - {Device Name}`
 
-**Example**: `sensor.commands_canal_g9_4k`
+**Example**: `sensor.commands_canal`
 
 **Format**: `sensor.commands_{device_name}` (spaces replaced by underscores, lowercase)
 
@@ -67,80 +69,70 @@ You need **3 pieces of information** to use this template:
 
 **Alternative method**: Use the UI selector in Services (see [GUIDE_DEVICE_ID.md](../documentation/GUIDE_DEVICE_ID.md))
 
-### 3. Device Name (Exact)
-
-**Where to find it**:
-- Go to the device commands sensor (from step 1)
-- Click on it to see details
-- Look at the **Attributes** section
-- Find **Device name**: `Canal - G9 4K`
-
-**Important**: Use the **exact name** including spaces, capitals, and special characters!
-
 ---
 
-## 🚀 Step-by-Step Guide
+## 🚀 Quick Start
 
 ### Step 1: Copy the Template
 
-Copy the template code from [`templates/device_buttons_card.yaml`](device_buttons_card.yaml)
+Copy the contents of [`device_buttons_card.yaml`](device_buttons_card.yaml)
 
-### Step 2: Replace the Values
+### Step 2: Replace Placeholders
 
-You need to replace **3 values** in the template:
+Find and replace these placeholders:
 
 ```yaml
-{% for cmd in state_attr('sensor.commands_your_device_name', 'commands') %}
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                              1️⃣ Replace with YOUR sensor name
+# REPLACE THIS:
+sensor.commands_your_device_name
+
+# WITH YOUR SENSOR NAME (example):
+sensor.commands_canal
 ```
 
 ```yaml
+# REPLACE THIS:
 device_id: "YOUR_RS90_DEVICE_ID_HERE"
-            ^^^^^^^^^^^^^^^^^^^^^^^^^
-            2️⃣ Replace with YOUR device ID
+
+# WITH YOUR RS90 DEVICE ID (example):
+device_id: "6f99751e78b5a07de72d549143e2975c"
 ```
+
+**Note**: The `haptique_device_id` is **automatically retrieved** from the sensor attributes - no manual input needed!
+
+### Step 3: Add to Dashboard
+
+1. Open your Home Assistant dashboard in **edit mode**
+2. Click **Add Card**
+3. Choose **Manual** at the bottom
+4. Paste your modified template
+5. Click **Save**
+
+---
+
+## 📝 Template Structure (v1.5.0)
 
 ```yaml
-device_name: "Your Device Name"
-              ^^^^^^^^^^^^^^^^^
-              3️⃣ Replace with YOUR exact device name
+type: grid
+title: Your Device
+columns: 4
+square: false
+cards:
+  {% for cmd in state_attr('sensor.commands_your_device_name', 'commands') %}
+  - type: button
+    name: "{{ cmd.replace('_', ' ') }}"
+    tap_action:
+      action: call-service
+      service: haptique_rs90.trigger_device_command
+      data:
+        device_id: "YOUR_RS90_DEVICE_ID_HERE"
+        haptique_device_id: "{{ state_attr('sensor.commands_your_device_name', 'haptique_device_id') }}"
+        command_name: "{{ cmd }}"
 ```
 
-**Example with real values**:
-
-```yaml
-# Before (template with placeholders)
-{% for cmd in state_attr('sensor.commands_your_device_name', 'commands') %}
-  device_id: "YOUR_RS90_DEVICE_ID_HERE"
-  device_name: "Your Device Name"
-
-# After (with your actual values)
-{% for cmd in state_attr('sensor.commands_canal_g9_4k', 'commands') %}
-  device_id: "6f99751e78b5a07de72d549143e2975c"
-  device_name: "Canal - G9 4K"
-```
-
-### Step 3: Generate the Card Code
-
-1. Go to **Developer Tools** → **Template** (URL: `/developer-tools/template`)
-2. **Paste your modified template** in the left editor
-3. Wait for the result to appear in the **Result** panel on the right
-4. **Copy the entire result code** (it will be much longer than the template)
-
-![Template Editor](../documentation/screenshots/template_editor.png)
-*The template editor generates the final card code*
-
-### Step 4: Add to Your Dashboard
-
-1. Go to any dashboard
-2. Click **Edit Dashboard** (top right)
-3. Click **Add Card**
-4. Scroll down and select **Manual** (at the bottom)
-5. **Paste the code** you copied from the Template Result
-6. Click **Save**
-
-Done! 🎉 You now have a beautiful remote control card!
+**What's New in v1.5.0**:
+- ✅ Uses `haptique_device_id` (stable ID) instead of `device_name`
+- ✅ Automatically retrieves the device ID from sensor attributes
+- ✅ Rename-proof: Works even if you rename the device in Haptique Config
 
 ---
 
@@ -148,211 +140,147 @@ Done! 🎉 You now have a beautiful remote control card!
 
 ### Change Grid Layout
 
-Modify the `columns` value to change button layout:
-
 ```yaml
-columns: 4  # 4 columns (default, good for mobile)
-columns: 5  # 5 columns (more compact)
-columns: 3  # 3 columns (larger buttons)
+columns: 3  # Change number of columns (default: 4)
+square: true  # Make buttons square (default: false)
 ```
 
-### Change Colors
+### Change Button Colors
 
-Modify the CSS variables:
+Find these lines in the template and modify the hex colors:
 
 ```yaml
---mdc-theme-primary: #1e3a8a;      # Main button color (blue)
---mdc-theme-secondary: #0f172a;    # Button gradient end (dark blue)
+--mdc-theme-primary: #1e3a8a;    # Button color (default: dark blue)
+--mdc-theme-secondary: #0f172a;  # Button gradient (default: darker blue)
 ```
 
-**Popular color schemes**:
+**Color Examples**:
+- Red: `#dc2626` / `#7f1d1d`
+- Green: `#16a34a` / `#14532d`
+- Orange: `#ea580c` / `#7c2d12`
+- Purple: `#9333ea` / `#581c87`
 
-**Red theme** (for power/media devices):
+### Change Button Size
+
 ```yaml
---mdc-theme-primary: #dc2626;
---mdc-theme-secondary: #7f1d1d;
+height: 50px !important;      # Button height (default: 50px)
+min-height: 50px !important;  # Minimum height
+font-size: 11px !important;   # Text size (default: 11px)
 ```
-
-**Green theme** (for eco/home devices):
-```yaml
---mdc-theme-primary: #16a34a;
---mdc-theme-secondary: #14532d;
-```
-
-**Purple theme** (for entertainment):
-```yaml
---mdc-theme-primary: #9333ea;
---mdc-theme-secondary: #581c87;
-```
-
-### Remove 3D Effect
-
-If you don't have card-mod or want flat buttons, simply delete the entire `card_mod:` section from the template.
 
 ---
 
-## 🔧 Troubleshooting
+## 📱 Example: Canal Plus
 
-### Buttons Don't Appear
+See [`example_canal_plus.yaml`](example_canal_plus.yaml) for a complete working example.
 
-**Problem**: Template generates empty result
-**Solution**: 
-- Check sensor name is correct (must start with `sensor.commands_`)
-- Verify the sensor exists in **Developer Tools** → **States**
+**Features**:
+- 4-column grid layout
+- 3D button styling with shadows
+- Automatic command retrieval
+- Uses stable `haptique_device_id`
+
+---
+
+## ❓ Troubleshooting
 
 ### Buttons Don't Work
 
-**Problem**: Clicking buttons does nothing
-**Solution**:
-- Verify `device_id` is correct (check URL in device page)
-- Verify `device_name` is **exact** (case-sensitive, include spaces/dashes)
-- Check your RS90 is online (Connection sensor = ON)
+**Check**:
+1. Is the service name correct? `haptique_rs90.trigger_device_command`
+2. Is your RS90 remote online? (Check binary sensor: `binary_sensor.{name}_connection`)
+3. Are you using the correct device_id? (Check URL or use UI selector)
 
-### Buttons Look Basic (No 3D Effect)
+### "Command not found" Error
 
-**Problem**: Buttons work but look flat
-**Solution**: Install **card-mod** via HACS → Frontend
+**Check**:
+1. Is the command name correct? (Check sensor attributes for exact command IDs)
+2. Does the device have this command? (Commands list in sensor attributes)
 
-### Wrong Commands Appear
+### Buttons Look Basic
 
-**Problem**: Buttons show commands for wrong device
-**Solution**: You used the wrong sensor name. Each device has its own `sensor.commands_{device}`.
+**Solution**: Install **card-mod** from HACS (see Prerequisites section above)
 
----
+### Device Renamed - Buttons Stopped Working
 
-## 📸 Screenshots
+**Solution**: With v1.5.0, this should NOT happen! The template uses `haptique_device_id` which is stable.
 
-### Generated Card Examples
-
-<table>
-<tr>
-<td width="50%">
-<img src="../documentation/screenshots/device_buttons_card.png" alt="Canal Plus Remote" />
-<p align="center"><em>Canal Plus - Full remote with 31 buttons</em></p>
-</td>
-<td width="50%">
-<p><strong>Features:</strong></p>
-<ul>
-<li>✅ 4-column grid layout</li>
-<li>✅ 3D button effect</li>
-<li>✅ Press animation</li>
-<li>✅ Auto-generated from sensor</li>
-<li>✅ Works with any device</li>
-</ul>
-</td>
-</tr>
-</table>
+If you're using an old template (pre-v1.5.0 with `device_name`), update to the new version.
 
 ---
 
-## 💡 Tips & Best Practices
+## 🔄 Migrating from Old Template (pre-v1.5.0)
 
-### Organize Multiple Devices
-
-Create **one card per device** and organize them in **tabs** or **vertical stacks**:
-
+**Old template used**:
 ```yaml
-type: vertical-stack
-title: Living Room Entertainment
-cards:
-  - type: markdown
-    content: "## TV Remote"
-  - # Your TV buttons card here
-  
-  - type: markdown
-    content: "## Sound System"
-  - # Your sound system buttons card here
+device_name: "Your Device Name"  # ← Breaks on rename
 ```
 
-### Add Card Title
-
-Wrap your card in a vertical stack with a title:
-
+**New template uses**:
 ```yaml
-type: vertical-stack
-cards:
-  - type: markdown
-    content: "# 📺 Canal Plus"
-    card_mod:
-      style: |
-        ha-card {
-          background: none;
-          box-shadow: none;
-          text-align: center;
-        }
-  - # Your buttons card here
+haptique_device_id: "{{ state_attr('sensor.commands_your_device', 'haptique_device_id') }}"  # ← Stable!
 ```
 
-### Use Conditional Cards
-
-Show different remotes based on what's playing:
-
-```yaml
-type: conditional
-conditions:
-  - entity: media_player.tv
-    state: "on"
-card:
-  # Your TV remote card here
-```
+**Migration steps**:
+1. Replace your old template with the new one
+2. Update sensor name
+3. Update device_id
+4. Done! The `haptique_device_id` is automatic
 
 ---
 
-## 🎬 Example: Complete Setup
+## 💡 Tips
 
-Here's a complete example for a "Canal - G9 4K" device:
+### Organize by Room
 
-**1. My information**:
-- Sensor: `sensor.commands_canal_g9_4k`
-- Device ID: `6f99751e78b5a07de72d549143e2975c`
-- Device name: `Canal - G9 4K`
+Create separate dashboard views for each room:
+- **Living Room**: TV, Soundbar, Cable Box
+- **Bedroom**: TV, Fan
+- **Office**: Projector, Sound System
 
-**2. Template with my values** (paste in Template Editor):
+### Use Card Titles
+
+Add a title to identify each remote:
 
 ```yaml
+title: Canal Plus Remote  # ← Custom title
 type: grid
-columns: 4
-square: false
-cards:
-  {% for cmd in state_attr('sensor.commands_canal_g9_4k', 'commands') %}
-  - type: button
-    name: "{{ cmd.replace('_', ' ') }}"
-    tap_action:
-      action: call-service
-      service: haptique_rs90.trigger_device_command
-      data:
-        device_id: "6f99751e78b5a07de72d549143e2975c"
-        device_name: "Canal - G9 4K"
-        command_name: "{{ cmd }}"
-    # ... rest of styling ...
-  {% endfor %}
 ```
 
-**3. Result**: Copy generated code 
+### Combine with Other Cards
 
-**4. Add to dashboard**: Paste in Manual card
+Add macro switches above device buttons:
 
-**5. Done!** 🎉
-
----
-
-## 📦 Files
-
-- **Template**: [`device_buttons_card.yaml`](device_buttons_card.yaml)
-- **Example**: [`example_canal_plus.yaml`](example_canal_plus.yaml) (with real values)
-- **Screenshot**: [device_buttons_card.png](../documentation/screenshots/device_buttons_card.png)
-
----
-
-## 🆘 Need Help?
-
-- 📖 [Main Documentation](../README.md)
-- 🔍 [How to Find Device ID](../documentation/GUIDE_DEVICE_ID.md)
-- 🐛 [Report Issues](https://github.com/daangel27/haptique_rs90/issues)
-- 💬 [Discussions](https://github.com/daangel27/haptique_rs90/discussions)
+```yaml
+type: vertical-stack
+cards:
+  - type: entities
+    entities:
+      - switch.macro_watch_movie
+      - switch.macro_tv
+  - type: grid  # ← Your device buttons template
+    ...
+```
 
 ---
 
-**Template Version**: 1.0  
-**Compatible with**: Haptique RS90 Integration v1.2.5+
-**Last Updated**: December 2025
+## 📚 See Also
+
+- [GUIDE_DEVICE_ID.md](../documentation/GUIDE_DEVICE_ID.md) - How to find Home Assistant device IDs
+- [GUIDE_DEVICE_ID_FR.md](../documentation/GUIDE_DEVICE_ID_FR.md) - French version
+- [README.md](../README.md) - Main integration documentation
+- [CHANGELOG.md](../CHANGELOG.md) - v1.5.0 changes
+
+---
+
+## 🙏 Credits
+
+Template created for the **Haptique RS90** Home Assistant integration.
+
+- **Hardware**: Cantata Communication Solutions
+- **Software**: Haptique
+- **Integration**: [@daangel27](https://github.com/daangel27)
+
+---
+
+**Questions?** Open an issue on [GitHub](https://github.com/daangel27/haptique_rs90/issues)!
