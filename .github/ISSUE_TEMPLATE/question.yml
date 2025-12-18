@@ -1,0 +1,48 @@
+---
+name: ❓ Question / Support
+about: Ask a question or get help with the integration
+title: '[QUESTION] '
+labels: question, needs-triage
+assignees: ''
+
+---
+
+## ❓ Question / Issue
+<!-- What do you need help with? -->
+
+
+
+## 📋 Context
+
+**Your Setup:**
+- **Home Assistant Version:** <!-- e.g., 2024.12.3 -->
+- **Haptique RS90 Integration Version:** <!-- e.g., 1.5.0 -->
+- **Installation Method:** <!-- HACS / Manual -->
+
+## 🔍 What You've Tried
+<!-- What have you already attempted? -->
+
+- [ ] Read the [README](https://github.com/daangel27/haptique_rs90/blob/main/README.md)
+- [ ] Checked the [Migration Guide](https://github.com/daangel27/haptique_rs90/blob/main/MIGRATION_GUIDE_v1.5.0.md) (if upgrading)
+- [ ] Searched existing issues
+- [ ] Checked Home Assistant logs
+
+## 📸 Relevant Information
+
+**Configuration / Code** (if applicable):
+```yaml
+# Your configuration here
+```
+
+**Logs** (if error-related):
+```
+Paste relevant logs here
+```
+
+## 🎯 Expected Outcome
+<!-- What are you trying to achieve? -->
+
+
+
+## 📝 Additional Context
+<!-- Any other information -->
