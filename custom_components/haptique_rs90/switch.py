@@ -48,6 +48,27 @@ async def async_setup_entry(
         _LOGGER.debug("Current macro IDs from MQTT: %s", current_macro_ids)
         _LOGGER.debug("Existing macro IDs in HA: %s", existing_macro_ids)
         
+        # Check for renamed macros (same ID, different name)
+        for macro in coordinator.data.get("macros", []):
+            macro_id = macro.get("id")
+            macro_name = macro.get("name")
+            if macro_id in existing_macro_ids and macro_name:
+                entity = entities.get(macro_id)
+                if entity and entity._macro_name != macro_name:
+                    _LOGGER.info("RENAME: Macro renamed: '%s' → '%s' (id: %s)", 
+                                entity._macro_name, macro_name, macro_id)
+                    entity._macro_name = macro_name
+                    # Update friendly name in entity registry
+                    entity_reg = er.async_get(hass)
+                    if entity_entry := entity_reg.async_get(entity.entity_id):
+                        entity_reg.async_update_entity(
+                            entity.entity_id,
+                            name=f"Macro: {macro_name}"
+                        )
+                    # Force immediate state update
+                    entity.async_write_ha_state()
+                    entity.async_schedule_update_ha_state(force_refresh=True)
+        
         # Find macros to add
         macros_to_add = current_macro_ids - existing_macro_ids
         new_entities = []
@@ -62,7 +83,7 @@ async def async_setup_entry(
                 entity = HaptiqueRS90MacroSwitch(coordinator, entry, macro_id, macro_name)
                 entities[macro_id] = entity
                 new_entities.append(entity)
-                _LOGGER.info("✓ Adding new macro switch: %s (id: %s)", macro_name, macro_id)
+                _LOGGER.info("SUCCESS: Adding new macro switch: %s (id: %s)", macro_name, macro_id)
         
         if new_entities:
             async_add_entities(new_entities)
@@ -85,7 +106,7 @@ async def async_setup_entry(
                 )
                 if entity_id:
                     entity_registry.async_remove(entity_id)
-                    _LOGGER.info("✓ Removed obsolete macro switch: %s (entity_id: %s)", entity.name, entity_id)
+                    _LOGGER.info("SUCCESS: Removed obsolete macro switch: %s (entity_id: %s)", entity.name, entity_id)
                 else:
                     _LOGGER.warning("Could not find entity_id for unique_id: %s", entity.unique_id)
             else:
@@ -139,11 +160,18 @@ class HaptiqueRS90MacroSwitch(HaptiqueRS90SwitchBase):
     ) -> None:
         """Initialize the macro switch."""
         super().__init__(coordinator, entry, "macro", macro_id)
+        
+        # Store macro name - friendly_name will come from @property name
         self._macro_name = macro_name
-        self._attr_name = f"Macro: {macro_name}"
+        
         self._attr_icon = "mdi:play-circle"
-        self._attr_device_class = "switch"  # Pour avoir la couleur bleu quand ON
+        self._attr_device_class = "switch"
 
+    @property
+    def name(self) -> str:
+        """Return the friendly name (updates on rename)."""
+        return self._macro_name
+    
     @property
     def is_on(self) -> bool:
         """Return True if the macro is currently running."""
@@ -162,8 +190,8 @@ class HaptiqueRS90MacroSwitch(HaptiqueRS90SwitchBase):
         macro_states = self.coordinator.data.get("macro_states", {})
         current_state = macro_states.get(self._macro_name, "off")
         return {
+            "rs90_macro_id": self._switch_id,  # Stable ID for service calls
             "macro_name": self._macro_name,
-            "macro_id": self._switch_id,
             "current_state": current_state,
         }
 

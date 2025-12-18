@@ -39,8 +39,16 @@
           "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
         },
         "macro_name": {
-          "name": "Macro name",
-          "description": "The exact name of the macro to trigger (case-sensitive)"
+          "name": "Macro name (DEPRECATED)",
+          "description": "DEPRECATED - Will be removed in future release of the integration. This parameter breaks when you rename the macro in Haptique Config! Use macro_id instead. The exact name of the macro to trigger (case-sensitive)."
+        },
+        "macro_id": {
+          "name": "Macro ID (RECOMMENDED)",
+          "description": "RECOMMENDED - The stable ID of the macro (from switch attributes). This ID never changes even if you rename the macro in Haptique Config."
+        },
+        "action": {
+          "name": "Action",
+          "description": "Action to perform (on or off)"
         }
       }
     },
@@ -53,12 +61,26 @@
           "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
         },
         "device_name": {
-          "name": "Device name",
-          "description": "The exact name of the device configured in RS90 (case-sensitive)"
+          "name": "Device name (DEPRECATED)",
+          "description": "DEPRECATED - Will be removed in future release of the integration. This parameter breaks when you rename the device in Haptique Config! Use haptique_device_id instead. The exact name of the device configured in RS90 (case-sensitive)."
+        },
+        "haptique_device_id": {
+          "name": "Haptique Device ID (RECOMMENDED)",
+          "description": "RECOMMENDED - The stable ID of the device (from sensor attributes). This ID never changes even if you rename the device in Haptique Config. Find it in sensor attributes: haptique_device_id"
         },
         "command_name": {
           "name": "Command name",
           "description": "The exact command name to send (check the device commands sensor to see available commands)"
+        }
+      }
+    },
+    "refresh_lists": {
+      "name": "Refresh lists",
+      "description": "Force refresh of device and macro lists from the RS90 remote. Use this if devices or macros don't appear after adding them in Haptique Config.",
+      "fields": {
+        "device_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote"
         }
       }
     }

@@ -4,7 +4,7 @@ trigger_macro:
   name: Trigger macro
   description: Triggers a specific macro on the Haptique RS90 remote
   fields:
-    device_id:
+    rs90_id:
       name: RS90 Remote
       description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)
       required: true
@@ -12,19 +12,30 @@ trigger_macro:
       selector:
         device:
           integration: haptique_rs90
-    macro_name:
-      name: Macro name
-      description: The exact name of the macro to trigger (case-sensitive)
+    rs90_macro_id:
+      name: Macro ID
+      description: The stable ID of the macro. Find it in sensor.macro_{name}_info attributes or switch.macro_{name} attributes. This ID never changes even if you rename the macro in Haptique Config.
       required: true
-      example: "Watch Movie"
+      example: "692eb1561bddd5814022960c"
       selector:
         text:
+    action:
+      name: Action
+      description: Action to perform (on or off)
+      required: false
+      default: "on"
+      example: "on"
+      selector:
+        select:
+          options:
+            - "on"
+            - "off"
 
 trigger_device_command:
   name: Trigger device command
   description: Sends a specific command to a device via the RS90 remote
   fields:
-    device_id:
+    rs90_id:
       name: RS90 Remote
       description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)
       required: true
@@ -32,11 +43,11 @@ trigger_device_command:
       selector:
         device:
           integration: haptique_rs90
-    device_name:
-      name: Device name
-      description: The exact name of the device configured in RS90 (case-sensitive)
+    rs90_device_id:
+      name: Device ID
+      description: The stable ID of the device. Find it in sensor.commands_{name} attributes. This ID never changes even if you rename the device in Haptique Config.
       required: true
-      example: "Canal - G9 4K"
+      example: "692ead781bddd58140228e33"
       selector:
         text:
     command_name:
@@ -48,12 +59,12 @@ trigger_device_command:
         text:
 
 refresh_lists:
-  name: Refresh device and macro lists
-  description: Forces the integration to re-scan and subscribe to new devices or macros. Use this after adding devices/macros in the Haptique Config app if they don't appear automatically.
+  name: Refresh lists
+  description: Force refresh of device and macro lists from the RS90 remote. Use this if devices or macros don't appear after adding them in Haptique Config.
   fields:
-    device_id:
+    rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)
+      description: Select your Haptique RS90 remote
       required: true
       example: "6f99751e78b5a07de72d549143e2975c"
       selector:

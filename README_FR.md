@@ -1,6 +1,6 @@
 # Haptique RS90 - Intégration Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.2.6-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -206,8 +206,9 @@ Déclenche une macro manuellement.
 ```yaml
 service: haptique_rs90.trigger_macro
 data:
-  device_id: "6f99751e78b5a07de72d549143e2975c"  # ID de votre RS90
-  macro_name: "Watch Movie"
+  rs90_id: "6f99751e78b5a07de72d549143e2975c"  # ID de votre télécommande RS90
+  rs90_macro_id: "692eb1561bddd5814022960c"  # Trouvez dans les attributs de sensor.macro_{nom}_info
+  action: "on"
 ```
 
 ### `haptique_rs90.trigger_device_command`
@@ -217,12 +218,12 @@ Envoie une commande à un appareil.
 ```yaml
 service: haptique_rs90.trigger_device_command
 data:
-  device_id: "6f99751e78b5a07de72d549143e2975c"
-  device_name: "Samsung TV"
+  rs90_id: "6f99751e78b5a07de72d549143e2975c"  # ID de votre télécommande RS90
+  rs90_device_id: "692ead781bddd58140228e33"  # Trouvez dans les attributs de sensor.{telecommande}_commands_{appareil}
   command_name: "POWER"
 ```
 
-**Astuce :** Utilisez l'entité `sensor.commands_{device}` pour voir les commandes disponibles pour chaque appareil.
+**Astuce :** Utilisez l'entité `sensor.{nom_telecommande}_commands_{appareil}` pour voir les commandes disponibles et obtenir le `rs90_device_id` depuis les attributs.
 
 ---
 

@@ -61,8 +61,9 @@ Dans **Outils de développement** > **Template**, testez :
 ```yaml
 service: haptique_rs90.trigger_macro
 data:
-  device_id: 6f99751e78b5a07de72d549143e2975c  # ← Rempli automatiquement
-  macro_name: "Watch Movie"
+  rs90_id: 6f99751e78b5a07de72d549143e2975c  # ← ID de l'appareil RS90
+  rs90_macro_id: "692eb1561bddd5814022960c"  # ← Depuis attributs de sensor.macro_{nom}_info
+  action: "on"
 ```
 
 ### ✅ Alternative (Sélecteur device)
@@ -72,7 +73,8 @@ service: haptique_rs90.trigger_macro
 target:
   device_id: 6f99751e78b5a07de72d549143e2975c
 data:
-  macro_name: "Watch Movie"
+  rs90_macro_id: "692eb1561bddd5814022960c"  # ← Depuis attributs de sensor.macro_{nom}_info
+  action: "on"
 ```
 
 ---

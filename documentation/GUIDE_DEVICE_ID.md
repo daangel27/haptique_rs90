@@ -61,8 +61,9 @@ In **Developer Tools** > **Template**, test:
 ```yaml
 service: haptique_rs90.trigger_macro
 data:
-  device_id: 6f99751e78b5a07de72d549143e2975c  # ← Automatically filled
-  macro_name: "Watch Movie"
+  rs90_id: 6f99751e78b5a07de72d549143e2975c  # ← RS90 device ID
+  rs90_macro_id: "692eb1561bddd5814022960c"  # ← From sensor.macro_{name}_info attributes
+  action: "on"
 ```
 
 ### ✅ Alternative (Device Selector)
@@ -72,7 +73,8 @@ service: haptique_rs90.trigger_macro
 target:
   device_id: 6f99751e78b5a07de72d549143e2975c
 data:
-  macro_name: "Watch Movie"
+  rs90_macro_id: "692eb1561bddd5814022960c"  # ← From sensor.macro_{name}_info attributes
+  action: "on"
 ```
 
 ---

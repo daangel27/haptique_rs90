@@ -26,77 +26,109 @@ async def async_setup_services(hass: HomeAssistant) -> None:
     
     async def handle_trigger_macro(call):
         """Handle the trigger_macro service call."""
-        device_id = call.data.get("device_id")
-        macro_name = call.data.get("macro_name")
+        rs90_id = call.data.get("rs90_id")
+        rs90_macro_id = call.data.get("rs90_macro_id")
+        action = call.data.get("action", "on")  # Default to "on"
+        
+        if not rs90_macro_id:
+            _LOGGER.error("rs90_macro_id is required")
+            return
         
         # Find the coordinator for this device
         device_registry = dr.async_get(hass)
-        device_entry = device_registry.async_get(device_id)
+        device_entry = device_registry.async_get(rs90_id)
         
         if not device_entry:
-            _LOGGER.error("Device not found: %s", device_id)
+            _LOGGER.error("Device not found: %s", rs90_id)
             return
         
         # Find the config entry
         for entry_id in device_entry.config_entries:
             if entry_id in hass.data.get(DOMAIN, {}):
                 coordinator = hass.data[DOMAIN][entry_id]
-                await coordinator.async_trigger_macro(macro_name)
+                
+                # Resolve rs90_macro_id to macro_name (for MQTT topic)
+                macros = coordinator.data.get("macros", [])
+                macro_name = None
+                for macro in macros:
+                    if macro.get("id") == rs90_macro_id:
+                        macro_name = macro.get("name")
+                        _LOGGER.debug("Resolved rs90_macro_id %s to macro_name: %s", 
+                                    rs90_macro_id, macro_name)
+                        break
+                
+                if not macro_name:
+                    _LOGGER.error("Could not find macro with rs90_macro_id: %s", rs90_macro_id)
+                    return
+                
+                await coordinator.async_trigger_macro(macro_name, action)
                 return
         
-        _LOGGER.error("Coordinator not found for device: %s", device_id)
+        _LOGGER.error("Coordinator not found for device: %s", rs90_id)
     
     async def handle_trigger_device_command(call):
         """Handle the trigger_device_command service call."""
-        device_id = call.data.get("device_id")
-        device_name = call.data.get("device_name")
+        rs90_id = call.data.get("rs90_id")
+        rs90_device_id = call.data.get("rs90_device_id")
         command_name = call.data.get("command_name")
+        
+        if not rs90_device_id:
+            _LOGGER.error("rs90_device_id is required")
+            return
         
         # Find the coordinator for this device
         device_registry = dr.async_get(hass)
-        device_entry = device_registry.async_get(device_id)
+        device_entry = device_registry.async_get(rs90_id)
         
         if not device_entry:
-            _LOGGER.error("Device not found: %s", device_id)
+            _LOGGER.error("Device not found: %s", rs90_id)
             return
         
         # Find the config entry
         for entry_id in device_entry.config_entries:
             if entry_id in hass.data.get(DOMAIN, {}):
                 coordinator = hass.data[DOMAIN][entry_id]
+                
+                # Resolve rs90_device_id to device_name (for MQTT topic)
+                devices = coordinator.data.get("devices", [])
+                device_name = None
+                for device in devices:
+                    if device.get("id") == rs90_device_id:
+                        device_name = device.get("name")
+                        _LOGGER.debug("Resolved rs90_device_id %s to device_name: %s", 
+                                    rs90_device_id, device_name)
+                        break
+                
+                if not device_name:
+                    _LOGGER.error("Could not find device with rs90_device_id: %s", rs90_device_id)
+                    return
+                
                 await coordinator.async_trigger_device_command(device_name, command_name)
                 return
         
-        _LOGGER.error("Coordinator not found for device: %s", device_id)
+        _LOGGER.error("Coordinator not found for device: %s", rs90_id)
     
     async def handle_refresh_lists(call):
-        """Handle the refresh_lists service call.
-        
-        Forces the integration to re-process device and macro lists
-        and subscribe to any new devices/macros that were added.
-        
-        Useful when the RS90 doesn't republish retained messages after
-        configuration changes in the Haptique Config app.
-        """
-        device_id = call.data.get("device_id")
+        """Handle the refresh_lists service call."""
+        rs90_id = call.data.get("rs90_id")
         
         # Find the coordinator for this device
         device_registry = dr.async_get(hass)
-        device_entry = device_registry.async_get(device_id)
+        device_entry = device_registry.async_get(rs90_id)
         
         if not device_entry:
-            _LOGGER.error("Device not found: %s", device_id)
+            _LOGGER.error("Device not found: %s", rs90_id)
             return
         
         # Find the config entry
         for entry_id in device_entry.config_entries:
             if entry_id in hass.data.get(DOMAIN, {}):
                 coordinator = hass.data[DOMAIN][entry_id]
-                _LOGGER.info("Forcing refresh of device and macro lists...")
                 await coordinator.async_force_refresh_lists()
+                _LOGGER.info("Force refresh lists requested for device: %s", rs90_id)
                 return
         
-        _LOGGER.error("Coordinator not found for device: %s", device_id)
+        _LOGGER.error("Coordinator not found for device: %s", rs90_id)
     
     # Register services only once
     if not hass.services.has_service(DOMAIN, "trigger_macro"):

@@ -3,15 +3,15 @@ type: grid
 columns: 4
 square: false
 cards:
-  {% for cmd in state_attr('sensor.commands_your_device_name', 'commands') %}
+  {% for cmd in state_attr('sensor.your_remote_name_commands_your_device_name', 'commands') %}
   - type: button
     name: "{{ cmd.replace('_', ' ') }}"
     tap_action:
       action: call-service
       service: haptique_rs90.trigger_device_command
       data:
-        device_id: "YOUR_RS90_DEVICE_ID_HERE"
-        device_name: "Your Device Name"
+        rs90_id: "YOUR_RS90_DEVICE_ID_HERE"
+        rs90_device_id: "{{ state_attr('sensor.your_remote_name_commands_your_device_name', 'rs90_device_id') }}"
         command_name: "{{ cmd }}"
     card_mod:
       style: |

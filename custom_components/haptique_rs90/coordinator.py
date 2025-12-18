@@ -133,7 +133,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         battery_trigger_topic = f"{self.base_topic}/{TOPIC_BATTERY_STATUS}"
         _LOGGER.info("Publishing to %s to trigger battery level update", battery_trigger_topic)
         try:
-            _LOGGER.debug("📤 MQTT PUBLISH: topic='%s', payload='', qos=0, retain=False", battery_trigger_topic)
+            _LOGGER.debug("MQTT PUBLISH: topic='%s', payload='', qos=0, retain=False", battery_trigger_topic)
             await mqtt.async_publish(
                 self.hass,
                 battery_trigger_topic,
@@ -141,7 +141,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 qos=0,  # QoS 0 for monitoring requests (Haptique best practice)
                 retain=False
             )
-            _LOGGER.info("✓ Battery level trigger published successfully")
+            _LOGGER.info("SUCCESS: Battery level trigger published successfully")
         except Exception as err:
             _LOGGER.error("✗ Failed to publish battery trigger: %s", err)
         
@@ -167,11 +167,11 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             """Handle new MQTT message."""
             # msg.payload is already a string (decoded by Home Assistant)
             payload_str = str(msg.payload)[:100] if msg.payload else ""
-            _LOGGER.debug("📥 MQTT received on '%s': payload='%s' (len=%d)", 
+            _LOGGER.debug("MQTT received on '%s': payload='%s' (len=%d)", 
                          topic, payload_str, len(msg.payload) if msg.payload else 0)
             callback_func(msg.payload)
         
-        _LOGGER.debug("📡 MQTT SUBSCRIBE: topic='%s', qos=%d", topic, qos)
+        _LOGGER.debug("MQTT SUBSCRIBE: topic='%s', qos=%d", topic, qos)
         _LOGGER.info("Attempting to subscribe to MQTT topic: %s (QoS %d)", topic, qos)
         try:
             unsubscribe = await mqtt.async_subscribe(
@@ -180,7 +180,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             # Only add to global list if requested (avoid double-tracking)
             if add_to_global:
                 self._subscriptions.append(unsubscribe)
-            _LOGGER.info("✓ Successfully subscribed to topic: %s (QoS %d)", topic, qos)
+            _LOGGER.info("SUCCESS: Successfully subscribed to topic: %s (QoS %d)", topic, qos)
             return unsubscribe
         except Exception as err:
             _LOGGER.error("✗ Failed to subscribe to topic %s: %s", topic, err)
@@ -231,7 +231,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             
             # Subscribe to new devices
             for device_name in new_devices:
-                _LOGGER.info("🆕 New device detected: %s - subscribing to details", device_name)
+                _LOGGER.info("NEW: New device detected: %s - subscribing to details", device_name)
                 asyncio.create_task(
                     self._subscribe_device_details(device_name)
                 )
@@ -285,7 +285,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             
             # Subscribe to new macros
             for macro_name in new_macros:
-                _LOGGER.info("🆕 New macro detected: %s - subscribing to trigger", macro_name)
+                _LOGGER.info("NEW: New macro detected: %s - subscribing to trigger", macro_name)
                 asyncio.create_task(
                     self._subscribe_macro_trigger(macro_name)
                 )
@@ -300,12 +300,12 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 trigger_topic = f"{self.base_topic}/macro/{macro_name}/trigger"
                 _LOGGER.debug("Checking macro_subscriptions dict, keys: %s", list(self._macro_subscriptions.keys()))
                 if macro_name in self._macro_subscriptions:
-                    _LOGGER.debug("📡 MQTT UNSUBSCRIBE: topic='%s'", trigger_topic)
+                    _LOGGER.debug("MQTT UNSUBSCRIBE: topic='%s'", trigger_topic)
                     unsubscribe_func = self._macro_subscriptions.pop(macro_name)
                     unsubscribe_func()
-                    _LOGGER.info("✓ Unsubscribed from macro trigger: %s", macro_name)
+                    _LOGGER.info("SUCCESS: Unsubscribed from macro trigger: %s", macro_name)
                 else:
-                    _LOGGER.warning("⚠️ Macro %s not found in subscriptions dict!", macro_name)
+                    _LOGGER.warning("WARNING: Macro %s not found in subscriptions dict!", macro_name)
                 
                 # Remove state from memory
                 if macro_name in self.data["macro_states"]:
@@ -395,7 +395,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         # Step 1: Request device details by publishing empty payload to /detail
         detail_topic = f"{self.base_topic}/device/{device_name}/detail"
         _LOGGER.info("Requesting device details for '%s' via topic: %s", device_name, detail_topic)
-        _LOGGER.debug("📤 MQTT PUBLISH (REQUEST DETAILS): topic='%s', payload='', qos=0, retain=False", detail_topic)
+        _LOGGER.debug("MQTT PUBLISH (REQUEST DETAILS): topic='%s', payload='', qos=0, retain=False", detail_topic)
         
         try:
             await mqtt.async_publish(
@@ -405,7 +405,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 qos=0,
                 retain=False
             )
-            _LOGGER.info("✓ Device details request published for: %s", device_name)
+            _LOGGER.info("SUCCESS: Device details request published for: %s", device_name)
         except Exception as err:
             _LOGGER.error("✗ Failed to publish device details request for %s: %s", device_name, err)
             return
@@ -427,7 +427,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             
             try:
                 commands = json.loads(payload)
-                _LOGGER.info("✓ Received %d commands for device '%s'", len(commands), device_name)
+                _LOGGER.info("SUCCESS: Received %d commands for device '%s'", len(commands), device_name)
                 
                 # Normalize ID field (handle both "id", "Id", "ID")
                 normalized_commands = []
@@ -441,7 +441,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                     _LOGGER.debug("Normalized command: id=%s, name=%s", normalized_command.get("id"), normalized_command.get("name"))
                 
                 self.data["device_commands"][device_name] = normalized_commands
-                _LOGGER.info("✓ Stored %d normalized commands for '%s'", len(normalized_commands), device_name)
+                _LOGGER.info("SUCCESS: Stored %d normalized commands for '%s'", len(normalized_commands), device_name)
                 _LOGGER.debug("Current device_commands keys: %s", list(self.data["device_commands"].keys()))
                 self.async_set_updated_data(self.data)
             except json.JSONDecodeError as err:
@@ -449,7 +449,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         
         # Subscribe to /commands topic (where RS90 actually publishes the retained message)
         await self._subscribe(commands_topic, handle_device_commands)
-        _LOGGER.info("✓ Subscribed to retained commands topic: %s", commands_topic)
+        _LOGGER.info("SUCCESS: Subscribed to retained commands topic: %s", commands_topic)
 
     async def _subscribe_macro_trigger(self, macro_name: str) -> None:
         """Subscribe to macro trigger topic for state tracking."""
@@ -464,7 +464,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             # Store the macro state in memory only
             if state in ["on", "off"]:
                 self.data["macro_states"][macro_name] = state
-                _LOGGER.info("✓ Macro '%s' state updated to: %s", macro_name, state)
+                _LOGGER.info("SUCCESS: Macro '%s' state updated to: %s", macro_name, state)
                 self.async_set_updated_data(self.data)
             else:
                 _LOGGER.warning("Invalid macro state '%s' for macro '%s', expected 'on' or 'off'", state, macro_name)
@@ -477,7 +477,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         if unsubscribe:
             self._macro_subscriptions[macro_name] = unsubscribe
             self._subscribed_macros.add(macro_name)  # Add AFTER successful subscription
-            _LOGGER.info("✓ Subscribed to macro trigger: %s", topic)
+            _LOGGER.info("SUCCESS: Subscribed to macro trigger: %s", topic)
         else:
             _LOGGER.error("Failed to subscribe to macro trigger: %s", topic)
 
@@ -487,7 +487,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         _LOGGER.debug("Triggering macro: %s with action: %s", macro_name, action)
         
         # Publish without retain - RS90 manages its own state
-        _LOGGER.debug("📤 MQTT PUBLISH (MACRO): topic='%s', payload='%s', qos=1, retain=False", topic, action)
+        _LOGGER.debug("MQTT PUBLISH (MACRO): topic='%s', payload='%s', qos=1, retain=False", topic, action)
         await mqtt.async_publish(self.hass, topic, action, qos=1, retain=False)
         
         # Update local state immediately (will be confirmed by MQTT callback)
@@ -498,7 +498,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         """Trigger a device command."""
         topic = f"{self.base_topic}/device/{device_name}/trigger"
         _LOGGER.debug("Triggering command %s for device %s", command_name, device_name)
-        _LOGGER.debug("📤 MQTT PUBLISH (DEVICE): topic='%s', payload='%s', qos=1, retain=False", topic, command_name)
+        _LOGGER.debug("MQTT PUBLISH (DEVICE): topic='%s', payload='%s', qos=1, retain=False", topic, command_name)
         await mqtt.async_publish(self.hass, topic, command_name, qos=1, retain=False)
 
     async def async_shutdown(self) -> None:
@@ -540,7 +540,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                     qos=0,
                     retain=False
                 )
-                _LOGGER.debug("✓ Battery refresh request sent")
+                _LOGGER.debug("SUCCESS: Battery refresh request sent")
             except Exception as err:
                 _LOGGER.error("✗ Failed to send battery refresh request: %s", err)
         
@@ -573,7 +573,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             new_devices = current_device_names - self._subscribed_devices
             
             if new_devices:
-                _LOGGER.info("🆕 Found %d new unsubscribed devices: %s", len(new_devices), new_devices)
+                _LOGGER.info("NEW: Found %d new unsubscribed devices: %s", len(new_devices), new_devices)
                 for device_name in new_devices:
                     _LOGGER.info("Subscribing to commands for: %s", device_name)
                     await self._subscribe_device_details(device_name)
@@ -588,7 +588,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             new_macros = current_macro_names - self._subscribed_macros
             
             if new_macros:
-                _LOGGER.info("🆕 Found %d new unsubscribed macros: %s", len(new_macros), new_macros)
+                _LOGGER.info("NEW: Found %d new unsubscribed macros: %s", len(new_macros), new_macros)
                 for macro_name in new_macros:
                     _LOGGER.info("Subscribing to trigger for: %s", macro_name)
                     await self._subscribe_macro_trigger(macro_name)
