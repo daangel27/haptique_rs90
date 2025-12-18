@@ -206,8 +206,9 @@ Manually trigger a macro.
 ```yaml
 service: haptique_rs90.trigger_macro
 data:
-  device_id: "6f99751e78b5a07de72d549143e2975c"  # Your RS90 device ID
-  macro_name: "Watch Movie"
+  rs90_id: "6f99751e78b5a07de72d549143e2975c"  # Your RS90 device ID
+  rs90_macro_id: "692eb1561bddd5814022960c"  # Find in sensor.macro_{name}_info attributes
+  action: "on"
 ```
 
 ### `haptique_rs90.trigger_device_command`
@@ -217,12 +218,12 @@ Send a command to a device.
 ```yaml
 service: haptique_rs90.trigger_device_command
 data:
-  device_id: "6f99751e78b5a07de72d549143e2975c"
-  device_name: "Samsung TV"
+  rs90_id: "6f99751e78b5a07de72d549143e2975c"  # Your RS90 device ID
+  rs90_device_id: "692ead781bddd58140228e33"  # Find in sensor.{remote}_commands_{device} attributes
   command_name: "POWER"
 ```
 
-**Tip:** Use the `sensor.commands_{device}` entity to see available commands for each device.
+**Tip:** Use the `sensor.{remote_name}_commands_{device}` entity to see available commands and get the `rs90_device_id` from attributes.
 
 ---
 
