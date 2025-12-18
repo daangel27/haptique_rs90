@@ -6,12 +6,16 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  issues: read
+  contents: read
+
 jobs:
-  notify:
+  notify-new-issue:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
-      - name: Send email notification on new issue
-        if: github.event.action == 'opened'
+      - name: Send email notification
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -21,8 +25,10 @@ jobs:
           subject: "[Haptique RS90] New Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
           to: ${{ secrets.EMAIL_TO }}
           from: GitHub Issues <noreply@github.com>
+          ignore_cert: true
+          convert_markdown: true
           html_body: |
-            <h2>New Issue Opened</h2>
+            <h2>🆕 New Issue Opened</h2>
             <p><strong>Issue #${{ github.event.issue.number }}:</strong> ${{ github.event.issue.title }}</p>
             <p><strong>Author:</strong> @${{ github.event.issue.user.login }}</p>
             <p><strong>Labels:</strong> ${{ join(github.event.issue.labels.*.name, ', ') }}</p>
@@ -31,8 +37,11 @@ jobs:
             <h3>Description:</h3>
             <pre>${{ github.event.issue.body }}</pre>
 
-      - name: Send email on issue comment
-        if: github.event.action == 'created'
+  notify-comment:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment'
+    steps:
+      - name: Send email on comment
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -42,8 +51,10 @@ jobs:
           subject: "[Haptique RS90] Comment on Issue #${{ github.event.issue.number }}"
           to: ${{ secrets.EMAIL_TO }}
           from: GitHub Issues <noreply@github.com>
+          ignore_cert: true
+          convert_markdown: true
           html_body: |
-            <h2>New Comment</h2>
+            <h2>💬 New Comment</h2>
             <p><strong>Issue #${{ github.event.issue.number }}:</strong> ${{ github.event.issue.title }}</p>
             <p><strong>Commented by:</strong> @${{ github.event.comment.user.login }}</p>
             <p><strong>Link:</strong> <a href="${{ github.event.comment.html_url }}">${{ github.event.comment.html_url }}</a></p>

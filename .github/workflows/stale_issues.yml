@@ -1,0 +1,63 @@
+name: Check Stale Issues
+
+on:
+  schedule:
+    # Run every 12 hours
+    - cron: '0 */12 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for stale issues
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Issues awaiting user response
+          stale-issue-message: |
+            **⏰ Waiting for Response / En attente de réponse**
+
+            🇫🇷 **Français:**
+            Cette issue est marquée comme "en attente de réponse" car nous avons besoin d'informations supplémentaires.
+            
+            **⚠️ Action requise:** Sans réponse dans les 48 heures, cette issue sera automatiquement fermée pour maintenir le projet organisé.
+            
+            💡 **Que faire:**
+            - Répondez aux questions posées ci-dessus
+            - Fournissez les logs ou informations demandés
+            - Indiquez si le problème est résolu
+            
+            Si l'issue est fermée automatiquement et que le problème persiste, n'hésitez pas à rouvrir ou créer une nouvelle issue avec les informations complètes.
+
+            ---
+
+            🇬🇧 **English:**
+            This issue is marked as "awaiting response" because we need additional information.
+            
+            **⚠️ Action required:** Without a response within 48 hours, this issue will be automatically closed to keep the project organized.
+            
+            💡 **What to do:**
+            - Answer the questions asked above
+            - Provide the requested logs or information
+            - Indicate if the problem is resolved
+            
+            If the issue is auto-closed and the problem persists, feel free to reopen or create a new issue with complete information.
+
+          close-issue-message: |
+            **🔒 Auto-closed / Fermé automatiquement**
+
+            🇫🇷 Cette issue a été fermée automatiquement en raison de l'absence de réponse. Si le problème persiste, n'hésitez pas à créer une nouvelle issue avec les informations complètes.
+
+            🇬🇧 This issue was automatically closed due to lack of response. If the problem persists, feel free to create a new issue with complete information.
+
+          days-before-stale: 3
+          days-before-close: 2
+          stale-issue-label: 'awaiting-response'
+          exempt-issue-labels: 'bug,enhancement,in-progress,confirmed'
+          operations-per-run: 30

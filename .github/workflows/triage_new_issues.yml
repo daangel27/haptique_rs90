@@ -1,0 +1,92 @@
+name: Triage New Issues
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add welcome comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `👋 Merci pour votre issue ! / Thank you for your issue!
+
+            **🇫🇷 Français:**
+            Votre issue a été créée et sera examinée prochainement. Pour accélérer le traitement :
+            - ✅ Vérifiez que vous avez fourni toutes les informations demandées
+            - 📋 Consultez la [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
+            - 🔄 Si vous migrez depuis v1.2.x, consultez le [guide de migration](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
+
+            **⏰ Important:** Si nous avons besoin d'informations supplémentaires et qu'il n'y a pas de réponse dans les 7 jours, cette issue sera automatiquement fermée.
+
+            ---
+
+            **🇬🇧 English:**
+            Your issue has been created and will be reviewed shortly. To speed up processing:
+            - ✅ Verify you provided all requested information
+            - 📋 Check the [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
+            - 🔄 If migrating from v1.2.x, see [migration guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
+
+            **⏰ Important:** If we need additional information and there's no response within 7 days, this issue will be automatically closed.`
+            })
+
+      - name: Auto-label by keywords
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = issue.body ? issue.body.toLowerCase() : '';
+            const labels = [];
+
+            // Check for migration issues
+            if (body.includes('v1.2') || body.includes('migration') || body.includes('macro_name') || body.includes('device_name')) {
+              labels.push('migration');
+            }
+
+            // Check for MQTT issues
+            if (body.includes('mqtt') || body.includes('broker')) {
+              labels.push('mqtt');
+            }
+
+            // Check for sensor issues
+            if (body.includes('sensor.') || body.includes('commands_')) {
+              labels.push('sensors');
+            }
+
+            // Check for service issues
+            if (body.includes('service:') || body.includes('trigger_macro') || body.includes('trigger_device_command')) {
+              labels.push('services');
+            }
+
+            // Check for RS90 firmware issues
+            if (body.includes('firmware') || body.includes('haptique config')) {
+              labels.push('rs90-firmware');
+            }
+
+            if (labels.length > 0) {
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: labels
+                });
+                console.log(`Added labels: ${labels.join(', ')}`);
+              } catch (error) {
+                console.log(`Could not add labels (labels may not exist): ${error.message}`);
+                console.log('Please create these labels in your repository:');
+                labels.forEach(label => console.log(`  - ${label}`));
+              }
+            }
