@@ -1,48 +1,97 @@
----
 name: ❓ Question / Support
-about: Ask a question or get help with the integration
-title: '[QUESTION] '
-labels: question, needs-triage
-assignees: ''
+description: Ask a question or get help with the integration
+title: "[QUESTION] "
+labels: ["question", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Need help? We're here! ❓
+        Please provide as much detail as possible so we can assist you quickly.
 
----
+  - type: textarea
+    id: question
+    attributes:
+      label: ❓ Your Question
+      description: What do you need help with?
+      placeholder: I'm trying to... but I don't understand how...
+    validations:
+      required: true
 
-## ❓ Question / Issue
-<!-- What do you need help with? -->
+  - type: input
+    id: ha-version
+    attributes:
+      label: Home Assistant Version
+      placeholder: e.g., 2024.12.3
+    validations:
+      required: true
 
+  - type: input
+    id: integration-version
+    attributes:
+      label: Haptique RS90 Integration Version
+      placeholder: e.g., 1.5.0
+    validations:
+      required: true
 
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation Method
+      options:
+        - HACS
+        - Manual
+    validations:
+      required: true
 
-## 📋 Context
+  - type: checkboxes
+    id: what-tried
+    attributes:
+      label: 🔍 What I've Already Tried
+      description: What have you already attempted?
+      options:
+        - label: Read the README documentation
+        - label: Checked the Migration Guide (if upgrading from v1.2.x)
+        - label: Searched existing issues
+        - label: Checked Home Assistant logs
+        - label: Restarted Home Assistant
 
-**Your Setup:**
-- **Home Assistant Version:** <!-- e.g., 2024.12.3 -->
-- **Haptique RS90 Integration Version:** <!-- e.g., 1.5.0 -->
-- **Installation Method:** <!-- HACS / Manual -->
+  - type: textarea
+    id: config-code
+    attributes:
+      label: 📝 Configuration / Code (if applicable)
+      description: Your configuration or code
+      placeholder: |
+        service: haptique_rs90.trigger_macro
+        data:
+          rs90_id: "..."
+          rs90_macro_id: "..."
+      render: yaml
 
-## 🔍 What You've Tried
-<!-- What have you already attempted? -->
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 Logs (if error-related)
+      description: |
+        If you're seeing errors, paste relevant logs here
+        Go to Settings > System > Logs, filter by "haptique_rs90"
+      placeholder: Paste logs here (if applicable)...
+      render: shell
 
-- [ ] Read the [README](https://github.com/daangel27/haptique_rs90/blob/main/README.md)
-- [ ] Checked the [Migration Guide](https://github.com/daangel27/haptique_rs90/blob/main/MIGRATION_GUIDE_v1.5.0.md) (if upgrading)
-- [ ] Searched existing issues
-- [ ] Checked Home Assistant logs
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: 🎯 What I'm Trying to Achieve
+      description: What are you trying to accomplish?
+      placeholder: |
+        I want to...
+        The goal is to...
+    validations:
+      required: true
 
-## 📸 Relevant Information
-
-**Configuration / Code** (if applicable):
-```yaml
-# Your configuration here
-```
-
-**Logs** (if error-related):
-```
-Paste relevant logs here
-```
-
-## 🎯 Expected Outcome
-<!-- What are you trying to achieve? -->
-
-
-
-## 📝 Additional Context
-<!-- Any other information -->
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 Additional Context
+      description: Any other information that might help
+      placeholder: Screenshots, examples, links...

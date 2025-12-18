@@ -1,87 +1,179 @@
----
 name: 🐛 Bug Report
-about: Report a bug or issue with the Haptique RS90 integration
-title: '[BUG] '
-labels: bug, needs-triage
-assignees: ''
+description: Report a bug or issue with the Haptique RS90 integration
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thank you for reporting a bug! 🐛
+        Please fill out the information below to help us resolve your issue quickly.
 
----
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 🐛 Bug Description
+      description: A clear and concise description of the bug
+      placeholder: Describe what's not working...
+    validations:
+      required: true
 
-## 🐛 Bug Description
-<!-- A clear and concise description of the bug -->
+  - type: input
+    id: ha-version
+    attributes:
+      label: Home Assistant Version
+      description: What version of Home Assistant are you running?
+      placeholder: e.g., 2024.12.3
+    validations:
+      required: true
 
+  - type: input
+    id: integration-version
+    attributes:
+      label: Haptique RS90 Integration Version
+      description: What version of the integration?
+      placeholder: e.g., 1.5.0
+    validations:
+      required: true
 
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation Method
+      description: How did you install the integration?
+      options:
+        - HACS
+        - Manual
+    validations:
+      required: true
 
-## 📋 Environment Information
+  - type: input
+    id: rs90-name
+    attributes:
+      label: RS90 Remote Name
+      description: The name you gave your RS90 in Home Assistant (used in sensor names)
+      placeholder: e.g., "Salon" (results in sensor.salon_commands_canal)
+    validations:
+      required: true
 
-**Required Information:**
-- **Home Assistant Version:** <!-- e.g., 2024.12.3 -->
-- **Haptique RS90 Integration Version:** <!-- e.g., 1.5.0 -->
-- **Installation Method:** <!-- HACS / Manual -->
-- **RS90 Remote Name in HA:** <!-- e.g., "Salon" (used in sensor names) -->
-- **Haptique RS90 Firmware Version:** <!-- Check in Haptique Config app -->
+  - type: input
+    id: firmware-version
+    attributes:
+      label: RS90 Firmware Version
+      description: Check in Haptique Config app
+      placeholder: e.g., 2.1.0
 
-## 🔄 Steps to Reproduce
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: Detailed steps to reproduce the bug
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Execute service '...'
+        4. See error
+    validations:
+      required: true
 
-**Please provide detailed steps:**
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ Expected Behavior
+      description: What should happen?
+      placeholder: I expected...
+    validations:
+      required: true
 
-1. Go to '...'
-2. Click on '...'
-3. Execute service '...'
-4. See error
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happens?
+      placeholder: But instead...
+    validations:
+      required: true
 
-## ✅ Expected Behavior
-<!-- What should happen -->
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 Home Assistant Logs
+      description: |
+        **REQUIRED**: Go to Settings > System > Logs, filter by "haptique_rs90"
+        Paste relevant logs here (remove sensitive data like passwords/IPs)
+      placeholder: Paste your logs here...
+      render: shell
+    validations:
+      required: true
 
+  - type: textarea
+    id: service-call
+    attributes:
+      label: 🔧 Service Call (if applicable)
+      description: The service call that fails
+      placeholder: |
+        service: haptique_rs90.trigger_macro
+        data:
+          rs90_id: "..."
+          rs90_macro_id: "..."
+      render: yaml
 
+  - type: textarea
+    id: automation
+    attributes:
+      label: 📝 Automation (if applicable)
+      description: Your automation code
+      placeholder: Your automation YAML here...
+      render: yaml
 
-## ❌ Actual Behavior
-<!-- What actually happens -->
+  - type: input
+    id: num-devices
+    attributes:
+      label: Number of Devices
+      description: How many devices configured in RS90?
+      placeholder: e.g., 5
 
+  - type: input
+    id: num-macros
+    attributes:
+      label: Number of Macros
+      description: How many macros configured in RS90?
+      placeholder: e.g., 3
 
+  - type: dropdown
+    id: mqtt-broker
+    attributes:
+      label: MQTT Broker
+      description: Which MQTT broker are you using?
+      options:
+        - Home Assistant Mosquitto Add-on
+        - External Mosquitto
+        - Other
+    validations:
+      required: true
 
-## 📸 Screenshots / Logs
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      description: Please confirm you have done these steps
+      options:
+        - label: I have updated to the latest version of the integration
+          required: true
+        - label: I have restarted Home Assistant after updating
+          required: true
+        - label: I have checked the documentation
+          required: true
+        - label: I have searched existing issues for similar problems
+          required: true
+        - label: I have included relevant logs (with sensitive data removed)
+          required: true
+        - label: I have migrated to v1.5.0 parameters if coming from older version
+          required: false
 
-**Home Assistant Logs** (REQUIRED):
-<!-- Go to Settings > System > Logs, filter by "haptique_rs90" -->
-```
-Paste relevant logs here
-```
-
-**Screenshots** (if applicable):
-<!-- Drag and drop images here -->
-
-## 🔧 Configuration
-
-**Service call that fails** (if applicable):
-```yaml
-service: haptique_rs90.trigger_macro
-data:
-  rs90_id: "..."
-  rs90_macro_id: "..."
-```
-
-**Automation excerpt** (if applicable):
-```yaml
-# Your automation code here
-```
-
-## 📱 RS90 Configuration
-
-- **Number of devices configured:** <!-- e.g., 5 -->
-- **Number of macros configured:** <!-- e.g., 3 -->
-- **MQTT Broker:** <!-- e.g., Mosquitto, Home Assistant built-in -->
-- **MQTT QoS:** <!-- Default is 1 -->
-
-## ✅ Checklist
-
-Please confirm you have:
-- [ ] Updated to the latest version of the integration
-- [ ] Restarted Home Assistant after updating
-- [ ] Checked the [documentation](https://github.com/daangel27/haptique_rs90)
-- [ ] Searched existing issues for similar problems
-- [ ] Included relevant logs (with sensitive data removed)
-- [ ] Migrated to v1.5.0 parameters if coming from older version
-
-## 📝 Additional Context
-<!-- Any other information that might help -->
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 Additional Context
+      description: Any other information that might help
+      placeholder: Add any other context here...
