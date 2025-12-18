@@ -1,0 +1,183 @@
+name: Triage Issues
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:  # ← AJOUTÉ : Permet déclenchement manuel
+    inputs:
+      issue_number:
+        description: 'Issue number to process (leave empty to process all open issues)'
+        required: false
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  triage-new:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
+    steps:
+      - name: Add welcome comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `👋 Merci pour votre issue ! / Thank you for your issue!
+
+            **🇫🇷 Français:**
+            Votre issue a été créée et sera examinée prochainement. Pour accélérer le traitement :
+            - ✅ Vérifiez que vous avez fourni toutes les informations demandées
+            - 📋 Consultez la [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
+            - 🔄 Si vous migrez depuis v1.2.x, consultez le [guide de migration](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
+
+            **⏰ Important:** Si nous avons besoin d'informations supplémentaires et qu'il n'y a pas de réponse dans les 7 jours, cette issue sera automatiquement fermée.
+
+            ---
+
+            **🇬🇧 English:**
+            Your issue has been created and will be reviewed shortly. To speed up processing:
+            - ✅ Verify you provided all requested information
+            - 📋 Check the [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
+            - 🔄 If migrating from v1.2.x, see [migration guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
+
+            **⏰ Important:** If we need additional information and there's no response within 7 days, this issue will be automatically closed.`
+            })
+
+      - name: Auto-label by keywords
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = issue.body ? issue.body.toLowerCase() : '';
+            const labels = [];
+
+            if (body.includes('v1.2') || body.includes('migration') || body.includes('macro_name') || body.includes('device_name')) {
+              labels.push('migration');
+            }
+            if (body.includes('mqtt') || body.includes('broker')) {
+              labels.push('mqtt');
+            }
+            if (body.includes('sensor.') || body.includes('commands_')) {
+              labels.push('sensors');
+            }
+            if (body.includes('service:') || body.includes('trigger_macro') || body.includes('trigger_device_command')) {
+              labels.push('services');
+            }
+            if (body.includes('firmware') || body.includes('haptique config')) {
+              labels.push('rs90-firmware');
+            }
+
+            if (labels.length > 0) {
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: labels
+                });
+              } catch (error) {
+                console.log(`Could not add labels: ${error.message}`);
+              }
+            }
+
+  triage-existing:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Process existing issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = '${{ github.event.inputs.issue_number }}';
+            
+            // Function to process a single issue
+            async function processIssue(issue) {
+              const title = issue.title.toLowerCase();
+              const body = issue.body ? issue.body.toLowerCase() : '';
+              const labels = [];
+
+              // Check for keywords
+              if (body.includes('v1.2') || body.includes('migration') || body.includes('macro_name') || body.includes('device_name')) {
+                labels.push('migration');
+              }
+              if (body.includes('mqtt') || body.includes('broker')) {
+                labels.push('mqtt');
+              }
+              if (body.includes('sensor.') || body.includes('commands_')) {
+                labels.push('sensors');
+              }
+              if (body.includes('service:') || body.includes('trigger_macro') || body.includes('trigger_device_command')) {
+                labels.push('services');
+              }
+              if (body.includes('firmware') || body.includes('haptique config')) {
+                labels.push('rs90-firmware');
+              }
+
+              // Add labels if any found
+              if (labels.length > 0) {
+                try {
+                  await github.rest.issues.addLabels({
+                    issue_number: issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    labels: labels
+                  });
+                  console.log(`✅ Issue #${issue.number}: Added labels ${labels.join(', ')}`);
+                } catch (error) {
+                  console.log(`❌ Issue #${issue.number}: Could not add labels - ${error.message}`);
+                }
+              } else {
+                console.log(`ℹ️ Issue #${issue.number}: No labels to add`);
+              }
+
+              // Add welcome comment
+              try {
+                await github.rest.issues.createComment({
+                  issue_number: issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `👋 **Automatic processing of existing issue**
+
+🇫🇷 Cette issue existante a été traitée automatiquement pour ajouter les labels appropriés.
+
+🇬🇧 This existing issue was automatically processed to add appropriate labels.`
+                });
+                console.log(`✅ Issue #${issue.number}: Added comment`);
+              } catch (error) {
+                console.log(`❌ Issue #${issue.number}: Could not add comment - ${error.message}`);
+              }
+            }
+
+            // Process specific issue or all open issues
+            if (issueNumber) {
+              console.log(`Processing issue #${issueNumber}...`);
+              const { data: issue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(issueNumber)
+              });
+              await processIssue(issue);
+            } else {
+              console.log('Processing all open issues...');
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100
+              });
+              
+              console.log(`Found ${issues.length} open issues`);
+              for (const issue of issues) {
+                if (!issue.pull_request) {  // Skip pull requests
+                  await processIssue(issue);
+                }
+              }
+            }
+            
+            console.log('✅ Processing complete!');
