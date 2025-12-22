@@ -624,3 +624,4 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             "subscriptions_count": len(self._subscriptions),
             "subscribed_devices": list(self._subscribed_devices),
         }
+
