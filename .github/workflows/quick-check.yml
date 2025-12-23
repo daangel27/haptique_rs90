@@ -1,0 +1,29 @@
+name: Quick Check
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  quick-check:
+    name: Quick validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check structure
+        run: |
+          test -f custom_components/haptique_rs90/__init__.py
+          test -f custom_components/haptique_rs90/manifest.json
+          test -f custom_components/haptique_rs90/coordinator.py
+          echo "✅ Structure OK"
+
+      - name: Validate JSON
+        run: |
+          python3 -m json.tool custom_components/haptique_rs90/manifest.json > /dev/null
+          echo "✅ manifest.json valid"
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep -o '"version": *"[^"]*"' custom_components/haptique_rs90/manifest.json | cut -d'"' -f4)
+          echo "Version: $VERSION"
