@@ -333,3 +333,5 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 **Author:** daangel27  
 **Last updated:** December 2025  
 **Languages:** English, Français
+
+<!-- Test workflow CI/CD -->

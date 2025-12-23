@@ -1,0 +1,48 @@
+name: Tests & Validation
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  validate-structure:
+    name: Validate Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          test -f custom_components/haptique_rs90/__init__.py || exit 1
+          test -f custom_components/haptique_rs90/manifest.json || exit 1
+          test -f custom_components/haptique_rs90/coordinator.py || exit 1
+          test -f custom_components/haptique_rs90/sensor.py || exit 1
+          test -f custom_components/haptique_rs90/switch.py || exit 1
+          test -f custom_components/haptique_rs90/config_flow.py || exit 1
+          echo "✅ Structure OK"
+
+      - name: Validate manifest.json
+        run: |
+          python3 -m json.tool custom_components/haptique_rs90/manifest.json
+          VERSION=$(grep -o '"version": *"[^"]*"' custom_components/haptique_rs90/manifest.json | cut -d'"' -f4)
+          echo "Version: $VERSION"
+
+      - name: Check Python syntax
+        run: |
+          for file in custom_components/haptique_rs90/*.py; do
+            python3 -m py_compile "$file"
+          done
+          echo "✅ Python syntax OK"
+
+  hassfest:
+    name: Hassfest Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Hassfest
+        uses: home-assistant/actions/hassfest@master

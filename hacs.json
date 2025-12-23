@@ -1,7 +1,5 @@
 {
   "name": "Haptique RS90",
   "render_readme": true,
-  "filename": "haptique_rs90.zip",
-  "domains": ["sensor", "binary_sensor", "switch"],
   "homeassistant": "2024.1.0"
 }
