@@ -3,7 +3,7 @@ name: Triage Issues
 on:
   issues:
     types: [opened]
-  workflow_dispatch:  # ← AJOUTÉ : Permet déclenchement manuel
+  workflow_dispatch:
     inputs:
       issue_number:
         description: 'Issue number to process (leave empty to process all open issues)'
@@ -27,26 +27,26 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `👋 Merci pour votre issue ! / Thank you for your issue!
+              body: `?? Merci pour votre issue ! / Thank you for your issue!
 
-            **🇫🇷 Français:**
-            Votre issue a été créée et sera examinée prochainement. Pour accélérer le traitement :
-            - ✅ Vérifiez que vous avez fourni toutes les informations demandées
-            - 📋 Consultez la [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
-            - 🔄 Si vous migrez depuis v1.2.x, consultez le [guide de migration](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
+            **???? Fran�ais:**
+            Votre issue a �t� cr��e et sera examin�e prochainement. Pour acc�l�rer le traitement :
+            - ? V�rifiez que vous avez fourni toutes les informations demand�es
+            - ?? Consultez la [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
+            - ?? Si vous migrez depuis v1.2.x, consultez le [guide de migration](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
 
-            **⏰ Important:** Si nous avons besoin d'informations supplémentaires et qu'il n'y a pas de réponse dans les 7 jours, cette issue sera automatiquement fermée.
+            **? Important:** Si nous avons besoin d'informations suppl�mentaires et qu'il n'y a pas de r�ponse dans les 7 jours, cette issue sera automatiquement ferm�e.
 
             ---
 
-            **🇬🇧 English:**
+            **???? English:**
             Your issue has been created and will be reviewed shortly. To speed up processing:
-            - ✅ Verify you provided all requested information
-            - 📋 Check the [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
-            - 🔄 If migrating from v1.2.x, see [migration guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
+            - ? Verify you provided all requested information
+            - ?? Check the [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
+            - ?? If migrating from v1.2.x, see [migration guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
 
-            **⏰ Important:** If we need additional information and there's no response within 7 days, this issue will be automatically closed.`
-            })
+            **? Important:** If we need additional information and there's no response within 7 days, this issue will be automatically closed.`
+            });
 
       - name: Auto-label by keywords
         uses: actions/github-script@v7
@@ -96,13 +96,11 @@ jobs:
           script: |
             const issueNumber = '${{ github.event.inputs.issue_number }}';
             
-            // Function to process a single issue
             async function processIssue(issue) {
               const title = issue.title.toLowerCase();
               const body = issue.body ? issue.body.toLowerCase() : '';
               const labels = [];
 
-              // Check for keywords
               if (body.includes('v1.2') || body.includes('migration') || body.includes('macro_name') || body.includes('device_name')) {
                 labels.push('migration');
               }
@@ -119,7 +117,6 @@ jobs:
                 labels.push('rs90-firmware');
               }
 
-              // Add labels if any found
               if (labels.length > 0) {
                 try {
                   await github.rest.issues.addLabels({
@@ -128,33 +125,27 @@ jobs:
                     repo: context.repo.repo,
                     labels: labels
                   });
-                  console.log(`✅ Issue #${issue.number}: Added labels ${labels.join(', ')}`);
+                  console.log(`? Issue #${issue.number}: Added labels ${labels.join(', ')}`);
                 } catch (error) {
-                  console.log(`❌ Issue #${issue.number}: Could not add labels - ${error.message}`);
+                  console.log(`? Issue #${issue.number}: Could not add labels - ${error.message}`);
                 }
               } else {
-                console.log(`ℹ️ Issue #${issue.number}: No labels to add`);
+                console.log(`?? Issue #${issue.number}: No labels to add`);
               }
 
-              // Add welcome comment
               try {
                 await github.rest.issues.createComment({
                   issue_number: issue.number,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: `👋 **Automatic processing of existing issue**
-
-🇫🇷 Cette issue existante a été traitée automatiquement pour ajouter les labels appropriés.
-
-🇬🇧 This existing issue was automatically processed to add appropriate labels.`
+                  body: `?? **Automatic processing of existing issue**\n\n???? Cette issue existante a �t� trait�e automatiquement pour ajouter les labels appropri�s.\n\n???? This existing issue was automatically processed to add appropriate labels.`
                 });
-                console.log(`✅ Issue #${issue.number}: Added comment`);
+                console.log(`? Issue #${issue.number}: Added comment`);
               } catch (error) {
-                console.log(`❌ Issue #${issue.number}: Could not add comment - ${error.message}`);
+                console.log(`? Issue #${issue.number}: Could not add comment - ${error.message}`);
               }
             }
 
-            // Process specific issue or all open issues
             if (issueNumber) {
               console.log(`Processing issue #${issueNumber}...`);
               const { data: issue } = await github.rest.issues.get({
@@ -174,10 +165,10 @@ jobs:
               
               console.log(`Found ${issues.length} open issues`);
               for (const issue of issues) {
-                if (!issue.pull_request) {  // Skip pull requests
+                if (!issue.pull_request) {
                   await processIssue(issue);
                 }
               }
             }
             
-            console.log('✅ Processing complete!');
+            console.log('? Processing complete!');
