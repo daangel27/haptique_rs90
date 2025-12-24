@@ -22,6 +22,7 @@ from .const import (
     TOPIC_BATTERY_LEVEL,
     TOPIC_KEYS,
     TOPIC_TEST_STATUS,
+    TOPIC_LED_LIGHT,
     STATE_ONLINE,
     STATE_OFFLINE,
 )
@@ -66,6 +67,8 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             "device_commands": {},
             "test_status": None,
             "macro_states": {},  # Store macro states (on/off) from MQTT only
+            "led_light_state": "off",  # RGB ring light state
+            "led_light_duration": 5,  # Default duration in seconds
         }
         
         _LOGGER.info("Coordinator initialized - updates via MQTT only")
@@ -486,7 +489,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         topic = f"{self.base_topic}/macro/{macro_name}/trigger"
         _LOGGER.debug("Triggering macro: %s with action: %s", macro_name, action)
         
-        # Publish without retain - RS90 manages its own state
+        # Publish WITH retain - macro state is persistent (as per Haptique API doc)
         _LOGGER.debug("MQTT PUBLISH (MACRO): topic='%s', payload='%s', qos=1, retain=False", topic, action)
         await mqtt.async_publish(self.hass, topic, action, qos=1, retain=False)
         
@@ -500,6 +503,32 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         _LOGGER.debug("Triggering command %s for device %s", command_name, device_name)
         _LOGGER.debug("MQTT PUBLISH (DEVICE): topic='%s', payload='%s', qos=1, retain=False", topic, command_name)
         await mqtt.async_publish(self.hass, topic, command_name, qos=1, retain=False)
+
+    async def async_control_led_light(self, state: str, duration: int = 5) -> None:
+        """Control RGB ring light animation.
+        
+        Args:
+            state: "on" or "off"
+            duration: Duration in seconds (1-10) when turning on
+        """
+        topic = f"{self.base_topic}/{TOPIC_LED_LIGHT}"
+        
+        if state == "on":
+            # Clamp duration between 1 and 10 seconds
+            duration = max(1, min(10, duration))
+            payload = str(duration)
+            _LOGGER.debug("Turning on LED light for %d seconds", duration)
+        else:
+            payload = "off"
+            _LOGGER.debug("Turning off LED light")
+        
+        _LOGGER.debug("MQTT PUBLISH (LED): topic='%s', payload='%s', qos=1, retain=True", topic, payload)
+        await mqtt.async_publish(self.hass, topic, payload, qos=1, retain=True)
+        
+        # Update local state
+        self.data["led_light_state"] = state
+        self.data["led_light_duration"] = duration if state == "on" else 0
+        self.async_set_updated_data(self.data)
 
     async def async_shutdown(self) -> None:
         """Unsubscribe from all MQTT topics and cancel timers."""

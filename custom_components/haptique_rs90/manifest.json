@@ -7,8 +7,7 @@
   "documentation": "https://github.com/daangel27/haptique_rs90",
   "integration_type": "device",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/daangel27/haptique_rs90/issues",
   "mqtt": ["Haptique/+/status"],
-  "requirements": ["aiomqtt>=2.0.0"],
-  "version": "1.5.0"
+  "requirements": [],
+  "version": "1.5.1"
 }

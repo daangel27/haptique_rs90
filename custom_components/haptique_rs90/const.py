@@ -14,6 +14,7 @@ TOPIC_MACRO_TRIGGER = "macro/{macro_name}/trigger"
 TOPIC_DEVICE_DETAIL = "device/{device_name}/detail"
 TOPIC_DEVICE_TRIGGER = "device/{device_name}/trigger"
 TOPIC_TEST_STATUS = "test/status"
+TOPIC_LED_LIGHT = "ledlight/on"  # RGB ring light control
 
 # Attributes
 ATTR_REMOTE_ID = "remote_id"

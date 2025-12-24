@@ -15,6 +15,7 @@ from .coordinator import HaptiqueRS90Coordinator
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
+    Platform.LIGHT,   # RGB ring light control - First in controls section
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.SWITCH,  # Macros as switches (on/off state visible)
@@ -153,6 +154,47 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         )
 
 
+async def _async_cleanup_old_macro_info_sensors(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove old macro info sensors and device list sensor (migration v1.5.0 -> v1.6.0)."""
+    from homeassistant.helpers import entity_registry as er
+    
+    entity_registry = er.async_get(hass)
+    remote_id = entry.data["remote_id"]
+    
+    _LOGGER.info("=== Starting cleanup of old sensors for entry: %s ===", entry.entry_id)
+    
+    # Find all macro info sensors and device list sensor for this remote
+    entities_to_remove = []
+    all_entities = []
+    
+    for entity in entity_registry.entities.values():
+        if entity.platform == DOMAIN and entity.config_entry_id == entry.entry_id:
+            all_entities.append(f"{entity.entity_id} (unique_id: {entity.unique_id})")
+            
+            # Check if it's a macro info sensor (unique_id contains "macro_info_")
+            # or device list sensor (unique_id ends with "_device_list")
+            if entity.unique_id:
+                if "macro_info_" in entity.unique_id or entity.unique_id.endswith("_device_list"):
+                    entities_to_remove.append(entity.entity_id)
+                    _LOGGER.info("Found old sensor to remove: %s (unique_id: %s)", entity.entity_id, entity.unique_id)
+    
+    _LOGGER.info("All entities for this integration: %s", all_entities)
+    _LOGGER.info("Entities marked for removal: %s", entities_to_remove)
+    
+    # Remove all found entities
+    for entity_id in entities_to_remove:
+        try:
+            entity_registry.async_remove(entity_id)
+            _LOGGER.info("✓ Successfully removed old sensor: %s", entity_id)
+        except Exception as err:
+            _LOGGER.error("✗ Failed to remove sensor %s: %s", entity_id, err)
+    
+    if entities_to_remove:
+        _LOGGER.info("=== Migration complete: Removed %d old sensors ===", len(entities_to_remove))
+    else:
+        _LOGGER.info("=== No old sensors found to remove ===")
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Haptique RS90 Remote from a config entry."""
     _LOGGER.debug("Setting up Haptique RS90 Remote integration")
@@ -169,6 +211,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     # Setup platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    
+    # Cleanup old sensors AFTER platforms are loaded
+    await _async_cleanup_old_macro_info_sensors(hass, entry)
     
     # Register device
     device_registry = dr.async_get(hass)

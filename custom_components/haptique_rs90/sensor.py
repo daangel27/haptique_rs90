@@ -35,17 +35,14 @@ async def async_setup_entry(
     
     # Base sensors (always present)
     entities = [
+        RS90InfoSummarySensor(coordinator, entry),  # First for visibility
         HaptiqueRS90BatterySensor(coordinator, entry),
         HaptiqueRS90LastKeySensor(coordinator, entry),
         HaptiqueRS90RunningMacroSensor(coordinator, entry),
-        HaptiqueRS90DeviceListSensor(coordinator, entry),
     ]
     
     # Track device command sensors by device ID
     device_sensors: dict[str, HaptiqueRS90DeviceCommandsSensor] = {}
-    
-    # Track macro info sensors by macro ID
-    macro_info_sensors: dict[str, RS90MacroInfoSensor] = {}
     
     # Create device command sensors
     devices = coordinator.data.get("devices", [])
@@ -62,21 +59,6 @@ async def async_setup_entry(
         device_sensors[device_id] = sensor
         entities.append(sensor)
         _LOGGER.debug("Setup commands sensor for device: %s (id: %s)", device_name, device_id)
-    
-    # Create macro info sensors
-    macros = coordinator.data.get("macros", [])
-    sorted_macros = sorted(macros, key=lambda m: m.get("name", "").lower())
-    
-    for macro in sorted_macros:
-        macro_id = macro.get("id")
-        macro_name = macro.get("name")
-        if not macro_id or not macro_name:
-            continue
-        
-        sensor = RS90MacroInfoSensor(coordinator, entry, macro_id, macro_name)
-        macro_info_sensors[macro_id] = sensor
-        entities.append(sensor)
-        _LOGGER.debug("Setup macro info sensor: %s (id: %s)", macro_name, macro_id)
     
     async_add_entities(entities)
     
@@ -166,95 +148,8 @@ async def async_setup_entry(
             else:
                 _LOGGER.warning("Could not find sensor for device_id: %s", device_id)
     
-    @callback
-    def manage_macro_info_sensors() -> None:
-        """Add new macro info sensors and remove obsolete ones."""
-        _LOGGER.debug("=== SENSOR: Macro info entity update triggered ===")
-        entity_registry = er.async_get(hass)
-        
-        # Build mapping of macro IDs to names from current MQTT data
-        current_macros = coordinator.data.get("macros", [])
-        macro_id_to_name = {macro.get("id"): macro.get("name") 
-                           for macro in current_macros 
-                           if macro.get("id") and macro.get("name")}
-        
-        current_macro_ids = set(macro_id_to_name.keys())
-        existing_macro_ids = set(macro_info_sensors.keys())
-        
-        _LOGGER.debug("Current macro IDs from MQTT: %s", current_macro_ids)
-        _LOGGER.debug("Existing macro info IDs in HA: %s", existing_macro_ids)
-        
-        # Check for renamed macros (same ID, different name)
-        for macro_id in current_macro_ids & existing_macro_ids:
-            new_name = macro_id_to_name[macro_id]
-            sensor = macro_info_sensors.get(macro_id)
-            if sensor and sensor._macro_name != new_name:
-                old_name = sensor._macro_name
-                _LOGGER.info("RENAME: Macro renamed: '%s' → '%s' (id: %s)", 
-                            old_name, new_name, macro_id)
-                # Update sensor's internal name
-                sensor._macro_name = new_name
-                # Update friendly name in entity registry
-                entity_reg = er.async_get(hass)
-                if entity_entry := entity_reg.async_get(sensor.entity_id):
-                    entity_reg.async_update_entity(
-                        sensor.entity_id,
-                        name=f"Macro Info - {new_name}"
-                    )
-                # Force immediate state update
-                sensor.async_write_ha_state()
-                sensor.async_schedule_update_ha_state(force_refresh=True)
-        
-        # Find macros to add
-        macros_to_add = current_macro_ids - existing_macro_ids
-        new_entities = []
-        
-        if macros_to_add:
-            _LOGGER.info("Macro info sensors to add (by ID): %s", macros_to_add)
-        
-        for macro in coordinator.data.get("macros", []):
-            macro_id = macro.get("id")
-            macro_name = macro.get("name")
-            if macro_id in macros_to_add and macro_name:
-                sensor = RS90MacroInfoSensor(coordinator, entry, macro_id, macro_name)
-                macro_info_sensors[macro_id] = sensor
-                new_entities.append(sensor)
-                _LOGGER.info("SUCCESS: Adding macro info sensor for new macro: %s (id: %s)", macro_name, macro_id)
-        
-        if new_entities:
-            async_add_entities(new_entities)
-        
-        # Find macros to remove
-        macros_to_remove = existing_macro_ids - current_macro_ids
-        
-        if macros_to_remove:
-            _LOGGER.info("Macro info sensors to remove (by ID): %s", macros_to_remove)
-        
-        for macro_id in macros_to_remove:
-            sensor = macro_info_sensors.pop(macro_id, None)
-            if sensor:
-                macro_name = sensor._macro_name
-                _LOGGER.debug("Processing removal of macro info: %s (id: %s, unique_id: %s)", 
-                             macro_name, macro_id, sensor.unique_id)
-                # Remove from entity registry
-                entity_id = entity_registry.async_get_entity_id(
-                    "sensor",
-                    DOMAIN,
-                    sensor.unique_id
-                )
-                if entity_id:
-                    entity_registry.async_remove(entity_id)
-                    _LOGGER.info("SUCCESS: Removed obsolete macro info sensor: %s (entity_id: %s)", 
-                               macro_name, entity_id)
-                else:
-                    _LOGGER.warning("Could not find entity_id for macro info sensor: %s (unique_id: %s)", 
-                                   macro_name, sensor.unique_id)
-            else:
-                _LOGGER.warning("Could not find sensor for macro_id: %s", macro_id)
-    
     # Register listener for coordinator updates
     entry.async_on_unload(coordinator.async_add_listener(manage_device_sensors))
-    entry.async_on_unload(coordinator.async_add_listener(manage_macro_info_sensors))
 
 
 class HaptiqueRS90SensorBase(CoordinatorEntity, SensorEntity):
@@ -404,42 +299,6 @@ class HaptiqueRS90RunningMacroSensor(HaptiqueRS90SensorBase):
         }
 
 
-class HaptiqueRS90DeviceListSensor(HaptiqueRS90SensorBase):
-    """Device list sensor for Haptique RS90."""
-
-    def __init__(
-        self,
-        coordinator: HaptiqueRS90Coordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the device list sensor."""
-        super().__init__(coordinator, entry, "device_list")
-        self._attr_name = "Device List"
-        self._attr_icon = "mdi:devices"
-
-    @property
-    def native_value(self) -> int:
-        """Return the number of devices."""
-        devices = self.coordinator.data.get("devices", [])
-        return len(devices)
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return device names as attributes."""
-        devices = self.coordinator.data.get("devices", [])
-        device_names = [device.get("name") for device in devices if device.get("name")]
-        
-        attributes = {
-            "device_count": len(devices),
-            "devices": device_names,
-        }
-        
-        # Add each device as a separate attribute for easy access
-        for idx, name in enumerate(device_names, 1):
-            attributes[f"device_{idx}"] = name
-        
-        return attributes
-
 
 class HaptiqueRS90DeviceCommandsSensor(HaptiqueRS90SensorBase):
     """Sensor for displaying commands of a specific device."""
@@ -512,44 +371,69 @@ class HaptiqueRS90DeviceCommandsSensor(HaptiqueRS90SensorBase):
         return attributes
 
 
-class RS90MacroInfoSensor(HaptiqueRS90SensorBase):
-    """Sensor providing macro information and stable ID."""
+
+class RS90InfoSummarySensor(HaptiqueRS90SensorBase):
+    """Sensor providing RS90 configuration summary with all IDs."""
     
     def __init__(
         self,
         coordinator: HaptiqueRS90Coordinator,
         entry: ConfigEntry,
-        macro_id: str,
-        macro_name: str,
     ) -> None:
-        """Initialize the macro info sensor."""
-        super().__init__(coordinator, entry, f"macro_info_{macro_id}")
+        """Initialize the RS90 info summary sensor."""
+        super().__init__(coordinator, entry, "info_summary")
         
-        self._macro_id = macro_id
-        self._macro_name = macro_name
-        self._attr_icon = "mdi:information"
-        self._attr_entity_category = EntityCategory.DIAGNOSTIC
-    
-    @property
-    def name(self) -> str:
-        """Return the friendly name (updates on rename)."""
-        return f"Macro Info - {self._macro_name}"
+        self._attr_name = "Info Summary"
+        self._attr_icon = "mdi:information-variant"
     
     @property
     def native_value(self) -> str:
-        """Return the sensor state - always 'available'."""
-        return "available"
+        """Return summary state."""
+        devices_count = len(self.coordinator.data.get("devices", []))
+        macros_count = len(self.coordinator.data.get("macros", []))
+        return f"{devices_count} devices, {macros_count} macros"
     
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """Return macro information as attributes."""
-        # Get current macro state from coordinator
-        macro_states = self.coordinator.data.get("macro_states", {})
-        current_state = macro_states.get(self._macro_name, "off")
+        """Return all RS90 configuration information as attributes."""
+        from homeassistant.helpers import device_registry as dr
+        
+        # Get RS90 device info from Home Assistant device registry
+        device_registry = dr.async_get(self.hass)
+        rs90_device = device_registry.async_get_device(
+            identifiers={(DOMAIN, self._entry.data["remote_id"])}
+        )
+        
+        ha_device_id = rs90_device.id if rs90_device else "N/A"
+        
+        # Build devices dictionary with name as key, id as value
+        devices = self.coordinator.data.get("devices", [])
+        devices_dict = {}
+        for device in sorted(devices, key=lambda d: d.get("name", "").lower()):
+            if device.get("name") and device.get("id"):
+                devices_dict[device.get("name")] = device.get("id")
+        
+        # Build macros dictionary with name as key, id as value
+        macros = self.coordinator.data.get("macros", [])
+        macros_dict = {}
+        for macro in sorted(macros, key=lambda m: m.get("name", "").lower()):
+            if macro.get("name") and macro.get("id"):
+                macros_dict[macro.get("name")] = macro.get("id")
+        
+        # RS90 info as individual attributes
+        device_name = self._entry.data.get('name') or f"RS90 {self._entry.data['remote_id'][:8]}"
         
         return {
-            "rs90_macro_id": self._macro_id,  # Stable ID for service calls
-            "macro_name": self._macro_name,
-            "current_state": current_state,  # on/off state
+            # Devices with name: id format
+            "devices": devices_dict,
+            "devices_count": len(devices_dict),
+            
+            # Macros with name: id format
+            "macros": macros_dict,
+            "macros_count": len(macros_dict),
+            
+            # RS90 Remote info
+            "rs90_id": ha_device_id,  # For service calls (HA device ID)
+            "rs90_device_name": device_name,
         }
 
