@@ -1,4 +1,4 @@
-# Services disponibles pour l'intégration Haptique RS90 - Traduction française
+# Services disponibles pour l'intégration Haptique RS90
 
 trigger_macro:
   name: Déclencher une macro
@@ -6,30 +6,16 @@ trigger_macro:
   fields:
     rs90_id:
       name: Télécommande RS90
-      description: Sélectionnez votre télécommande Haptique RS90 (dans Paramètres > Appareils et services > Haptique RS90)
-      required: true
+      description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
       example: "6f99751e78b5a07de72d549143e2975c"
-      selector:
-        device:
-          integration: haptique_rs90
     rs90_macro_id:
       name: ID de la macro
-      description: L'ID stable de la macro. Trouvez-le dans les attributs de sensor.macro_{nom}_info ou switch.macro_{nom}. Cet ID ne change jamais même si vous renommez la macro dans Haptique Config.
-      required: true
+      description: L'identifiant stable de la macro. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire macros) ou dans switch.macro_{nom} attributs. Cet ID ne change jamais même si vous renommez la macro dans Haptique Config.
       example: "692eb1561bddd5814022960c"
-      selector:
-        text:
     action:
       name: Action
       description: Action à effectuer (on ou off)
-      required: false
-      default: "on"
       example: "on"
-      selector:
-        select:
-          options:
-            - "on"
-            - "off"
 
 trigger_device_command:
   name: Déclencher une commande appareil
@@ -37,26 +23,16 @@ trigger_device_command:
   fields:
     rs90_id:
       name: Télécommande RS90
-      description: Sélectionnez votre télécommande Haptique RS90 (dans Paramètres > Appareils et services > Haptique RS90)
-      required: true
+      description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
       example: "6f99751e78b5a07de72d549143e2975c"
-      selector:
-        device:
-          integration: haptique_rs90
     rs90_device_id:
       name: ID de l'appareil
-      description: L'ID stable de l'appareil. Trouvez-le dans les attributs de sensor.commands_{nom}. Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config.
-      required: true
+      description: L'identifiant stable de l'appareil. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire devices) ou dans sensor.commands_{nom} attributs. Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config.
       example: "692ead781bddd58140228e33"
-      selector:
-        text:
     command_name:
       name: Nom de la commande
-      description: Le nom exact de la commande à envoyer (consultez le sensor de commandes de l'appareil pour voir les commandes disponibles)
-      required: true
+      description: Le nom exact de la commande à envoyer (consultez le capteur de commandes de l'appareil pour voir les commandes disponibles)
       example: "POWER"
-      selector:
-        text:
 
 refresh_lists:
   name: Actualiser les listes
@@ -64,9 +40,18 @@ refresh_lists:
   fields:
     rs90_id:
       name: Télécommande RS90
-      description: Sélectionnez votre télécommande Haptique RS90
-      required: true
+      description: Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
       example: "6f99751e78b5a07de72d549143e2975c"
-      selector:
-        device:
-          integration: haptique_rs90
+
+trigger_rgb_light:
+  name: Déclencher l'anneau RGB
+  description: Active l'animation de l'anneau RGB avec une durée personnalisée
+  fields:
+    rs90_id:
+      name: Télécommande RS90
+      description: Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
+      example: "9b974dab9a7649e13baeb921d4c9bb85"
+    duration:
+      name: Durée
+      description: Durée en secondes (1-10)
+      example: 5

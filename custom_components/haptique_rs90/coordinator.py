@@ -56,6 +56,9 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self._battery_refresh_timer: callable | None = None
         self._battery_refresh_interval = 3600  # 1 hour in seconds
         
+        # LED light auto-off timer
+        self._led_light_timer: callable | None = None
+        
         # Data storage
         self.data: dict[str, Any] = {
             "status": STATE_OFFLINE,
@@ -490,8 +493,8 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         _LOGGER.debug("Triggering macro: %s with action: %s", macro_name, action)
         
         # Publish WITH retain - macro state is persistent (as per Haptique API doc)
-        _LOGGER.debug("MQTT PUBLISH (MACRO): topic='%s', payload='%s', qos=1, retain=False", topic, action)
-        await mqtt.async_publish(self.hass, topic, action, qos=1, retain=False)
+        _LOGGER.debug("MQTT PUBLISH (MACRO): topic='%s', payload='%s', qos=1, retain=True", topic, action)
+        await mqtt.async_publish(self.hass, topic, action, qos=1, retain=True)
         
         # Update local state immediately (will be confirmed by MQTT callback)
         self.data["macro_states"][macro_name] = action
@@ -510,20 +513,47 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         Args:
             state: "on" or "off"
             duration: Duration in seconds (1-10) when turning on
+        
+        Note:
+            - Uses retain=False to prevent replay on RS90 reconnect
+            - No MQTT OFF command sent (RS90 handles auto-off internally)
+            - Local timer tracks state for Home Assistant UI only
         """
         topic = f"{self.base_topic}/{TOPIC_LED_LIGHT}"
+        
+        # Cancel existing timer if any
+        if self._led_light_timer:
+            self._led_light_timer()
+            self._led_light_timer = None
         
         if state == "on":
             # Clamp duration between 1 and 10 seconds
             duration = max(1, min(10, duration))
             payload = str(duration)
             _LOGGER.debug("Turning on LED light for %d seconds", duration)
+            
+            # Send MQTT command with retain=False to avoid replay on reconnect
+            _LOGGER.debug("MQTT PUBLISH (LED): topic='%s', payload='%s', qos=1, retain=False", topic, payload)
+            await mqtt.async_publish(self.hass, topic, payload, qos=1, retain=False)
+            
+            # Schedule local state update (no MQTT OFF command needed)
+            async def _auto_turn_off(_now=None):
+                """Automatically update local state after duration (RS90 handles actual off)."""
+                _LOGGER.debug("LED light duration expired, updating local state to OFF")
+                self.data["led_light_state"] = "off"
+                self.data["led_light_duration"] = 0
+                self.async_set_updated_data(self.data)
+                self._led_light_timer = None
+            
+            from homeassistant.helpers.event import async_call_later
+            self._led_light_timer = async_call_later(
+                self.hass,
+                duration,
+                _auto_turn_off
+            )
         else:
-            payload = "off"
-            _LOGGER.debug("Turning off LED light")
-        
-        _LOGGER.debug("MQTT PUBLISH (LED): topic='%s', payload='%s', qos=1, retain=True", topic, payload)
-        await mqtt.async_publish(self.hass, topic, payload, qos=1, retain=True)
+            # Manual OFF: cancel timer, update local state only (no MQTT command)
+            _LOGGER.debug("Turning off LED light (local state only, no MQTT)")
         
         # Update local state
         self.data["led_light_state"] = state
@@ -539,6 +569,12 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             self._battery_refresh_timer()
             self._battery_refresh_timer = None
             _LOGGER.debug("Cancelled battery refresh timer")
+        
+        # Cancel LED light timer
+        if self._led_light_timer:
+            self._led_light_timer()
+            self._led_light_timer = None
+            _LOGGER.debug("Cancelled LED light timer")
         
         # Unsubscribe from all global topics
         for unsubscribe in self._subscriptions:

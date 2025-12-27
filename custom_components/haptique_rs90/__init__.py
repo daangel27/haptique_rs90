@@ -15,7 +15,7 @@ from .coordinator import HaptiqueRS90Coordinator
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
-    Platform.LIGHT,   # RGB ring light control - First in controls section
+    Platform.BUTTON,  # RGB ring light control - First in controls section
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.SWITCH,  # Macros as switches (on/off state visible)
@@ -131,6 +131,29 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         
         _LOGGER.error("Coordinator not found for device: %s", rs90_id)
     
+    async def handle_trigger_rgb_light(call):
+        """Handle the trigger_rgb_light service call."""
+        rs90_id = call.data.get("rs90_id")
+        duration = call.data.get("duration", 5)  # Default 5 seconds
+        
+        # Find the coordinator for this device
+        device_registry = dr.async_get(hass)
+        device_entry = device_registry.async_get(rs90_id)
+        
+        if not device_entry:
+            _LOGGER.error("Device not found: %s", rs90_id)
+            return
+        
+        # Find the config entry
+        for entry_id in device_entry.config_entries:
+            if entry_id in hass.data.get(DOMAIN, {}):
+                coordinator = hass.data[DOMAIN][entry_id]
+                await coordinator.async_control_led_light("on", duration=duration)
+                _LOGGER.info("RGB light triggered for device: %s with duration: %d", rs90_id, duration)
+                return
+        
+        _LOGGER.error("Coordinator not found for device: %s", rs90_id)
+    
     # Register services only once
     if not hass.services.has_service(DOMAIN, "trigger_macro"):
         hass.services.async_register(
@@ -151,6 +174,13 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             DOMAIN,
             "refresh_lists",
             handle_refresh_lists,
+        )
+    
+    if not hass.services.has_service(DOMAIN, "trigger_rgb_light"):
+        hass.services.async_register(
+            DOMAIN,
+            "trigger_rgb_light",
+            handle_trigger_rgb_light,
         )
 
 

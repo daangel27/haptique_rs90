@@ -6,7 +6,7 @@ trigger_macro:
   fields:
     rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)
+      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)
       required: true
       example: "6f99751e78b5a07de72d549143e2975c"
       selector:
@@ -14,7 +14,7 @@ trigger_macro:
           integration: haptique_rs90
     rs90_macro_id:
       name: Macro ID
-      description: The stable ID of the macro. Find it in sensor.macro_{name}_info attributes or switch.macro_{name} attributes. This ID never changes even if you rename the macro in Haptique Config.
+      description: The stable ID of the macro. Find it in sensor.rs90_info_summary attributes (macros dictionary) or switch.macro_{name} attributes. This ID never changes even if you rename the macro in Haptique Config.
       required: true
       example: "692eb1561bddd5814022960c"
       selector:
@@ -37,7 +37,7 @@ trigger_device_command:
   fields:
     rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)
+      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)
       required: true
       example: "6f99751e78b5a07de72d549143e2975c"
       selector:
@@ -45,7 +45,7 @@ trigger_device_command:
           integration: haptique_rs90
     rs90_device_id:
       name: Device ID
-      description: The stable ID of the device. Find it in sensor.commands_{name} attributes. This ID never changes even if you rename the device in Haptique Config.
+      description: The stable ID of the device. Find it in sensor.rs90_info_summary attributes (devices dictionary) or sensor.commands_{name} attributes. This ID never changes even if you rename the device in Haptique Config.
       required: true
       example: "692ead781bddd58140228e33"
       selector:
@@ -64,9 +64,34 @@ refresh_lists:
   fields:
     rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote
+      description: Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary attribute rs90_id)
       required: true
       example: "6f99751e78b5a07de72d549143e2975c"
       selector:
         device:
           integration: haptique_rs90
+
+trigger_rgb_light:
+  name: Trigger RGB Ring Light
+  description: Activate the RGB ring light animation with custom duration
+  fields:
+    rs90_id:
+      name: RS90 Remote
+      description: Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary attribute rs90_id)
+      required: true
+      example: "9b974dab9a7649e13baeb921d4c9bb85"
+      selector:
+        device:
+          integration: haptique_rs90
+    duration:
+      name: Duration
+      description: Duration in seconds (1-10)
+      required: false
+      default: 5
+      example: 5
+      selector:
+        number:
+          min: 1
+          max: 10
+          step: 1
+          mode: slider
