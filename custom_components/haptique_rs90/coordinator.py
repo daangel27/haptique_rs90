@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 from typing import Any
 
 from homeassistant.components import mqtt
@@ -45,6 +46,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         
         self.entry = entry
         self.remote_id = entry.data[CONF_REMOTE_ID]
+        self.device_id = None  # Will be set after device registration
         self._subscriptions: list[callable] = []  # Global subscriptions (status, battery, etc.)
         self._macro_subscriptions: dict[str, callable] = {}  # Macro-specific subscriptions
         
@@ -366,6 +368,21 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             if "button:" in payload:
                 button_num = payload.split("button:")[1].strip()
                 _LOGGER.debug("Key pressed: button %s", button_num)
+                
+                # Fire Home Assistant event for EVERY key press (including duplicates)
+                # This allows automations to trigger on repeated button presses
+                self.hass.bus.async_fire(
+                    f"{DOMAIN}_key_pressed",
+                    {
+                        "remote_id": self.remote_id,
+                        "device_id": self.device_id,  # HA device ID for device triggers
+                        "button": int(button_num),
+                        "timestamp": time.time(),  # Ensures uniqueness
+                    }
+                )
+                _LOGGER.debug("Fired event: %s_key_pressed with button %s", DOMAIN, button_num)
+                
+                # Update sensor state (for backward compatibility)
                 self.data["last_key"] = button_num
                 self.async_set_updated_data(self.data)
             else:
@@ -626,10 +643,27 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         This method re-processes the current device and macro lists stored in memory
         and subscribes to any new devices/macros that aren't yet subscribed.
         
+        Also requests a fresh battery level update from the RS90.
+        
         Useful when RS90 doesn't automatically republish device/list or macro/list
         after configuration changes in the Haptique Config app.
         """
         _LOGGER.warning("Force refresh lists requested")
+        
+        # Request battery level update
+        battery_trigger_topic = f"{self.base_topic}/{TOPIC_BATTERY_STATUS}"
+        _LOGGER.info("Requesting battery level update...")
+        try:
+            await mqtt.async_publish(
+                self.hass,
+                battery_trigger_topic,
+                "",
+                qos=0,
+                retain=False
+            )
+            _LOGGER.debug("Battery refresh request sent to %s", battery_trigger_topic)
+        except Exception as err:
+            _LOGGER.error("Failed to request battery update: %s", err)
         
         # Re-process current device list
         if self.data.get("devices"):

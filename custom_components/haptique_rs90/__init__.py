@@ -247,7 +247,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     # Register device
     device_registry = dr.async_get(hass)
-    device_registry.async_get_or_create(
+    device_entry = device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(DOMAIN, entry.data["remote_id"])},
         name=entry.data.get("name", f"Haptique RS90 {entry.data['remote_id'][:8]}"),
@@ -255,6 +255,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         model="RS90",
         sw_version="1.0",
     )
+    
+    # Store HA device ID in coordinator for event firing
+    coordinator.device_id = device_entry.id
     
     # Register services
     await async_setup_services(hass)

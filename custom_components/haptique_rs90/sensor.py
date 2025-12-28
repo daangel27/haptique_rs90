@@ -433,7 +433,8 @@ class RS90InfoSummarySensor(HaptiqueRS90SensorBase):
             "macros_count": len(macros_dict),
             
             # RS90 Remote info
-            "rs90_id": ha_device_id,  # For service calls (HA device ID)
+            "rs90_id": ha_device_id,  # HA Device ID for service calls
+            "rs90_remote_id": self._entry.data['remote_id'],  # MQTT RemoteID
             "rs90_device_name": device_name,
         }
 
