@@ -25,20 +25,20 @@ jobs:
             **🇫🇷 Français:**
             Votre issue a été créée et sera examinée prochainement. Pour accélérer le traitement :
             - ✅ Vérifiez que vous avez fourni toutes les informations demandées
-            - 📋 Consultez la [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README_FR.md)
+            - 📖 Consultez la [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README_FR.md)
             - 🔄 Si vous migrez depuis v1.2.x, consultez le [guide de migration](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
 
-            **⏰ Important:** Si nous avons besoin d'informations supplémentaires et qu'il n'y a pas de réponse dans les 7 jours, cette issue sera automatiquement fermée.
+            ⚠️ **Important:** Si nous avons besoin d'informations supplémentaires et qu'il n'y a pas de réponse dans les 7 jours, cette issue sera automatiquement fermée.
 
             ---
 
             **🇬🇧 English:**
             Your issue has been created and will be reviewed shortly. To speed up processing:
             - ✅ Verify you provided all requested information
-            - 📋 Check the [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
+            - 📖 Check the [documentation](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/README.md)
             - 🔄 If migrating from v1.2.x, see [migration guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/MIGRATION_GUIDE_v1.5.0.md)
 
-            **⏰ Important:** If we need additional information and there's no response within 7 days, this issue will be automatically closed.`
+            ⚠️ **Important:** If we need additional information and there's no response within 7 days, this issue will be automatically closed.`
             })
 
       - name: Auto-label by keywords
