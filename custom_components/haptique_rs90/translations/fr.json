@@ -31,57 +31,120 @@
   },
   "services": {
     "trigger_macro": {
-      "name": "Declencher une macro",
-      "description": "Declenche une macro specifique sur la telecommande Haptique RS90.",
+      "name": "Déclencher une macro",
+      "description": "Demander l’exécution ON/OFF d’une macro ou séquence migrée. Le retour du firmware détermine l’état.",
       "fields": {
-        "device_id": {
-          "name": "Telecommande RS90",
-          "description": "Selectionnez votre telecommande Haptique RS90 (trouvez-la dans Parametres > Appareils et services > Haptique RS90)"
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
         },
-        "macro_name": {
-          "name": "Nom de la macro (OBSOLETE)",
-          "description": "OBSOLETE - Sera supprime dans une future version de l'integration. Ce parametre casse lors d'un renommage de macro dans Haptique Config! Utilisez macro_id a la place. Le nom exact de la macro a declencher (sensible a la casse)."
-        },
-        "macro_id": {
-          "name": "ID de la macro (RECOMMANDE)",
-          "description": "RECOMMANDE - L'ID stable de la macro (depuis les attributs du switch). Cet ID ne change jamais meme si vous renommez la macro dans Haptique Config."
+        "rs90_macro_id": {
+          "name": "ID de la macro",
+          "description": "L'identifiant stable de la macro. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire macros) ou dans switch.macro_{nom} attributs. Cet ID ne change jamais même si vous renommez la macro dans Haptique Config."
         },
         "action": {
           "name": "Action",
-          "description": "Action a effectuer (on ou off)"
+          "description": "Action à effectuer (on ou off)"
         }
       }
     },
     "trigger_device_command": {
-      "name": "Declencher une commande",
-      "description": "Envoie une commande specifique a un appareil via la telecommande RS90.",
+      "name": "Déclencher une commande appareil",
+      "description": "Envoie une commande spécifique à un appareil via la télécommande RS90",
       "fields": {
-        "device_id": {
-          "name": "Telecommande RS90",
-          "description": "Selectionnez votre telecommande Haptique RS90 (trouvez-la dans Parametres > Appareils et services > Haptique RS90)"
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
         },
-        "device_name": {
-          "name": "Nom de l'appareil (OBSOLETE)",
-          "description": "OBSOLETE - Sera supprime dans une future version de l'integration. Ce parametre casse lors d'un renommage d'appareil dans Haptique Config! Utilisez haptique_device_id a la place. Le nom exact de l'appareil configure dans le RS90 (sensible a la casse)."
-        },
-        "haptique_device_id": {
-          "name": "ID de l'appareil Haptique (RECOMMANDE)",
-          "description": "RECOMMANDE - L'ID stable de l'appareil (depuis les attributs du sensor). Cet ID ne change jamais meme si vous renommez l'appareil dans Haptique Config. Trouvez-le dans les attributs du sensor: haptique_device_id"
+        "rs90_device_id": {
+          "name": "ID de l'appareil",
+          "description": "L'identifiant stable de l'appareil. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire devices) ou dans sensor.commands_{nom} attributs. Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config."
         },
         "command_name": {
           "name": "Nom de la commande",
-          "description": "Le nom exact de la commande a envoyer (consultez le capteur de commandes pour voir les commandes disponibles)"
+          "description": "Le nom exact de la commande à envoyer (consultez le capteur de commandes de l'appareil pour voir les commandes disponibles)"
         }
       }
     },
     "refresh_lists": {
       "name": "Actualiser les listes",
-      "description": "Force l'actualisation des listes d'appareils et de macros depuis la telecommande RS90. Utilisez ceci si les appareils ou macros n'apparaissent pas apres les avoir ajoutes dans Haptique Config.",
+      "description": "Demander la découverte, la batterie et les états mémorisés. Un ancien firmware peut ignorer discovery/refresh.",
       "fields": {
-        "device_id": {
-          "name": "Telecommande RS90",
-          "description": "Selectionnez votre telecommande Haptique RS90"
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
         }
+      }
+    },
+    "trigger_rgb_light": {
+      "name": "Déclencher l'anneau RGB",
+      "description": "Active l'animation de l'anneau RGB avec une durée personnalisée",
+      "fields": {
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
+        },
+        "duration": {
+          "name": "Durée",
+          "description": "Durée en secondes (1-10)"
+        }
+      }
+    },
+    "trigger_sequence": {
+      "name": "Déclencher une séquence",
+      "description": "Demander l’exécution ON/OFF d’une séquence avec son identifiant stable.",
+      "fields": {
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
+        },
+        "rs90_sequence_id": {
+          "name": "Identifiant de la cible",
+          "description": "Demander l’exécution ON/OFF d’une séquence avec son identifiant stable."
+        },
+        "action": {
+          "name": "Action",
+          "description": "Action à effectuer (on ou off)"
+        }
+      }
+    },
+    "query_status": {
+      "name": "Interroger l’état mémorisé",
+      "description": "Demander l’état d’exécution mémorisé d’une macro ou séquence. Ce n’est pas une mesure de l’alimentation des appareils.",
+      "fields": {
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
+        },
+        "target_kind": {
+          "name": "Type de cible",
+          "description": "Type de cible"
+        },
+        "target_id": {
+          "name": "Identifiant de la cible",
+          "description": "Demander l’état d’exécution mémorisé d’une macro ou séquence. Ce n’est pas une mesure de l’alimentation des appareils."
+        }
+      }
+    },
+    "launch_app": {
+      "name": "Ouvrir une application",
+      "description": "Ouvrir une application installée avec son nom de paquet. Le retour confirme l’acceptation Android, pas la lecture.",
+      "fields": {
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
+        },
+        "app_package_id": {
+          "name": "Nom de paquet",
+          "description": "Nom de paquet indiqué dans apps_by_id, par exemple com.spotify.music."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_app": {
+        "name": "Dernière application signalée"
       }
     }
   }

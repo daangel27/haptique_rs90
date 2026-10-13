@@ -32,34 +32,119 @@
   "services": {
     "trigger_macro": {
       "name": "Trigger macro",
-      "description": "Triggers a specific macro on the Haptique RS90 remote.",
+      "description": "Request ON/OFF execution of a macro or migrated sequence. Firmware feedback determines state.",
       "fields": {
-        "device_id": {
+        "rs90_id": {
           "name": "RS90 Remote",
-          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)"
         },
-        "macro_name": {
-          "name": "Macro name",
-          "description": "The exact name of the macro to trigger (case-sensitive)"
+        "rs90_macro_id": {
+          "name": "Macro ID",
+          "description": "The stable ID of the macro. Find it in sensor.rs90_info_summary attributes (macros dictionary) or switch.macro_{name} attributes. This ID never changes even if you rename the macro in Haptique Config."
+        },
+        "action": {
+          "name": "Action",
+          "description": "Action to perform (on or off)"
         }
       }
     },
     "trigger_device_command": {
       "name": "Trigger device command",
-      "description": "Sends a specific command to a device via the RS90 remote.",
+      "description": "Sends a specific command to a device via the RS90 remote",
       "fields": {
-        "device_id": {
+        "rs90_id": {
           "name": "RS90 Remote",
-          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90)"
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)"
         },
-        "device_name": {
-          "name": "Device name",
-          "description": "The exact name of the device configured in RS90 (case-sensitive)"
+        "rs90_device_id": {
+          "name": "Device ID",
+          "description": "The stable ID of the device. Find it in sensor.rs90_info_summary attributes (devices dictionary) or sensor.commands_{name} attributes. This ID never changes even if you rename the device in Haptique Config."
         },
         "command_name": {
           "name": "Command name",
           "description": "The exact command name to send (check the device commands sensor to see available commands)"
         }
+      }
+    },
+    "refresh_lists": {
+      "name": "Refresh lists",
+      "description": "Request fresh discovery, battery and persisted macro/sequence state. Older firmware may ignore discovery/refresh.",
+      "fields": {
+        "rs90_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary attribute rs90_id)"
+        }
+      }
+    },
+    "trigger_rgb_light": {
+      "name": "Trigger RGB Ring Light",
+      "description": "Activate the RGB ring light animation with custom duration",
+      "fields": {
+        "rs90_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary attribute rs90_id)"
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "Duration in seconds (1-10)"
+        }
+      }
+    },
+    "trigger_sequence": {
+      "name": "Trigger sequence",
+      "description": "Request ON/OFF execution of a command sequence using its stable ID.",
+      "fields": {
+        "rs90_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)"
+        },
+        "rs90_sequence_id": {
+          "name": "Target ID",
+          "description": "Request ON/OFF execution of a command sequence using its stable ID."
+        },
+        "action": {
+          "name": "Action",
+          "description": "Action to perform (on or off)"
+        }
+      }
+    },
+    "query_status": {
+      "name": "Query persisted status",
+      "description": "Request the persisted execution state of a macro or sequence. This is not a physical equipment power measurement.",
+      "fields": {
+        "rs90_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)"
+        },
+        "target_kind": {
+          "name": "Target kind",
+          "description": "Target kind"
+        },
+        "target_id": {
+          "name": "Target ID",
+          "description": "Request the persisted execution state of a macro or sequence. This is not a physical equipment power measurement."
+        }
+      }
+    },
+    "launch_app": {
+      "name": "Launch app",
+      "description": "Launch an installed app by package ID. Feedback confirms Android accepted the intent, not playback.",
+      "fields": {
+        "rs90_id": {
+          "name": "RS90 Remote",
+          "description": "Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)"
+        },
+        "app_package_id": {
+          "name": "App package ID",
+          "description": "Package ID from Info Summary apps_by_id, such as com.spotify.music."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_app": {
+        "name": "Last Reported App"
       }
     }
   }

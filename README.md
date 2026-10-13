@@ -1,5 +1,14 @@
 # Haptique RS90 - Home Assistant Integration
 
+## Standard MQTT contribution (draft)
+
+Adds real-macro and sequence switches, persisted-state queries, installed-app
+launch buttons, a last-reported-app sensor and fresh discovery requests. Existing registered macro switches are preserved during sequence migration.
+State remains unknown until firmware feedback arrives; execution requests are never
+retained. See [Standard MQTT controls and acceptance](documentation/STANDARD_MQTT.md)
+for actions, firmware compatibility and the outstanding live-device checks.
+
+
 [![Version](https://img.shields.io/badge/version-1.7.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)

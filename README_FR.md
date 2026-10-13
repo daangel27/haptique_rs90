@@ -1,5 +1,15 @@
 # Haptique RS90 - Intégration Home Assistant
 
+## Contribution Standard MQTT (brouillon)
+
+Ajoute les macros réelles, les séquences, l’interrogation des états mémorisés et
+l’actualisation de la découverte, les boutons d’ouverture des applications et
+un capteur indiquant la dernière application signalée. Les identités des interrupteurs existants sont
+conservées lors de la migration. Seul le retour du firmware confirme l’état.
+Voir le [guide Standard MQTT](documentation/STANDARD_MQTT.md), notamment les
+vérifications encore nécessaires sur une télécommande réelle.
+
+
 [![Version](https://img.shields.io/badge/version-1.7.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
