@@ -104,12 +104,11 @@ async def test_setup_clears_stale_firmware_version(hass, coordinator):
         identifiers={("haptique_rs90", "remote-1")},
         sw_version="1.0",
     )
-    registry.async_get_or_create(
+    device = registry.async_get_or_create(
         config_entry_id=coordinator.entry.entry_id,
         identifiers={("haptique_rs90", "remote-1")},
         manufacturer="Haptique",
         model="RS90",
         sw_version=None,
     )
-    device = registry.async_get_device(identifiers={("haptique_rs90", "remote-1")})
     assert device.sw_version is None
