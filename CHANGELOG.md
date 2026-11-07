@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.1] - 2026-11-07
+
+Maintenance release: no change in behaviour.
+
+### 🐛 Fixes
+- Drop the unused `aiomqtt` requirement (Home Assistant no longer installs it)
+- Minimum Home Assistant version set to **2024.8** (oldest version the test suite passes on)
+
+### 📚 Documentation
+- Device buttons card template rewritten: only the sensor to replace, RS90 and device IDs found automatically, duplicate commands removed, `perform-action` syntax, correct 4-step procedure (render in Developer tools → Template, then paste the result in a Manual card), new KODI example
+- Installation through the Home Assistant **Marketplace** (2026.11+), with the HACS steps kept for older versions
+- README: new screenshots, finding IDs with the Info Summary sensor, minimum Home Assistant version badge
+
+---
+
 ## [1.8.0] - 2026-11-07
 
 Requires the RS90 **Standard MQTT** firmware (tested on 4.1.2 / 4.2).

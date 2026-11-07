@@ -1,18 +1,25 @@
-title: Your Device
+{#- Haptique RS90 - device buttons card (Home Assistant 2024.8+)
+    1. Replace the sensor below with your "Commands - <device>" sensor entity ID.
+    2. Paste this whole file in Developer tools > Template.
+    3. Copy the Result into a Manual card of your dashboard.
+    See README.md / README_FR.md in this folder. -#}
+{%- set sensor = 'sensor.your_rs90_commands_your_device' -%}
 type: grid
+title: {{ state_attr(sensor, 'device_name') }}
 columns: 4
 square: false
 cards:
-  {% for cmd in state_attr('sensor.your_remote_name_commands_your_device_name', 'commands') %}
+{%- for cmd in state_attr(sensor, 'commands') | unique %}
   - type: button
-    name: "{{ cmd.replace('_', ' ') }}"
+    name: {{ cmd | replace('_', ' ') | tojson }}
+    show_icon: false
     tap_action:
-      action: call-service
-      service: haptique_rs90.trigger_device_command
+      action: perform-action
+      perform_action: haptique_rs90.trigger_device_command
       data:
-        rs90_id: "YOUR_RS90_DEVICE_ID_HERE"
-        rs90_device_id: "{{ state_attr('sensor.your_remote_name_commands_your_device_name', 'rs90_device_id') }}"
-        command_name: "{{ cmd }}"
+        rs90_id: {{ device_id(sensor) | tojson }}
+        rs90_device_id: {{ state_attr(sensor, 'rs90_device_id') | tojson }}
+        command_name: {{ cmd | tojson }}
     card_mod:
       style: |
         ha-card {
@@ -58,4 +65,4 @@ cards:
           z-index: 1 !important;
           text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
         }
-  {% endfor %}
+{%- endfor %}

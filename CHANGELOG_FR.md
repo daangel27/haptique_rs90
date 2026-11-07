@@ -7,6 +7,21 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.8.1] - 2026-11-07
+
+Version de maintenance : aucun changement de comportement.
+
+### 🐛 Corrections
+- Suppression de la dépendance inutilisée `aiomqtt` (Home Assistant ne l'installe plus)
+- Version minimale de Home Assistant fixée à **2024.8** (plus ancienne version sur laquelle les tests passent)
+
+### 📚 Documentation
+- Modèle de carte « boutons d'un appareil » réécrit : seul le capteur est à remplacer, identifiants de la RS90 et de l'appareil trouvés automatiquement, commandes en double supprimées, syntaxe `perform-action`, procédure corrigée en 4 étapes (calcul dans Outils de développement → Modèle, puis collage du résultat dans une carte Manuel), nouvel exemple KODI
+- Installation via le **Marketplace** de Home Assistant (2026.11+), avec la procédure HACS conservée pour les versions plus anciennes
+- README : nouvelles captures, identifiants à retrouver avec le capteur Info Summary, badge de version minimale de Home Assistant
+
+---
+
 ## [1.8.0] - 2026-11-07
 
 Nécessite le firmware **Standard MQTT** de la RS90 (testé en 4.1.2 / 4.2).

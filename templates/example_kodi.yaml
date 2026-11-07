@@ -1,18 +1,22 @@
+{#- Example: KODI commands of an RS90 named "Salon".
+    Same steps as device_buttons_card.yaml. -#}
+{%- set sensor = 'sensor.salon_rs90_commands_kodi_osmc_vero4k' -%}
 type: grid
-title: Canal - G9 4K
+title: {{ state_attr(sensor, 'device_name') }}
 columns: 4
 square: false
 cards:
-  {% for cmd in state_attr('sensor.salon_commands_canal', 'commands') %}
+{%- for cmd in state_attr(sensor, 'commands') | unique %}
   - type: button
-    name: "{{ cmd.replace('_', ' ') }}"
+    name: {{ cmd | replace('_', ' ') | tojson }}
+    show_icon: false
     tap_action:
-      action: call-service
-      service: haptique_rs90.trigger_device_command
+      action: perform-action
+      perform_action: haptique_rs90.trigger_device_command
       data:
-        rs90_id: "6f99751e78b5a07de72d549143e2975c"
-        rs90_device_id: "{{ state_attr('sensor.salon_commands_canal', 'rs90_device_id') }}"
-        command_name: "{{ cmd }}"
+        rs90_id: {{ device_id(sensor) | tojson }}
+        rs90_device_id: {{ state_attr(sensor, 'rs90_device_id') | tojson }}
+        command_name: {{ cmd | tojson }}
     card_mod:
       style: |
         ha-card {
@@ -58,4 +62,4 @@ cards:
           z-index: 1 !important;
           text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
         }
-  {% endfor %}
+{%- endfor %}
