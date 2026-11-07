@@ -123,7 +123,7 @@ Toutes les entités sont créées automatiquement.
 | Capteur binaire **Connection** | En ligne / hors ligne |
 | Capteur **Last Key Pressed** | Dernière touche appuyée |
 | Capteurs **Commands - {appareil}** | Nombre de commandes, liste complète en attributs |
-| Capteur **Info Summary** | Tous les identifiants (appareils, macros, séquences, applications) au même endroit |
+| Capteur **Info Summary** | Tous les identifiants (appareils, macros, séquences, applications) au même endroit, voir [Retrouver les identifiants](#-retrouver-les-identifiants--le-capteur-info-summary) |
 
 > ℹ️ L'état d'une macro est ce que la RS90 signale, **pas** une mesure de l'alimentation de la TV ou de l'ampli.
 
@@ -175,7 +175,32 @@ actions:
 
 ## 🔧 Actions disponibles
 
-`rs90_id` est l'**identifiant d'appareil Home Assistant** de la RS90 (choisissez-le avec le sélecteur d'appareil dans l'éditeur d'actions). Les identifiants des macros, séquences, appareils et applications se trouvent dans les attributs des entités et dans **Info Summary**.
+### 🆔 Retrouver les identifiants : le capteur Info Summary
+
+Tous les identifiants utiles aux actions sont rassemblés dans le capteur **Info Summary** (`sensor.<nom>_info_summary`) : ouvrez-le depuis la page de l'appareil, puis **Attributs** (ou Outils de développement → États).
+
+<table>
+<tr>
+<td width="40%"><img src="documentation/screenshots/info_summary.png" alt="Info Summary" /></td>
+<td valign="top">
+
+| Attribut | Sert pour |
+|----------|-----------|
+| **Rs90 ID** | `rs90_id` dans toutes les actions (identifiant d'appareil Home Assistant) |
+| **Rs90 remote ID** | L'identifiant MQTT de la télécommande (topics `Haptique/<remote ID>/…`) |
+| **Macros** / **Macros by ID** | `rs90_macro_id` |
+| **Sequences** / **Sequences by ID** | `rs90_sequence_id` |
+| **Devices** / **Devices by ID** | `rs90_device_id` |
+| **Apps by ID** | `app_package_id` |
+
+L'état affiche les totaux (ex. `5 devices, 3 macros, 3 sequences`). Les listes *by ID* restent lisibles même quand deux éléments portent le même nom.
+
+</td>
+</tr>
+</table>
+
+Dans l'éditeur d'actions, vous pouvez aussi simplement choisir la RS90 avec le sélecteur d'appareil pour `rs90_id`. Les identifiants des macros et séquences figurent aussi dans les attributs de chaque interrupteur.
+
 
 | Action | Description |
 |--------|-------------|

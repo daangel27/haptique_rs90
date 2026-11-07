@@ -123,7 +123,7 @@ All entities are created automatically.
 | **Connection** binary sensor | Online / offline |
 | **Last Key Pressed** sensor | Last pressed button |
 | **Commands - {device}** sensors | Number of commands, full list in attributes |
-| **Info Summary** sensor | All IDs (devices, macros, sequences, apps) in one place |
+| **Info Summary** sensor | All IDs (devices, macros, sequences, apps) in one place, see [Finding the IDs](#-finding-the-ids-the-info-summary-sensor) |
 
 > ℹ️ Macro states are what the RS90 reports, **not** a measurement of the TV or amplifier power.
 
@@ -175,7 +175,32 @@ actions:
 
 ## 🔧 Available Actions
 
-`rs90_id` is the **Home Assistant device ID** of the RS90 (pick it with the device selector in the action editor). IDs of macros, sequences, devices and apps are in the entity attributes and in **Info Summary**.
+### 🆔 Finding the IDs: the Info Summary sensor
+
+All the IDs needed by the actions are gathered in the **Info Summary** sensor (`sensor.<name>_info_summary`): open it from the device page, then **Attributes** (or Developer tools → States).
+
+<table>
+<tr>
+<td width="40%"><img src="documentation/screenshots/info_summary.png" alt="Info Summary" /></td>
+<td valign="top">
+
+| Attribute | Use it for |
+|-----------|------------|
+| **Rs90 ID** | `rs90_id` in every action (Home Assistant device ID) |
+| **Rs90 remote ID** | The MQTT ID of the remote (`Haptique/<remote ID>/…` topics) |
+| **Macros** / **Macros by ID** | `rs90_macro_id` |
+| **Sequences** / **Sequences by ID** | `rs90_sequence_id` |
+| **Devices** / **Devices by ID** | `rs90_device_id` |
+| **Apps by ID** | `app_package_id` |
+
+The state shows the totals (e.g. `5 devices, 3 macros, 3 sequences`). The *by ID* lists stay readable even when two items share the same name.
+
+</td>
+</tr>
+</table>
+
+In the action editor you can also simply pick the RS90 with the device selector for `rs90_id`. Macro and sequence IDs are also in each switch's attributes.
+
 
 | Action | Description |
 |--------|-------------|

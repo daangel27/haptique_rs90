@@ -13,6 +13,17 @@ The `device_id` is the **unique Home Assistant identifier** for your RS90 remote
 
 ---
 
+## Quickest: the Info Summary sensor
+
+Open the **Info Summary** sensor of your RS90 (device page → Sensors → Info Summary → Attributes):
+- **Rs90 ID** is the Home Assistant device ID (`rs90_id`)
+- **Rs90 remote ID** is the MQTT ID
+- macro, sequence, device and app IDs are listed too (*by ID* attributes)
+
+See [Finding the IDs](../README.md#-finding-the-ids-the-info-summary-sensor) in the README.
+
+---
+
 ## Method 1: Graphical Interface (Recommended)
 
 ### In the Services UI
