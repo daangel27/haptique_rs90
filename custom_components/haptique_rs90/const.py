@@ -40,3 +40,7 @@ CONF_DASHBOARD_COMMANDS = "dashboard_commands"
 # Options: wake a sleeping RS90 up by sending packets to its IP address.
 CONF_WAKE_HOST = "wake_host"
 CONF_WAKE_AUTO = "wake_auto"
+
+# Logbook events shown in the device activity
+COMMAND_EVENT = "haptique_rs90_command_sent"
+WAKE_EVENT = "haptique_rs90_wake"

@@ -1,5 +1,7 @@
 """Describe Haptique RS90 execution results in the logbook.
 
+Also describes device commands sent and wake-ups.
+
 The Last Macro Result sensor only creates a logbook entry when its state
 changes, so repeated identical results (e.g. two consecutive "skipped") would
 be invisible. Every result event gets its own entry here instead.
@@ -18,7 +20,7 @@ from homeassistant.components.logbook import (
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 
-from .const import DOMAIN
+from .const import COMMAND_EVENT, DOMAIN, WAKE_EVENT
 from .targets import RESULT_EVENT
 
 
@@ -30,6 +32,17 @@ def result_message(data: dict[str, Any]) -> str:
     action = data.get("action")
     prefix = action.upper() if action else "result"
     return f"{prefix}: {status}"
+
+
+def wake_message(data: dict[str, Any]) -> str:
+    """Build a message such as 'woke up in 18 s'."""
+    result = data.get("result")
+    if result == "sent":
+        return "wake-up sent"
+    seconds = data.get("seconds")
+    if result == "woke":
+        return f"woke up in {seconds} s"
+    return f"did not wake up within {seconds} s"
 
 
 def _target_entity_id(
@@ -81,3 +94,22 @@ def async_describe_events(
         return description
 
     async_describe_event(DOMAIN, RESULT_EVENT, async_describe_result)
+
+    @callback
+    def async_describe_command(event: Event) -> dict[str, str]:
+        data = event.data
+        return {
+            LOGBOOK_ENTRY_NAME: f"RS90 {data.get('device') or 'device'}",
+            LOGBOOK_ENTRY_MESSAGE: f"{data.get('command')} sent",
+        }
+
+    async_describe_event(DOMAIN, COMMAND_EVENT, async_describe_command)
+
+    @callback
+    def async_describe_wake(event: Event) -> dict[str, str]:
+        return {
+            LOGBOOK_ENTRY_NAME: "RS90",
+            LOGBOOK_ENTRY_MESSAGE: wake_message(event.data),
+        }
+
+    async_describe_event(DOMAIN, WAKE_EVENT, async_describe_wake)

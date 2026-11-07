@@ -105,3 +105,46 @@ async def test_no_auto_wake_by_default(hass, coordinator, publish):
     with patch.object(wake, "_send_burst") as burst:
         await coordinator.async_trigger_target("macro", "m1", "on")
     burst.assert_not_called()
+
+
+async def test_queued_commands_after_wake(hass, coordinator, publish):
+    """Presses during a wake-up all go out, in order, and show in the logbook."""
+    from homeassistant.core import callback
+
+    from custom_components.haptique_rs90.const import COMMAND_EVENT, WAKE_EVENT
+    from custom_components.haptique_rs90.logbook import wake_message
+
+    hass.config_entries.async_update_entry(
+        coordinator.entry,
+        options={CONF_WAKE_HOST: "192.168.10.245", CONF_WAKE_AUTO: True},
+    )
+    await message(hass, "status", "offline")
+    events = []
+    for event_type in (COMMAND_EVENT, WAKE_EVENT):
+        hass.bus.async_listen(event_type, callback(lambda e: events.append(e)))
+
+    def burst(host):
+        hass.loop.call_soon_threadsafe(
+            lambda: hass.async_create_task(message(hass, "status", "online"))
+        )
+
+    with (
+        patch.object(wake, "_send_burst", burst),
+        patch("custom_components.haptique_rs90.wake.WAKE_SETTLE", 0.05),
+        patch("custom_components.haptique_rs90.coordinator.WAKE_SETTLE", 0.05),
+        patch("custom_components.haptique_rs90.coordinator.QUEUE_GAP", 0.01),
+    ):
+        await asyncio.gather(
+            *(
+                coordinator.async_trigger_device_command("KODI", cmd)
+                for cmd in ("DOWN1", "DOWN2", "DOWN3")
+            )
+        )
+    await hass.async_block_till_done()
+    sent = [c.args[2] for c in publish.call_args_list if "/device/" in c.args[1]]
+    assert sent == ["DOWN1", "DOWN2", "DOWN3"]
+    wakes = [e.data for e in events if e.event_type == WAKE_EVENT]
+    assert [w["result"] for w in wakes] == ["sent", "woke"]
+    assert wake_message(wakes[1]).startswith("woke up in")
+    commands = [e.data["command"] for e in events if e.event_type == COMMAND_EVENT]
+    assert commands == ["DOWN1", "DOWN2", "DOWN3"]

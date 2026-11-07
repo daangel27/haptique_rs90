@@ -15,6 +15,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
+    COMMAND_EVENT,
     CONF_REMOTE_ID,
     CONF_WAKE_AUTO,
     CONF_WAKE_HOST,
@@ -30,9 +31,10 @@ from .const import (
     TOPIC_MACRO_LIST,
     TOPIC_STATUS,
     TOPIC_TEST_STATUS,
+    WAKE_EVENT,
 )
 from .targets import TargetManager, parse_inventory, valid_reference
-from .wake import async_wake
+from .wake import QUEUE_GAP, WAKE_SETTLE, async_wake
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -75,6 +77,9 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         # Set while the RS90 reports online; used to wait for a wake-up.
         self._online = asyncio.Event()
         self._wake_lock = asyncio.Lock()
+        # Commands wait until this monotonic time after a wake-up, so the RS90
+        # has resubscribed and queued commands go out one by one.
+        self._send_not_before = float("-inf")
 
         # LED light auto-off timer
         self._led_light_timer: callable | None = None
@@ -437,16 +442,56 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 "Set the RS90 IP address in the integration options to wake it up"
             )
         async with self._wake_lock:
-            return await async_wake(self.hass, self.wake_host, self._online)
+            return await self._async_wake_locked()
+
+    async def _async_wake_locked(self) -> bool:
+        """Wake the RS90 (caller holds the wake lock) and log it."""
+        if self._online.is_set():
+            return True
+        self._fire_activity(WAKE_EVENT, {"result": "sent"})
+        started = time.monotonic()
+        woke = await async_wake(self.hass, self.wake_host, self._online)
+        self._fire_activity(
+            WAKE_EVENT,
+            {
+                "result": "woke" if woke else "failed",
+                "seconds": round(time.monotonic() - started),
+            },
+        )
+        if woke:
+            self._send_not_before = time.monotonic() + WAKE_SETTLE
+        return woke
+
+    def _fire_activity(self, event_type: str, data: dict[str, Any]) -> None:
+        """Fire an event that the logbook shows in the device activity."""
+        self.hass.bus.async_fire(
+            event_type,
+            {"remote_id": self.remote_id, "device_id": self.device_id, **data},
+        )
 
     async def _async_ensure_awake(self) -> None:
-        """Before a command: wake a sleeping RS90 up when auto-wake is on."""
-        if self.data.get("status") == STATE_ONLINE or not self.auto_wake:
+        """Before a command: wake a sleeping RS90 up when auto-wake is on.
+
+        Commands pressed while a wake-up is in progress queue on the wake lock
+        and are released one by one once the RS90 has settled.
+        """
+        if not self.auto_wake:
             return
-        if not await self.async_wake():
-            raise HomeAssistantError("The RS90 did not wake up")
-        # Let the RS90 resubscribe to its command topics.
-        await asyncio.sleep(1)
+        if (
+            self.data.get("status") == STATE_ONLINE
+            and not self._wake_lock.locked()
+            and time.monotonic() >= self._send_not_before
+        ):
+            return
+        async with self._wake_lock:
+            if self.data.get("status") != STATE_ONLINE and not self._online.is_set():
+                if not await self._async_wake_locked():
+                    raise HomeAssistantError("The RS90 did not wake up")
+            delay = self._send_not_before - time.monotonic()
+            if delay > 0:
+                await asyncio.sleep(delay)
+            # Space out the next queued command.
+            self._send_not_before = time.monotonic() + QUEUE_GAP
 
     async def async_launch_app(self, package_id: str) -> None:
         if self._closed or not self._app_feedback_ready:
@@ -632,6 +677,9 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             command_name,
         )
         await mqtt.async_publish(self.hass, topic, command_name, qos=1, retain=False)
+        self._fire_activity(
+            COMMAND_EVENT, {"device": device_name, "command": command_name}
+        )
 
     async def async_control_led_light(self, state: str, duration: int = 5) -> None:
         """Control RGB ring light animation.
