@@ -1,7 +1,7 @@
 # Haptique RS90 - Home Assistant Integration
 
 [![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
-[![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![hacs](https://img.shields.io/badge/Marketplace%20%2F%20HACS-Custom-orange.svg)](https://hacs.xyz)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Home Assistant integration for the **Haptique RS90** universal remote via MQTT: macros, sequences, installed apps, device commands, key presses and RGB ring light.
@@ -70,19 +70,25 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 
 ## 🚀 Installation
 
-### Via HACS (Recommended)
+### Via the Marketplace / HACS (Recommended)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=daangel27&repository=haptique_rs90&category=integration)
+[![Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=daangel27&repository=haptique_rs90&category=integration)
+
+Since **Home Assistant 2026.11**, HACS is built into Home Assistant as the **Marketplace**.
 
 **Manual steps** (if the button doesn't work):
 
+**Home Assistant 2026.11 or newer (Marketplace)**
+1. Go to **Settings** → **Marketplace**
+2. Click **⋮** (three dots) → **Custom repositories**
+3. Add `https://github.com/daangel27/haptique_rs90` with the category `Integration`
+4. Open **Haptique RS90** and select **Install**: the setup starts right away, no restart needed
+
+**Older versions (HACS)**
 1. Open **HACS** in Home Assistant
 2. Click **⋮** (three dots) → **Custom repositories**
-3. Add repository:
-   - **URL**: `https://github.com/daangel27/haptique_rs90`
-   - **Category**: `Integration`
-4. Search for **"Haptique RS90"** and click **Download**
-5. Restart Home Assistant
+3. Add `https://github.com/daangel27/haptique_rs90` with the category `Integration`
+4. Search for **"Haptique RS90"**, click **Download**, then restart Home Assistant
 
 ### Manual Installation
 

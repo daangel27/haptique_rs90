@@ -66,7 +66,8 @@ Signalées à Haptique, impossibles à corriger dans l'intégration :
 
 ## 🚀 Mise à jour
 
-- **HACS** : ouvrez HACS → Haptique RS90 → **Mettre à jour**, puis redémarrez Home Assistant
+- **Marketplace** (Home Assistant 2026.11+) : Paramètres → Marketplace → Haptique RS90 → **Mettre à jour**
+- **HACS** (versions plus anciennes) : ouvrez HACS → Haptique RS90 → **Mettre à jour**, puis redémarrez Home Assistant
 - **Manuelle** : téléchargez la [v1.8.0](https://github.com/daangel27/haptique_rs90/releases/tag/v1.8.0), remplacez `custom_components/haptique_rs90/`, redémarrez
 
 Les nouveaux boutons d'applications sont désactivés : activez ceux que vous voulez dans **Paramètres → Appareils et services → Entités**.
