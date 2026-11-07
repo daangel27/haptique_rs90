@@ -85,6 +85,7 @@ class HaptiqueRS90WakeButton(CoordinatorEntity, ButtonEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "wake"
     _attr_icon = "mdi:alarm"
+    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(
         self, coordinator: HaptiqueRS90Coordinator, entry: ConfigEntry
