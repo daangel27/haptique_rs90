@@ -324,6 +324,10 @@ Hors de son socle, la RS90 se met en veille au bout d'un moment et apparaît **h
 
 Home Assistant envoie quelques paquets à l'adresse IP de la RS90 jusqu'à ce qu'elle repasse en ligne (20 secondes au maximum). Seule l'adresse IP est nécessaire : la RS90 utilise par défaut une adresse MAC Wi-Fi aléatoire, et l'adresse MAC contenue dans le paquet n'a pas d'importance.
 
+Chaque réveil apparaît dans l'**Activité** de la RS90 (`wake-up sent`, puis `woke up in 8 s` ou `did not wake up`), comme chaque commande envoyée à un appareil. Après un réveil, Home Assistant attend 4 secondes puis envoie une par une les commandes appuyées entre-temps.
+
+> ⚠️ Juste après son réveil, la RS90 peut encore rater une commande destinée à un appareil piloté par le réseau (ex. Kodi) quand plusieurs sont appuyées d'affilée. Les appareils infrarouges ne sont pas concernés. Laissez la RS90 sur son socle si chaque commande doit passer.
+
 ---
 
 ## 🛠️ Dépannage
@@ -346,6 +350,9 @@ Limitations connues du firmware (signalées à Haptique) :
 - En passant d'une macro à une autre, la précédente peut rester **ON** ; l'éteindre ensuite renvoie `skipped (already_in_requested_state)`
 
 Utilisez **Last Macro Result** et le journal pour voir ce que la RS90 a réellement fait, et `haptique_rs90.query_status` pour relire un état.
+
+### Une commande d'appareil ne fait rien
+L'Activité affiche `RS90 <appareil> <commande> sent`, mais l'appareil ne réagit pas : vérifiez qu'il n'a pas **deux commandes du même nom** (affichées deux fois dans son capteur **Commands**, ex. deux `POWER`). Les commandes sont envoyées par leur nom : la RS90 utilise donc toujours la même, qui peut être un *Power on* discret sans effet quand l'appareil est déjà allumé. Renommez l'une d'elles dans l'application Haptique (ex. `POWER_ON` / `POWER_OFF`).
 
 ### Last Reported App ne change pas quand on quitte une application
 Le firmware signale seulement l'application ouverte, pas le moment où on la quitte.

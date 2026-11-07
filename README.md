@@ -324,6 +324,10 @@ Off its dock, the RS90 goes to sleep after a while and shows as **offline**: its
 
 Home Assistant sends a few packets to the RS90's IP address until it reports online again (up to 20 seconds). Only the IP address is needed: the RS90 uses a random Wi-Fi MAC address by default, and the MAC address inside the packet doesn't matter.
 
+Each wake-up shows in the RS90's **Activity** (`wake-up sent`, then `woke up in 8 s` or `did not wake up`), along with every device command sent. After a wake-up, Home Assistant waits 4 seconds and then sends the commands pressed meanwhile, one by one.
+
+> ⚠️ Right after waking up, the RS90 can still miss a command sent to a network-controlled device (e.g. Kodi) when several are pressed in a row. Infrared devices are not affected. Leave the RS90 on its dock when every command must go through.
+
 ---
 
 ## 🛠️ Troubleshooting
@@ -346,6 +350,9 @@ Known firmware limitations (reported to Haptique):
 - When switching from one macro to another, the previous one can stay **ON**; turning it off later returns `skipped (already_in_requested_state)`
 
 Use **Last Macro Result** and the logbook to see what the RS90 actually did, and `haptique_rs90.query_status` to re-read a state.
+
+### A device command does nothing
+The Activity shows `RS90 <device> <command> sent`, but the device doesn't react: check that the device doesn't have **two commands with the same name** (shown twice in its **Commands** sensor, e.g. two `POWER`). Commands are sent by name, so the RS90 always uses the same one, which may be a discrete *Power on* that does nothing when the device is already on. Rename one of them in the Haptique app (e.g. `POWER_ON` / `POWER_OFF`).
 
 ### Last Reported App doesn't change when leaving an app
 The firmware only reports the app that was opened, not when you leave it.
