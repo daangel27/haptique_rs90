@@ -12,19 +12,26 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 
 ## 📸 Captures d'écran
 
+<p align="center">
+<img src="documentation/screenshots/device_info.png" alt="Page de l'appareil" width="90%" />
+<br/><em>Page de l'appareil : macros, séquences, boutons d'applications et anneau RGB</em>
+</p>
+
 <table>
 <tr>
-<td width="30%">
-<img src="documentation/screenshots/device_info.png" alt="Informations de l'appareil" />
-<p align="center"><em>Informations et contrôles de l'appareil</em></p>
+<td width="34%" valign="top">
+<img src="documentation/screenshots/integration.png" alt="Intégration" />
+<p align="center"><em>L'intégration et son icône</em></p>
+<img src="documentation/screenshots/macro_result.png" alt="Last Macro Result" />
+<p align="center"><em>Last Macro Result et son historique</em></p>
 </td>
-<td width="30%">
-<img src="documentation/screenshots/device_list.png" alt="Liste des appareils" />
-<p align="center"><em>Liste des appareils</em></p>
+<td width="33%" valign="top">
+<img src="documentation/screenshots/sensors.png" alt="Capteurs" />
+<p align="center"><em>Capteurs et listes de commandes</em></p>
 </td>
-<td width="50%">
+<td width="33%" valign="top">
 <img src="documentation/screenshots/device_commands.png" alt="Commandes d'un appareil" />
-<p align="center"><em>Liste des commandes d'un appareil</em></p>
+<p align="center"><em>Commandes d'un appareil</em></p>
 </td>
 </tr>
 </table>
@@ -141,6 +148,8 @@ actions:
 ```
 
 Sans YAML avec les **déclencheurs d'appareil** : **Ajouter un déclencheur** → **Appareil** → votre RS90 → **Button pressed** → bouton 1 à 24.
+
+<img src="documentation/screenshots/device_trigger.png" alt="Déclencheur d'appareil" width="60%" />
 
 ### Résultats des macros
 

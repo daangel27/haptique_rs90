@@ -12,19 +12,26 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 
 ## 📸 Screenshots
 
+<p align="center">
+<img src="documentation/screenshots/device_info.png" alt="Device page" width="90%" />
+<br/><em>Device page: macros, sequences, app buttons and RGB ring light</em>
+</p>
+
 <table>
 <tr>
-<td width="30%">
-<img src="documentation/screenshots/device_info.png" alt="Device Info" />
-<p align="center"><em>Device Information & Controls</em></p>
+<td width="34%" valign="top">
+<img src="documentation/screenshots/integration.png" alt="Integration" />
+<p align="center"><em>Integration with its icon</em></p>
+<img src="documentation/screenshots/macro_result.png" alt="Last Macro Result" />
+<p align="center"><em>Last Macro Result with its history</em></p>
 </td>
-<td width="30%">
-<img src="documentation/screenshots/device_list.png" alt="Device List" />
-<p align="center"><em>Device List</em></p>
+<td width="33%" valign="top">
+<img src="documentation/screenshots/sensors.png" alt="Sensors" />
+<p align="center"><em>Sensors and command lists</em></p>
 </td>
-<td width="50%">
-<img src="documentation/screenshots/device_commands.png" alt="Device Commands" />
-<p align="center"><em>Device Commands List</em></p>
+<td width="33%" valign="top">
+<img src="documentation/screenshots/device_commands.png" alt="Device commands" />
+<p align="center"><em>Commands of a device</em></p>
 </td>
 </tr>
 </table>
@@ -141,6 +148,8 @@ actions:
 ```
 
 No YAML needed with **device triggers**: **Add Trigger** → **Device** → your RS90 → **Button pressed** → button 1-24.
+
+<img src="documentation/screenshots/device_trigger.png" alt="Device trigger" width="60%" />
 
 ### Macro results
 
