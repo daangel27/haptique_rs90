@@ -25,7 +25,7 @@ BURST_GAP = 0.3
 WAIT_PER_ATTEMPT = 3.0
 DEFAULT_TIMEOUT = 20.0
 # After waking up, give the RS90 time to resubscribe to its command topics.
-WAKE_SETTLE = 2.0
+WAKE_SETTLE = 4.0
 # Gap between commands queued during a wake-up.
 QUEUE_GAP = 0.3
 
