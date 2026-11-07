@@ -7,6 +7,8 @@ Build a dashboard remote with **one button per command** of any device controlle
 ![Device Buttons Card Example](../documentation/screenshots/device_buttons_card.png)
 *Example: the KODI card generated from `example_kodi.yaml`*
 
+> 💡 **Since 1.9.0**, the built-in [Haptique RS90 dashboard](../README.md#-dashboard) does this for every device automatically and stays up to date. This template remains useful to put one device's buttons in your own dashboard.
+
 > ℹ️ This is a **template**: Home Assistant dashboards can't run it directly. You render it once in **Developer tools → Template**, then paste the result into a card. Re-render it if the device's commands change.
 
 ---

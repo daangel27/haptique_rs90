@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] - Unreleased
+
+### ✨ New Features
+- **Haptique RS90 dashboard** (dashboard strategy shipped with the integration, Home Assistant 2026.5+ lists it under *Community dashboards*):
+  - RS90 view: macros as ON/OFF buttons (green = ON), sequences, apps and status
+  - One view per RS90 device, commands grouped like a remote (power, navigation pad, volume & channels, playback, keypad, inputs, more), 3D style with card-mod
+  - Rebuilt every time it opens, so new, renamed or removed devices, macros and apps show up by themselves; removed macros and apps are left out
+- **Integration options** become a menu: rename the remote, or choose the command buttons shown for each device (all by default, none hides the device)
+
+### 🐛 Fixes
+- Renaming the remote no longer wipes the other options
+- The dashboard script URL carries a hash of the file, so browsers load the new version after an update
+
+---
+
 ## [1.8.1] - 2026-11-07
 
 Maintenance release: no change in behaviour.

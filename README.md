@@ -45,6 +45,7 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 ## ✨ Features
 
 ### Control
+- 📺 **Ready-made dashboard**: an RS90 view and a remote for each device, always up to date (see [Dashboard](#-dashboard))
 - 🎛️ **Macro and sequence switches**: ON/OFF from Home Assistant, state confirmed by the RS90 firmware
 - 📱 **App buttons**: launch any app installed on the RS90 (disabled by default, enable the ones you want)
 - 📡 **Device commands**: send any IR/IP command of any configured device
@@ -136,6 +137,77 @@ All entities are created automatically.
 | **Info Summary** sensor | All IDs (devices, macros, sequences, apps) in one place, see [Finding the IDs](#-finding-the-ids-the-info-summary-sensor) |
 
 > ℹ️ Macro states are what the RS90 reports, **not** a measurement of the TV or amplifier power.
+
+---
+
+## 📺 Dashboard
+
+The integration ships a ready-made **Haptique RS90 dashboard**, built from your remote every time you open it: nothing to copy, nothing to keep up to date.
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_rs90.png" alt="RS90 view" width="90%" />
+<br/><em>RS90 view: macros (green when ON), sequences, apps and status</em>
+</p>
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_device.png" alt="Device view" width="90%" />
+<br/><em>One view per device, laid out like a remote</em>
+</p>
+
+### Create it
+
+1. **Settings** → **Dashboards** → **Add dashboard**
+2. Under **Community dashboards**, pick **Haptique RS90** (Home Assistant 2026.5+)
+3. Give it a title and an icon (e.g. `mdi:remote`), then **Create**
+
+On older versions, create an empty dashboard, open **⋮ → Raw configuration editor** and paste:
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+```
+
+### What you get
+
+- **RS90 view**: macros as ON/OFF buttons (green = ON), sequences, apps and the status sensors
+- **One view per device** (TV, AMPLI, KODI…), commands grouped like a remote: power, navigation pad, volume & channels, playback, keypad, inputs, more
+- Pressing a button sends the command through `haptique_rs90.trigger_device_command`
+- The 3D button style uses **card-mod** (Marketplace / HACS). Without it, buttons work but look plain.
+
+### Choose the buttons of each device
+
+By default every command is shown. To keep only the ones you use:
+
+1. **Settings** → **Devices & services** → **Haptique RS90 Remote** → ⚙️ **Configure**
+2. **Dashboard: choose command buttons** → pick the device
+3. Untick **Show all commands**, tick the commands you want and **Submit**
+
+Untick everything to hide a device. Reload the dashboard to see the change.
+
+<p align="center">
+<img src="documentation/screenshots/options_commands.png" alt="Choose the command buttons" width="45%" />
+</p>
+
+### Always up to date
+
+When you add, rename or remove a device, a macro, a sequence or an app on the RS90, the integration receives it over MQTT and the dashboard follows the next time you open (or reload) it: new device → new view, removed device → view gone, new macro → new button. A device with a custom button selection keeps it; new commands of a device left on **Show all commands** appear by themselves.
+
+> ℹ️ The RS90 must be **online** to publish its changes. If something doesn't show up, run the `haptique_rs90.refresh_lists` action.
+
+<details>
+<summary>Advanced: YAML options of the strategy</summary>
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+  hide_devices: [XBOX]          # views not to show
+  devices:                      # only these device views, with these commands
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    TV: all
+```
+
+The selection made in the integration options applies first.
+</details>
 
 ---
 

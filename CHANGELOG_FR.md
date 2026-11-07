@@ -7,6 +7,21 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.9.0] - Non publiée
+
+### ✨ Nouvelles fonctionnalités
+- **Tableau de bord Haptique RS90** (stratégie de tableau de bord fournie par l'intégration, listée sous *Community dashboards* dans Home Assistant 2026.5+) :
+  - Onglet RS90 : macros en boutons ON/OFF (vert = ON), séquences, applications et état
+  - Un onglet par appareil RS90, commandes regroupées comme sur une télécommande (alimentation, croix de navigation, volume et chaînes, lecture, pavé numérique, entrées, autres), style 3D avec card-mod
+  - Reconstruit à chaque ouverture : les appareils, macros et applications ajoutés, renommés ou supprimés suivent tout seuls ; les macros et applications supprimées n'apparaissent plus
+- Les **options de l'intégration** deviennent un menu : renommer la télécommande, ou choisir les boutons de commandes affichés pour chaque appareil (tous par défaut, aucun masque l'appareil)
+
+### 🐛 Corrections
+- Renommer la télécommande n'efface plus les autres options
+- L'adresse du script du tableau de bord contient une empreinte du fichier : les navigateurs chargent la nouvelle version après une mise à jour
+
+---
+
 ## [1.8.1] - 2026-11-07
 
 Version de maintenance : aucun changement de comportement.

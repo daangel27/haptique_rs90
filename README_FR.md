@@ -45,6 +45,7 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 ## ✨ Fonctionnalités
 
 ### Contrôle
+- 📺 **Tableau de bord prêt à l'emploi** : un onglet RS90 et une télécommande par appareil, toujours à jour (voir [Tableau de bord](#-tableau-de-bord))
 - 🎛️ **Interrupteurs de macros et de séquences** : ON/OFF depuis Home Assistant, état confirmé par le firmware de la RS90
 - 📱 **Boutons d'applications** : lancent n'importe quelle application installée sur la RS90 (désactivés par défaut, activez ceux qui vous intéressent)
 - 📡 **Commandes des appareils** : envoient n'importe quelle commande IR/IP d'un appareil configuré
@@ -136,6 +137,77 @@ Toutes les entités sont créées automatiquement.
 | Capteur **Info Summary** | Tous les identifiants (appareils, macros, séquences, applications) au même endroit, voir [Retrouver les identifiants](#-retrouver-les-identifiants--le-capteur-info-summary) |
 
 > ℹ️ L'état d'une macro est ce que la RS90 signale, **pas** une mesure de l'alimentation de la TV ou de l'ampli.
+
+---
+
+## 📺 Tableau de bord
+
+L'intégration fournit un **tableau de bord Haptique RS90** prêt à l'emploi, reconstruit à partir de votre télécommande à chaque ouverture : rien à copier, rien à tenir à jour.
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_rs90.png" alt="Onglet RS90" width="90%" />
+<br/><em>Onglet RS90 : macros (vertes quand elles sont ON), séquences, applications et état</em>
+</p>
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_device.png" alt="Onglet d'un appareil" width="90%" />
+<br/><em>Un onglet par appareil, disposé comme une télécommande</em>
+</p>
+
+### Le créer
+
+1. **Paramètres** → **Tableaux de bord** → **Ajouter un tableau de bord**
+2. Sous **Community dashboards**, choisissez **Haptique RS90** (Home Assistant 2026.5+)
+3. Donnez-lui un titre et une icône (ex. `mdi:remote`), puis **Créer**
+
+Sur les versions plus anciennes, créez un tableau de bord vide, ouvrez **⋮ → Éditeur de configuration brute** et collez :
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+```
+
+### Ce qu'on obtient
+
+- **Onglet RS90** : les macros en boutons ON/OFF (vert = ON), les séquences, les applications et les capteurs d'état
+- **Un onglet par appareil** (TV, AMPLI, KODI…), commandes regroupées comme sur une télécommande : alimentation, croix de navigation, volume et chaînes, lecture, pavé numérique, entrées, autres
+- Un appui sur un bouton envoie la commande via `haptique_rs90.trigger_device_command`
+- Le style de boutons 3D utilise **card-mod** (Marketplace / HACS). Sans lui, les boutons fonctionnent mais sont plus simples.
+
+### Choisir les boutons de chaque appareil
+
+Par défaut, toutes les commandes sont affichées. Pour ne garder que celles que vous utilisez :
+
+1. **Paramètres** → **Appareils et services** → **Haptique RS90 Remote** → ⚙️ **Configurer**
+2. **Dashboard: choose command buttons** → choisissez l'appareil
+3. Décochez **Show all commands**, cochez les commandes voulues et **Valider**
+
+Tout décocher masque l'appareil. Rechargez le tableau de bord pour voir le changement.
+
+<p align="center">
+<img src="documentation/screenshots/options_commands.png" alt="Choisir les boutons de commandes" width="45%" />
+</p>
+
+### Toujours à jour
+
+Quand vous ajoutez, renommez ou supprimez un appareil, une macro, une séquence ou une application sur la RS90, l'intégration le reçoit par MQTT et le tableau de bord suit à la prochaine ouverture (ou au rechargement) : nouvel appareil → nouvel onglet, appareil supprimé → onglet retiré, nouvelle macro → nouveau bouton. Un appareil dont vous avez choisi les boutons garde votre sélection ; les nouvelles commandes d'un appareil laissé sur **Show all commands** apparaissent toutes seules.
+
+> ℹ️ La RS90 doit être **en ligne** pour publier ses changements. Si quelque chose n'apparaît pas, lancez l'action `haptique_rs90.refresh_lists`.
+
+<details>
+<summary>Avancé : options YAML de la stratégie</summary>
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+  hide_devices: [XBOX]          # onglets à ne pas afficher
+  devices:                      # uniquement ces onglets, avec ces commandes
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    TV: all
+```
+
+La sélection faite dans les options de l'intégration s'applique en premier.
+</details>
 
 ---
 

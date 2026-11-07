@@ -74,3 +74,29 @@ async def test_websocket_command(hass, coordinator, remote, hass_ws_client):
     remotes = reply["result"]["remotes"]
     assert len(remotes) == 1
     assert remotes[0]["devices"][1]["commands"] == ["UP", "OK"]
+
+
+async def test_removed_targets_and_apps_left_out(hass, coordinator, remote):
+    await _seed(hass, coordinator)
+    registry = er.async_get(hass)
+    registry.async_get_or_create(
+        "switch",
+        "haptique_rs90",
+        "remote-1_macro_gone",
+        config_entry=coordinator.entry,
+        capabilities={"haptique_target_kind": "macro"},
+    )
+    # Before the inventory arrives, nothing is hidden.
+    assert len(_remote_layout(hass, coordinator)["macros"]) == 2
+
+    await message(
+        hass,
+        "macro/list",
+        json.dumps([{"id": "m1", "name": "CANAL", "type": "macro"}]),
+    )
+    await message(hass, "app/list", json.dumps([{"id": "other.app", "name": "X"}]))
+    layout = _remote_layout(hass, coordinator)
+    assert layout["macros"] == [
+        registry.async_get_entity_id("switch", "haptique_rs90", "remote-1_macro_m1")
+    ]
+    assert layout["apps"] == []  # Kore is no longer installed

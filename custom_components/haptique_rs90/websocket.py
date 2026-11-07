@@ -25,6 +25,24 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_dashboard)
 
 
+def _target_present(
+    coordinator: Any, remote_id: str, kind: str, unique_id: str
+) -> bool:
+    """Whether a macro/sequence switch still exists on the RS90.
+
+    Switches of deleted macros stay in the registry (unavailable); the
+    dashboard leaves them out once the inventory has been received.
+    """
+    targets = getattr(coordinator, "targets", None)
+    if targets is None or kind not in targets.seen:
+        return True
+    for identity in ("real_macro", "sequence", "macro"):
+        prefix = f"{remote_id}_{identity}_"
+        if unique_id.startswith(prefix):
+            return targets.target(kind, unique_id.removeprefix(prefix)) is not None
+    return True
+
+
 def _remote_layout(hass: HomeAssistant, coordinator: Any) -> dict[str, Any]:
     """Describe one RS90 from the registry and the last known inventory.
 
@@ -53,10 +71,17 @@ def _remote_layout(hass: HomeAssistant, coordinator: Any) -> dict[str, Any]:
         unique_id = item.unique_id or ""
         if item.domain == "switch":
             kind = (item.capabilities or {}).get("haptique_target_kind", "macro")
+            if not _target_present(coordinator, remote_id, kind, unique_id):
+                continue
             layout["sequences" if kind == "sequence" else "macros"].append(
                 item.entity_id
             )
         elif item.domain == "button" and unique_id.startswith(f"{remote_id}_app_"):
+            package_id = unique_id.removeprefix(f"{remote_id}_app_")
+            known = {app.get("id") for app in data.get("apps", [])}
+            # Leave out apps uninstalled from the RS90 (once the list is known).
+            if known and package_id not in known:
+                continue
             layout["apps"].append(item.entity_id)
         elif unique_id.startswith(f"{remote_id}_commands_") or unique_id.endswith(
             "_info_summary"
