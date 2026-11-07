@@ -645,6 +645,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             - No MQTT OFF command sent (RS90 handles auto-off internally)
             - Local timer tracks state for Home Assistant UI only
         """
+        await self._async_ensure_awake()
         topic = f"{self.base_topic}/{TOPIC_LED_LIGHT}"
 
         # Cancel existing timer if any
@@ -762,6 +763,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
 
     async def async_force_refresh_lists(self) -> None:
         """Request a new remote snapshot, battery and confirmed target states."""
+        await self._async_ensure_awake()
         await mqtt.async_publish(
             self.hass, f"{self.base_topic}/discovery/refresh", "", qos=0, retain=False
         )

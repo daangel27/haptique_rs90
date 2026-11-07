@@ -15,6 +15,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Un onglet par appareil RS90, commandes regroupées comme sur une télécommande (alimentation, croix de navigation, volume et chaînes, lecture, pavé numérique, entrées, autres), style 3D avec card-mod
   - Reconstruit à chaque ouverture : les appareils, macros et applications ajoutés, renommés ou supprimés suivent tout seuls ; les macros et applications supprimées n'apparaissent plus
 - **Réveiller la RS90** : saisissez son adresse IP dans les options pour obtenir un bouton **Réveiller**, et éventuellement la réveiller automatiquement avant les macros, applications et commandes (paquets UDP vers son IP jusqu'à ce qu'elle repasse en ligne, 20 s au maximum ; fonctionne avec l'adresse MAC aléatoire de la RS90)
+- Avec le réveil automatique, les boutons de l'anneau RGB et **Synchroniser** réveillent aussi la RS90, et **Last Reported App** garde sa dernière valeur pendant la veille
 - Bouton **Synchroniser** (entité de configuration) : demande à la RS90 de republier ses appareils, commandes, macros, séquences et applications, ainsi que la batterie et l'état des macros, sans passer par une action
 - Au réveil de la RS90, l'intégration lui redemande ses listes (au plus toutes les 5 minutes) : les changements faits pendant sa veille sont rattrapés
 - Les **options de l'intégration** deviennent un menu : renommer la télécommande, ou choisir les boutons de commandes affichés pour chaque appareil (tous par défaut, aucun masque l'appareil)

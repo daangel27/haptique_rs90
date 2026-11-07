@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - One view per RS90 device, commands grouped like a remote (power, navigation pad, volume & channels, playback, keypad, inputs, more), 3D style with card-mod
   - Rebuilt every time it opens, so new, renamed or removed devices, macros and apps show up by themselves; removed macros and apps are left out
 - **Wake the RS90 up**: enter its IP address in the options to get a **Wake up** button, and optionally wake it up automatically before macros, apps and device commands (UDP packets to its IP until it reports online, up to 20 s; works with the RS90's random MAC address)
+- With auto-wake, the RGB ring light and **Sync** buttons also wake the RS90 up, and **Last Reported App** keeps its last value while the RS90 sleeps
 - **Sync** button (configuration entity): asks the RS90 to publish its devices, commands, macros, sequences and apps again, plus battery and macro states, without using an action
 - When the RS90 wakes up, the integration asks for its lists again (at most every 5 minutes), so changes made while it slept are picked up
 - **Integration options** become a menu: rename the remote, or choose the command buttons shown for each device (all by default, none hides the device)

@@ -481,7 +481,11 @@ class HaptiqueRS90ActiveAppSensor(HaptiqueRS90SensorBase):
 
     @property
     def available(self) -> bool:
-        return self.coordinator.data["status"] == "online"
+        # It is the *last* reported app: keep showing it while the RS90 sleeps.
+        return (
+            self.coordinator.data["status"] == "online"
+            or self.coordinator.data.get("active_app") is not None
+        )
 
     def _app(self) -> dict | None:
         """Resolve the reported app.

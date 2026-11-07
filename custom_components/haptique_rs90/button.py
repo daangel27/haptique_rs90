@@ -73,7 +73,10 @@ class HaptiqueRS90RefreshButton(CoordinatorEntity, ButtonEntity):
 
     @property
     def available(self) -> bool:
-        return self.coordinator.data.get("status") == "online"
+        return (
+            self.coordinator.data.get("status") == "online"
+            or self.coordinator.auto_wake
+        )
 
     async def async_press(self) -> None:
         await self.coordinator.async_force_refresh_lists()
@@ -130,7 +133,10 @@ class HaptiqueRS90RGBButton(CoordinatorEntity, ButtonEntity):
     @property
     def available(self) -> bool:
         """Return True if entity is available."""
-        return self.coordinator.data.get("status") == "online"
+        return (
+            self.coordinator.data.get("status") == "online"
+            or self.coordinator.auto_wake
+        )
 
     async def async_press(self) -> None:
         """Handle button press - trigger RGB with default 5 seconds."""
