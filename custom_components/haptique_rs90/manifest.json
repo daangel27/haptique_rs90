@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/daangel27/haptique_rs90/issues",
   "mqtt": ["Haptique/+/status"],
   "requirements": ["aiomqtt>=2.0.0"],
-  "version": "1.7.0"
+  "version": "1.8.0"
 }

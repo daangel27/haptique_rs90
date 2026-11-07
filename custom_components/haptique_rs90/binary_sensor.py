@@ -53,7 +53,6 @@ class HaptiqueRS90ConnectionSensor(CoordinatorEntity, BinarySensorEntity):
             "name": entry.data.get("name", f"Haptique RS90 {self._remote_id[:8]}"),
             "manufacturer": "Haptique",
             "model": "RS90",
-            "sw_version": "1.0",
         }
 
     @property

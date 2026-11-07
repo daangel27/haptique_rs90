@@ -145,6 +145,9 @@
     "sensor": {
       "active_app": {
         "name": "Dernière application signalée"
+      },
+      "last_macro_result": {
+        "name": "Dernier résultat de macro"
       }
     }
   }

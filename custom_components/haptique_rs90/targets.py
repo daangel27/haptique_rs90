@@ -11,9 +11,11 @@ from typing import Any
 from homeassistant.components import mqtt
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.util import dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 TargetKey = tuple[str, str]
+RESULT_EVENT = "haptique_rs90_macro_result"
 INVENTORIES = {"macro": "macros", "sequence": "sequences"}
 
 
@@ -70,6 +72,7 @@ class TargetManager:
         self._subscriptions: dict[str, Callable[[], None]] = {}
         self._states: dict[TargetKey, str | None] = {}
         self._results: dict[TargetKey, dict[str, str]] = {}
+        self._requests: dict[TargetKey, str] = {}
         self._canonical_received: set[TargetKey] = set()
         self._known: set[TargetKey] = set()
         self._lock = asyncio.Lock()
@@ -123,10 +126,16 @@ class TargetManager:
         self.coordinator.data[INVENTORIES[kind]] = records
         self.seen.add(kind)
         current = self.items()
-        for key in set(self._states) | set(self._results) | self._canonical_received:
+        for key in (
+            set(self._states)
+            | set(self._results)
+            | set(self._requests)
+            | self._canonical_received
+        ):
             if key not in current or self.conflicting(key[1]):
                 self._states.pop(key, None)
                 self._results.pop(key, None)
+                self._requests.pop(key, None)
                 self._canonical_received.discard(key)
         self._publish_state()
         self._dirty = True
@@ -183,7 +192,9 @@ class TargetManager:
                 def received(msg, topic=topic):
                     route = self._routes().get(topic)
                     if not self._closed and route:
-                        self._handle_feedback(topic, route, msg.payload)
+                        self._handle_feedback(
+                            topic, route, msg.payload, bool(msg.retain)
+                        )
 
                 unsubscribe = await mqtt.async_subscribe(
                     self.coordinator.hass, topic, received, qos=0
@@ -200,8 +211,17 @@ class TargetManager:
                     await self.async_query(kind, target_id)
 
     @callback
+    def note_request(self, kind: str, target_id: str, action: str) -> None:
+        """Remember the action sent so its result can be labelled."""
+        self._requests[(kind, target_id)] = action
+
+    @callback
     def _handle_feedback(
-        self, topic: str, route: tuple[TargetKey, bool], payload: str
+        self,
+        topic: str,
+        route: tuple[TargetKey, bool],
+        payload: str,
+        retained: bool = False,
     ) -> None:
         key, canonical = route
         if topic.endswith("/status"):
@@ -232,7 +252,35 @@ class TargetManager:
                 for field in ("status", "error")
                 if isinstance(result.get(field), str)
             }
+            # A retained result replayed on (re)subscribe is not a new run.
+            if canonical and not retained:
+                self._record_result(key)
         self._publish_state()
+
+    @callback
+    def _record_result(self, key: TargetKey) -> None:
+        """Expose the latest execution result with its name and fire an event."""
+        kind, target_id = key
+        target = self.target(kind, target_id) or {}
+        result = self._results[key]
+        record = {
+            "target_kind": kind,
+            "target_id": target_id,
+            "target_name": target.get("name", target_id),
+            "action": self._requests.pop(key, None),
+            "status": result.get("status"),
+            "error": result.get("error"),
+            "timestamp": dt_util.utcnow().isoformat(),
+        }
+        self.coordinator.data["last_target_result"] = record
+        self.coordinator.hass.bus.async_fire(
+            RESULT_EVENT,
+            {
+                "device_id": getattr(self.coordinator, "device_id", None),
+                "remote_id": self.coordinator.remote_id,
+                **record,
+            },
+        )
 
     def _publish_state(self) -> None:
         data = self.coordinator.data

@@ -88,6 +88,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             "device_commands": {},
             "test_status": None,
             "macro_states": {},  # Store macro states (on/off) from MQTT only
+            "last_target_result": None,  # Last non-retained macro/sequence result
             "led_light_state": "off",  # RGB ring light state
             "led_light_duration": 5,  # Default duration in seconds
         }
@@ -542,6 +543,8 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             raise HomeAssistantError("Action must be on or off")
         if action == "off" and target.get("supportsOff") is False:
             raise HomeAssistantError("This macro does not support off")
+        # The result feedback does not echo the action, so remember it.
+        self.targets.note_request(kind, target_id, action)
         await mqtt.async_publish(
             self.hass,
             f"{self.base_topic}/{kind}/{target_id}/trigger",
