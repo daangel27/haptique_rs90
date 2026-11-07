@@ -70,6 +70,10 @@ _COMMAND_ICONS = (
 _WAKE_ICONS = {"sent": "mdi:alarm", "woke": "mdi:alarm-check"}
 
 
+# Same arrow as Home Assistant's own "state → new state" entries.
+ARROW = "→ "
+
+
 def command_icon(command: str | None) -> str:
     """Pick an icon for a device command, e.g. mdi:power for POWER_OFF."""
     name = (command or "").upper()
@@ -128,7 +132,7 @@ def async_describe_events(
         name = data.get("target_name") or data.get("target_id") or "RS90"
         description = {
             LOGBOOK_ENTRY_NAME: f"RS90 {name}",
-            LOGBOOK_ENTRY_MESSAGE: result_message(data),
+            LOGBOOK_ENTRY_MESSAGE: ARROW + result_message(data),
         }
         # Attach the entry to the macro/sequence switch so it also shows up
         # in that entity's own logbook.
@@ -147,7 +151,7 @@ def async_describe_events(
         data = event.data
         return {
             LOGBOOK_ENTRY_NAME: f"RS90 {data.get('device') or 'device'}",
-            LOGBOOK_ENTRY_MESSAGE: f"{data.get('command')} sent",
+            LOGBOOK_ENTRY_MESSAGE: f"{ARROW}{data.get('command')} sent",
             LOGBOOK_ENTRY_ICON: command_icon(data.get("command")),
         }
 
@@ -157,7 +161,7 @@ def async_describe_events(
     def async_describe_wake(event: Event) -> dict[str, str]:
         return {
             LOGBOOK_ENTRY_NAME: "RS90",
-            LOGBOOK_ENTRY_MESSAGE: wake_message(event.data),
+            LOGBOOK_ENTRY_MESSAGE: ARROW + wake_message(event.data),
             LOGBOOK_ENTRY_ICON: _WAKE_ICONS.get(
                 event.data.get("result"), "mdi:alarm-off"
             ),
