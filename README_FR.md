@@ -13,6 +13,11 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 ## 📸 Captures d'écran
 
 <p align="center">
+<img src="documentation/screenshots/integration.png" alt="Intégration" width="70%" />
+<br/><em>L'intégration et son icône</em>
+</p>
+
+<p align="center">
 <img src="documentation/screenshots/device_info.png" alt="Page de l'appareil" width="90%" />
 <br/><em>Page de l'appareil : macros, séquences, boutons d'applications et anneau RGB</em>
 </p>
@@ -20,8 +25,6 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 <table>
 <tr>
 <td width="34%" valign="top">
-<img src="documentation/screenshots/integration.png" alt="Intégration" />
-<p align="center"><em>L'intégration et son icône</em></p>
 <img src="documentation/screenshots/macro_result.png" alt="Last Macro Result" />
 <p align="center"><em>Last Macro Result et son historique</em></p>
 </td>
@@ -31,7 +34,7 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 </td>
 <td width="33%" valign="top">
 <img src="documentation/screenshots/device_commands.png" alt="Commandes d'un appareil" />
-<p align="center"><em>Commandes d'un appareil</em></p>
+<p align="center"><em>Commandes d'un appareil, avec ses identifiants</em></p>
 </td>
 </tr>
 </table>

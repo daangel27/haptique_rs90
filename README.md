@@ -13,6 +13,11 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 ## 📸 Screenshots
 
 <p align="center">
+<img src="documentation/screenshots/integration.png" alt="Integration" width="70%" />
+<br/><em>The integration with its icon</em>
+</p>
+
+<p align="center">
 <img src="documentation/screenshots/device_info.png" alt="Device page" width="90%" />
 <br/><em>Device page: macros, sequences, app buttons and RGB ring light</em>
 </p>
@@ -20,8 +25,6 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 <table>
 <tr>
 <td width="34%" valign="top">
-<img src="documentation/screenshots/integration.png" alt="Integration" />
-<p align="center"><em>Integration with its icon</em></p>
 <img src="documentation/screenshots/macro_result.png" alt="Last Macro Result" />
 <p align="center"><em>Last Macro Result with its history</em></p>
 </td>
@@ -31,7 +34,7 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 </td>
 <td width="33%" valign="top">
 <img src="documentation/screenshots/device_commands.png" alt="Device commands" />
-<p align="center"><em>Commands of a device</em></p>
+<p align="center"><em>Commands of a device, with its IDs</em></p>
 </td>
 </tr>
 </table>
