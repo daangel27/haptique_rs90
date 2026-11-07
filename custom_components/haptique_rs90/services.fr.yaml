@@ -12,7 +12,7 @@ trigger_macro:
     rs90_macro_id:
       name: ID de la macro
       description: L'identifiant stable de la macro. Trouvez-le dans sensor.rs90_info_summary
-        attributs (dictionnaire macros) ou dans switch.macro_{nom} attributs. Cet
+        attributs (dictionnaire macros) ou dans les attributs du switch de la macro (rs90_macro_id). Cet
         ID ne change jamais même si vous renommez la macro dans Haptique Config.
       example: 692eb1561bddd5814022960c
     action:
@@ -32,7 +32,7 @@ trigger_device_command:
     rs90_device_id:
       name: ID de l'appareil
       description: L'identifiant stable de l'appareil. Trouvez-le dans sensor.rs90_info_summary
-        attributs (dictionnaire devices) ou dans sensor.commands_{nom} attributs.
+        attributs (dictionnaire devices) ou dans les attributs du capteur de commandes (rs90_device_id).
         Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config.
       example: 692ead781bddd58140228e33
     command_name:
