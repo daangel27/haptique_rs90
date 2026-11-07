@@ -90,6 +90,8 @@ class HaptiqueRS90RGBButton(CoordinatorEntity, ButtonEntity):
 class HaptiqueRS90AppButton(CoordinatorEntity, ButtonEntity):
     """Launch by package ID and expose the last firmware launch outcome."""
 
+    _attr_entity_registry_enabled_default = False
+
     def __init__(self, coordinator, entry, package_id: str, app_name: str) -> None:
         super().__init__(coordinator)
         self._package_id = package_id

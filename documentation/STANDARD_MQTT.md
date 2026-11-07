@@ -99,6 +99,10 @@ one launch button per package. Package IDs determine identity and routing;
 duplicate or changed labels do not affect the controls. Removed apps become
 unavailable and their registered buttons survive reinstallation.
 
+New app buttons are disabled by default, including system apps. Enable only
+the apps you want under Settings > Devices & services > Entities. Existing
+entity enable/disable choices and the RGB Ring Light button are unchanged.
+
 ```yaml
 action: haptique_rs90.launch_app
 data:

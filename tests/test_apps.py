@@ -99,9 +99,51 @@ async def test_launch_app_action(hass, coordinator, remote, publish):
     )
 
 
+async def test_new_app_buttons_are_disabled_without_disabling_rgb(hass, coordinator):
+    platforms = [Platform.BUTTON]
+    await hass.config_entries.async_forward_entry_setups(coordinator.entry, platforms)
+    try:
+        await message(hass, "status", "online")
+        await inventory(
+            hass,
+            "app",
+            [
+                {"id": "com.spotify.music", "name": "Spotify"},
+                {"id": "com.android.traceur", "name": "System Tracing"},
+            ],
+        )
+        registry = er.async_get(hass)
+        for package in ("com.spotify.music", "com.android.traceur"):
+            entity_id = registry.async_get_entity_id(
+                "button", "haptique_rs90", f"remote-1_app_{package}"
+            )
+            assert entity_id is not None
+            assert (
+                registry.async_get(entity_id).disabled_by
+                is er.RegistryEntryDisabler.INTEGRATION
+            )
+            assert hass.states.get(entity_id) is None
+
+        rgb_id = registry.async_get_entity_id(
+            "button", "haptique_rs90", "remote-1_rgb_button"
+        )
+        assert registry.async_get(rgb_id).disabled_by is None
+        assert hass.states.get(rgb_id) is not None
+    finally:
+        await hass.config_entries.async_unload_platforms(coordinator.entry, platforms)
+
+
 async def test_registered_app_button_rename_remove_readd_and_active_sensor(
     hass, coordinator, publish
 ):
+    # Previously enabled buttons must stay enabled when defaults change.
+    registry = er.async_get(hass)
+    existing = registry.async_get_or_create(
+        "button",
+        "haptique_rs90",
+        "remote-1_app_com.spotify.music",
+        config_entry=coordinator.entry,
+    )
     platforms = [Platform.BUTTON, Platform.SENSOR]
     await hass.config_entries.async_forward_entry_setups(coordinator.entry, platforms)
     try:
@@ -114,7 +156,8 @@ async def test_registered_app_button_rename_remove_readd_and_active_sensor(
         sensor_id = registry.async_get_entity_id(
             "sensor", "haptique_rs90", "remote-1_active_app"
         )
-        assert button_id is not None
+        assert button_id == existing.entity_id
+        assert registry.async_get(button_id).disabled_by is None
         assert hass.states.get(sensor_id).state == "unknown"
         await hass.services.async_call(
             "button", "press", {"entity_id": button_id}, blocking=True
