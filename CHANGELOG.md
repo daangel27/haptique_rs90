@@ -33,6 +33,9 @@ Requires the RS90 **Standard MQTT** firmware (tested on 4.1.2 / 4.2).
 - New event `haptique_rs90_macro_result` with the same data, for automations (e.g. notify on `skipped` / `failed`)
 - Retained results replayed on reconnect are not reported as new runs
 
+#### Integration icon and logo
+- New icon and logo (light and dark), shipped in `brand/` so Home Assistant 2026.3+ shows them; the old root `icon.png` was never used by Home Assistant
+
 ### 🐛 Fixes
 - Replace deprecated `DeviceEntry.config_entries` with `config_entry_id` (breaks in HA 2027.10), with fallback for older HA
 - Remove hard-coded `sw_version: 1.0` (device page showed "Firmware: 1.0" whatever the RS90 version)
