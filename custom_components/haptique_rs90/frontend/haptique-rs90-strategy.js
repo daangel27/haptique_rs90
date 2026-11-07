@@ -79,38 +79,91 @@ function name(hass, entityId) {
   return (state && state.attributes.friendly_name) || entityId;
 }
 
-function tiles(entities, extra = {}) {
-  return entities.map((entity) => ({ type: "tile", entity, ...extra }));
+function shortName(hass, entityId) {
+  // "RS90 CANAL" -> "CANAL": the dashboard is already about the RS90.
+  return name(hass, entityId).replace(/^RS90\s+/i, "");
 }
 
-function section(title, cards) {
+function remoteButton(hass, entityId, colors, tapAction, icon) {
+  return {
+    type: "button",
+    entity: entityId,
+    name: shortName(hass, entityId),
+    icon: icon || undefined,
+    show_icon: true,
+    show_name: true,
+    show_state: false,
+    icon_height: "28px",
+    tap_action: tapAction,
+    hold_action: { action: "more-info" },
+    card_mod: { style: buttonStyle(colors, 86) },
+  };
+}
+
+function macroButton(hass, entityId) {
+  // Green when the RS90 reports the macro ON, grey otherwise.
+  const style = buttonStyle(["{{ '#16a34a' if is_state(config.entity, 'on') else '#3f3f46' }}", "{{ '#052e16' if is_state(config.entity, 'on') else '#18181b' }}"], 86);
+  return {
+    type: "button",
+    entity: entityId,
+    name: shortName(hass, entityId),
+    icon: "mdi:play-circle",
+    show_icon: true,
+    show_name: true,
+    show_state: true,
+    icon_height: "28px",
+    tap_action: { action: "toggle" },
+    hold_action: { action: "more-info" },
+    card_mod: { style },
+  };
+}
+
+function section(title, icon, cards, columns) {
   return {
     type: "grid",
-    cards: [{ type: "heading", heading: title }, ...cards],
+    cards: [
+      { type: "heading", heading: title, heading_style: "title", icon },
+      { type: "grid", columns, square: false, grid_options: { columns: "full" }, cards },
+    ],
   };
 }
 
 function remoteView(hass, remote, t, multi) {
   const sections = [];
   if (remote.macros.length) {
-    sections.push(section(t.macros, tiles(remote.macros, { features: [{ type: "toggle" }], features_position: "inline" })));
+    sections.push(section(t.macros, "mdi:play-circle", remote.macros.map((id) => macroButton(hass, id)), 3));
   }
   if (remote.sequences.length) {
-    sections.push(section(t.sequences, tiles(remote.sequences, { tap_action: { action: "toggle" } })));
+    sections.push(
+      section(
+        t.sequences,
+        "mdi:playlist-play",
+        remote.sequences.map((id) => remoteButton(hass, id, COLORS.volume, { action: "toggle" }, "mdi:playlist-play")),
+        3,
+      ),
+    );
   }
   sections.push(
-    section(
-      t.apps,
-      remote.apps.length
-        ? remote.apps.map((entity) => ({
-            type: "tile",
-            entity,
-            tap_action: { action: "perform-action", perform_action: "button.press", target: { entity_id: entity } },
-          }))
-        : [{ type: "markdown", content: t.noApps }],
-    ),
+    remote.apps.length
+      ? section(
+          t.apps,
+          "mdi:apps",
+          remote.apps.map((id) =>
+            remoteButton(hass, id, COLORS.app, { action: "perform-action", perform_action: "button.press", target: { entity_id: id } }),
+          ),
+          3,
+        )
+      : { type: "grid", cards: [{ type: "heading", heading: t.apps, heading_style: "title", icon: "mdi:apps" }, { type: "markdown", content: t.noApps }] },
   );
-  if (remote.status.length) sections.push(section(t.status, tiles(remote.status)));
+  if (remote.status.length) {
+    sections.push({
+      type: "grid",
+      cards: [
+        { type: "heading", heading: t.status, heading_style: "title", icon: "mdi:information-outline" },
+        ...remote.status.map((entity) => ({ type: "tile", entity, name: shortName(hass, entity) })),
+      ],
+    });
+  }
   return {
     title: multi ? remote.name : t.remote,
     path: multi ? `rs90-${slug(remote.name)}` : "rs90",
@@ -130,6 +183,7 @@ const COLORS = {
   volume: ["#1e3a8a", "#0f172a"],
   media: ["#0e7490", "#082f49"],
   number: ["#3f3f46", "#18181b"],
+  app: ["#6d28d9", "#2e1065"],
   other: ["#3f3f46", "#18181b"],
 };
 

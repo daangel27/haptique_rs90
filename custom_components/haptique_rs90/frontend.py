@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 from pathlib import Path
@@ -18,8 +19,15 @@ _REGISTERED = f"{DOMAIN}_frontend_registered"
 
 
 def _version() -> str:
+    """Integration version plus a hash of the script.
+
+    The hash changes whenever the script does, so browsers never keep an old
+    copy in cache (even between two builds of the same version).
+    """
     manifest = Path(__file__).parent / "manifest.json"
-    return json.loads(manifest.read_text(encoding="utf-8"))["version"]
+    version = json.loads(manifest.read_text(encoding="utf-8"))["version"]
+    digest = hashlib.sha256(STRATEGY_FILE.read_bytes()).hexdigest()[:8]
+    return f"{version}-{digest}"
 
 
 async def async_register_frontend(hass: HomeAssistant) -> None:
