@@ -1,7 +1,8 @@
 # Haptique RS90 - Intégration Home Assistant
 
 [![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
-[![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![hacs](https://img.shields.io/badge/Marketplace%20%2F%20HACS-Custom-orange.svg)](https://hacs.xyz)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.8%2B-18BCF2.svg?logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Intégration Home Assistant pour la télécommande universelle **Haptique RS90** via MQTT : macros, séquences, applications installées, commandes des appareils, appuis de touches et anneau lumineux RGB.
@@ -13,6 +14,11 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 ## 📸 Captures d'écran
 
 <p align="center">
+<img src="documentation/screenshots/integration.png" alt="Intégration" width="70%" />
+<br/><em>L'intégration et son icône</em>
+</p>
+
+<p align="center">
 <img src="documentation/screenshots/device_info.png" alt="Page de l'appareil" width="90%" />
 <br/><em>Page de l'appareil : macros, séquences, boutons d'applications et anneau RGB</em>
 </p>
@@ -20,8 +26,6 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 <table>
 <tr>
 <td width="34%" valign="top">
-<img src="documentation/screenshots/integration.png" alt="Intégration" />
-<p align="center"><em>L'intégration et son icône</em></p>
 <img src="documentation/screenshots/macro_result.png" alt="Last Macro Result" />
 <p align="center"><em>Last Macro Result et son historique</em></p>
 </td>
@@ -31,7 +35,7 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 </td>
 <td width="33%" valign="top">
 <img src="documentation/screenshots/device_commands.png" alt="Commandes d'un appareil" />
-<p align="center"><em>Commandes d'un appareil</em></p>
+<p align="center"><em>Commandes d'un appareil, avec ses identifiants</em></p>
 </td>
 </tr>
 </table>
@@ -70,19 +74,25 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 
 ## 🚀 Installation
 
-### Via HACS (recommandé)
+### Via le Marketplace / HACS (recommandé)
 
-[![Ouvrir votre instance Home Assistant et afficher un dépôt dans HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=daangel27&repository=haptique_rs90&category=integration)
+[![Ouvrir votre instance Home Assistant et afficher ce dépôt dans le Marketplace.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=daangel27&repository=haptique_rs90&category=integration)
+
+Depuis **Home Assistant 2026.11**, HACS est intégré à Home Assistant sous le nom **Marketplace**.
 
 **Étapes manuelles** (si le bouton ne fonctionne pas) :
 
+**Home Assistant 2026.11 ou plus récent (Marketplace)**
+1. Allez dans **Paramètres** → **Marketplace**
+2. Cliquez sur **Add from link** / **Ajouter depuis un lien** (en haut à droite)
+3. Collez `https://github.com/daangel27/haptique_rs90` dans le champ **GitHub link** et cliquez sur **Add** / **Ajouter**
+4. Ouvrez **Haptique RS90** et choisissez **Installer** : la configuration démarre aussitôt, sans redémarrage
+
+**Versions plus anciennes (HACS)**
 1. Ouvrez **HACS** dans Home Assistant
 2. Cliquez sur **⋮** (trois points) → **Dépôts personnalisés**
-3. Ajoutez le dépôt :
-   - **URL** : `https://github.com/daangel27/haptique_rs90`
-   - **Catégorie** : `Intégration`
-4. Cherchez **« Haptique RS90 »** et cliquez sur **Télécharger**
-5. Redémarrez Home Assistant
+3. Ajoutez `https://github.com/daangel27/haptique_rs90` avec la catégorie `Intégration`
+4. Cherchez **« Haptique RS90 »**, cliquez sur **Télécharger**, puis redémarrez Home Assistant
 
 ### Installation manuelle
 

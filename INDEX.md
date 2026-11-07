@@ -36,7 +36,7 @@ Older release notes and the v1.5.0 migration guide are in [documentation/archive
 
 ## 🎯 Quick Links
 
-- **Install via HACS**: custom repository `https://github.com/daangel27/haptique_rs90`
+- **Install via the Marketplace (HA 2026.11+) or HACS**: custom repository `https://github.com/daangel27/haptique_rs90`
 - **Releases**: [GitHub releases](https://github.com/daangel27/haptique_rs90/releases)
 - **Support**: [issues](https://github.com/daangel27/haptique_rs90/issues) · [discussions](https://github.com/daangel27/haptique_rs90/discussions)
 

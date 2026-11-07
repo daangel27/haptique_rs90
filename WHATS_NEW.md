@@ -66,7 +66,8 @@ Reported to Haptique, not fixable in the integration:
 
 ## 🚀 Upgrade
 
-- **HACS**: open HACS → Haptique RS90 → **Update**, then restart Home Assistant
+- **Marketplace** (Home Assistant 2026.11+): Settings → Marketplace → Haptique RS90 → **Update**
+- **HACS** (older versions): open HACS → Haptique RS90 → **Update**, then restart Home Assistant
 - **Manual**: download [v1.8.0](https://github.com/daangel27/haptique_rs90/releases/tag/v1.8.0), replace `custom_components/haptique_rs90/`, restart
 
 New app buttons are disabled: enable the apps you want in **Settings → Devices & services → Entities**.
