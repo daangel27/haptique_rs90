@@ -185,6 +185,7 @@ Par défaut, toutes les commandes sont affichées. Pour ne garder que celles que
 Tout décocher masque l'appareil. Rechargez le tableau de bord pour voir le changement.
 
 <p align="center">
+<img src="documentation/screenshots/options_menu.png" alt="Options de l'intégration" width="45%" />
 <img src="documentation/screenshots/options_commands.png" alt="Choisir les boutons de commandes" width="45%" />
 </p>
 
@@ -323,6 +324,11 @@ Hors de son socle, la RS90 se met en veille au bout d'un moment et apparaît **h
 4. Facultatif : cochez **La réveiller automatiquement avant d'envoyer une commande**. Les macros, applications et commandes (tableau de bord compris) fonctionnent alors pendant la veille : Home Assistant la réveille d'abord, ce qui ajoute quelques secondes.
 
 Home Assistant envoie quelques paquets à l'adresse IP de la RS90 jusqu'à ce qu'elle repasse en ligne (20 secondes au maximum). Seule l'adresse IP est nécessaire : la RS90 utilise par défaut une adresse MAC Wi-Fi aléatoire, et l'adresse MAC contenue dans le paquet n'a pas d'importance.
+
+<p align="center">
+<img src="documentation/screenshots/options_wake.png" alt="Options de réveil de la RS90" width="45%" />
+<img src="documentation/screenshots/activity_wake.png" alt="Réveil et commandes dans l'activité" width="45%" />
+</p>
 
 Chaque réveil apparaît dans l'**Activité** de la RS90 (`wake-up sent`, puis `woke up in 8 s` ou `did not wake up`), comme chaque commande envoyée à un appareil. Après un réveil, Home Assistant attend 4 secondes puis envoie une par une les commandes appuyées entre-temps.
 

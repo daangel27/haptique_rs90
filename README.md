@@ -185,6 +185,7 @@ By default every command is shown. To keep only the ones you use:
 Untick everything to hide a device. Reload the dashboard to see the change.
 
 <p align="center">
+<img src="documentation/screenshots/options_menu.png" alt="Integration options" width="45%" />
 <img src="documentation/screenshots/options_commands.png" alt="Choose the command buttons" width="45%" />
 </p>
 
@@ -323,6 +324,11 @@ Off its dock, the RS90 goes to sleep after a while and shows as **offline**: its
 4. Optional: tick **Wake it up automatically before sending a command**. Macros, apps and device commands (dashboard included) then work while the RS90 sleeps: Home Assistant wakes it up first, which adds a few seconds.
 
 Home Assistant sends a few packets to the RS90's IP address until it reports online again (up to 20 seconds). Only the IP address is needed: the RS90 uses a random Wi-Fi MAC address by default, and the MAC address inside the packet doesn't matter.
+
+<p align="center">
+<img src="documentation/screenshots/options_wake.png" alt="Wake the RS90 up options" width="45%" />
+<img src="documentation/screenshots/activity_wake.png" alt="Wake-up and commands in the activity" width="45%" />
+</p>
 
 Each wake-up shows in the RS90's **Activity** (`wake-up sent`, then `woke up in 8 s` or `did not wake up`), along with every device command sent. After a wake-up, Home Assistant waits 4 seconds and then sends the commands pressed meanwhile, one by one.
 
