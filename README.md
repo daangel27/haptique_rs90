@@ -192,7 +192,7 @@ Untick everything to hide a device. Reload the dashboard to see the change.
 
 When you add, rename or remove a device, a macro, a sequence or an app on the RS90, the integration receives it over MQTT and the dashboard follows the next time you open (or reload) it: new device → new view, removed device → view gone, new macro → new button. A device with a custom button selection keeps it; new commands of a device left on **Show all commands** appear by themselves.
 
-> ℹ️ The RS90 must be **online** to publish its changes; when it wakes up, the integration asks it for its lists again. If something still doesn't show up, press the **Refresh lists** button (RS90 device page, or the Status section of the dashboard).
+> ℹ️ The RS90 must be **online** to publish its changes; when it wakes up, the integration asks it for its lists again. If something still doesn't show up, press the **Sync with RS90** button (RS90 device page, or the Status section of the dashboard).
 
 <details>
 <summary>Advanced: YAML options of the strategy</summary>

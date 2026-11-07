@@ -176,7 +176,7 @@
     },
     "button": {
       "refresh_lists": {
-        "name": "Rafraîchir les listes"
+        "name": "Synchroniser avec la RS90"
       }
     }
   }

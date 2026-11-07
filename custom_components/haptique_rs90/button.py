@@ -59,7 +59,7 @@ class HaptiqueRS90RefreshButton(CoordinatorEntity, ButtonEntity):
 
     _attr_has_entity_name = True
     _attr_translation_key = "refresh_lists"
-    _attr_icon = "mdi:refresh"
+    _attr_icon = "mdi:sync"
     _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(

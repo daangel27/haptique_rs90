@@ -192,7 +192,7 @@ Tout décocher masque l'appareil. Rechargez le tableau de bord pour voir le chan
 
 Quand vous ajoutez, renommez ou supprimez un appareil, une macro, une séquence ou une application sur la RS90, l'intégration le reçoit par MQTT et le tableau de bord suit à la prochaine ouverture (ou au rechargement) : nouvel appareil → nouvel onglet, appareil supprimé → onglet retiré, nouvelle macro → nouveau bouton. Un appareil dont vous avez choisi les boutons garde votre sélection ; les nouvelles commandes d'un appareil laissé sur **Show all commands** apparaissent toutes seules.
 
-> ℹ️ La RS90 doit être **en ligne** pour publier ses changements ; à son réveil, l'intégration lui redemande ses listes. Si quelque chose n'apparaît toujours pas, appuyez sur le bouton **Rafraîchir les listes** (page de l'appareil RS90, ou section État du tableau de bord).
+> ℹ️ La RS90 doit être **en ligne** pour publier ses changements ; à son réveil, l'intégration lui redemande ses listes. Si quelque chose n'apparaît toujours pas, appuyez sur le bouton **Synchroniser avec la RS90** (page de l'appareil RS90, ou section État du tableau de bord).
 
 <details>
 <summary>Avancé : options YAML de la stratégie</summary>

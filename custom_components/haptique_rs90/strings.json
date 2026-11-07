@@ -176,7 +176,7 @@
     },
     "button": {
       "refresh_lists": {
-        "name": "Refresh lists"
+        "name": "Sync with RS90"
       }
     }
   }
