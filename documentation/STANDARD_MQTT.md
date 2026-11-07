@@ -1,10 +1,10 @@
 # Standard MQTT macros, sequences and state queries
 
-This contribution uses the Standard MQTT firmware contract documented in
-`ccs777/HaptiqueRS90`, `docs/standard-mqtt.md`. It requires firmware which
-publishes real macros separately from command sequences and implements
-`currentstatus` and `discovery/refresh`. No numbered firmware release has
-been verified yet. Existing unmarked macro inventories remain supported.
+Since 1.8.0 the integration uses the Standard MQTT firmware contract documented in
+`ccs777/HaptiqueRS90`, `docs/standard-mqtt.md` (contributed by @ccs777 in PR #38
+and #39). It requires firmware which publishes real macros separately from command
+sequences and implements `currentstatus` and `discovery/refresh`. Verified on
+RS90 firmware **4.1.2** and **4.2**. Existing unmarked macro inventories remain supported.
 
 ## Controls and compatibility
 
@@ -78,22 +78,24 @@ Info Summary retains its name-to-ID attributes and adds `macros_by_id`,
 `devices_by_id`, `sequences_by_id`, `sequences` and `sequences_count`.
 Use the ID-indexed maps when display names are duplicated.
 
-## Validation and live acceptance
+## Validation
 
 Tests use Home Assistant's MQTT utilities with simulated broker messages.
 Run `python -m pip install -r requirements_test.txt` with Python 3.14,
-then `python -m pytest`. Test dependencies are pinned to Home Assistant
-2026.10.1 through the custom-component test plugin.
+then `python -m pytest`.
 
-**Live broker/Home Assistant/RS90 acceptance is outstanding.** The PR stays
-a draft until discovery, real macro/sequence ON/OFF, state queries, execution
-errors, sleep/reconnection and command replay prevention have been checked
-against an RS90 with the merged Standard MQTT firmware. Record the firmware
-and Home Assistant versions before declaring release readiness.
+Live acceptance was done on 2026-11-07 with an RS90 on firmware 4.2 and
+Home Assistant 2026.10: discovery, macro ON/OFF, `skipped` results, app launch
+from Home Assistant and from the RS90 screen, sleep and reconnection.
+
+Known firmware limitations (reported to Haptique): a macro run from the RS90
+screen publishes no status or result; switching macros can leave the previous
+one ON; `active_app` reports the app label (not the package) when an app is
+opened on the screen, and nothing when leaving an app.
 
 ## Installed app controls
 
-The app contribution depends on the macro/sequence contribution. Firmware
+Firmware
 publishes `app/list` as `[{id:packageId,name:label}]` and the integration adds
 one launch button per package. Package IDs determine identity and routing;
 duplicate or changed labels do not affect the controls. Removed apps become
@@ -116,11 +118,21 @@ The button's `last_result` records `launched` or an error such as
 Android accepted the intent; it does not confirm playback or loading completion.
 An error never changes the Last Reported App sensor.
 
-Last Reported App shows the package received on retained `active_app` and
-includes its label when known. This is the last firmware observation, not
+Last Reported App shows the label of the app received on retained `active_app`,
+with the package in `app_package_id`. Apps opened on the RS90 screen are reported
+by label and resolved to their package through `app/list`. This is the last firmware observation, not
 continuous tracking of every later manual app transition. Info Summary adds
 `apps_by_id` and `apps_count`. `refresh_lists` refreshes app discovery through
 `discovery/refresh`; the firmware also supports `app/list/get`.
 
-Live acceptance must additionally verify normal and Android TV app discovery,
-launch success/error replies and the reported package on the real device.
+
+## Execution results
+
+Every non-retained `macro/{id}/result` or `sequence/{id}/result` updates the
+**Last Macro Result** sensor, e.g. `CANAL · OFF · skipped (already_in_requested_state)`,
+and fires the `haptique_rs90_macro_result` event with `device_id`, `remote_id`,
+`target_kind`, `target_id`, `target_name`, `action`, `status`, `error` and
+`timestamp`. `action` is known only for runs requested from Home Assistant.
+Each event gets its own logbook entry attached to the macro/sequence switch,
+so repeated identical results stay visible. Retained results replayed on
+(re)subscribe are ignored. The sensor restores its last value after a restart.

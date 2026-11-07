@@ -1,230 +1,82 @@
-# What's New in v1.7.0
+# What's New in v1.8.0
 
-**Release Date:** January 2026  
-**Type:** Major Feature Release  
-**Breaking Changes:** None ✅
+**Release date:** November 7, 2026
+**Type:** Feature release
+**Breaking changes:** None ✅ (existing macro switches keep their entity IDs)
+**Requires:** RS90 **Standard MQTT** firmware (tested on 4.1.2 and 4.2), Home Assistant 2024.8+
 
 ---
 
 ## 🎯 Top Features
 
-### 1. Event-Based Button Detection ⚡
+### 1. Macros and sequences, the Standard MQTT way 🎛️
 
-**Problem solved:** Pressing the same button twice didn't trigger automations.
+Thanks to [@ccs777](https://github.com/ccs777) (PR #38), macros and sequences are now discovered separately and triggered by their **stable ID**.
 
-**Now:** Every button press fires an event, even repeated presses!
+- One switch per macro and one per sequence
+- The state is the one **confirmed by the RS90** (`ON` / `OFF` / unknown), never guessed
+- New actions `haptique_rs90.trigger_sequence` and `haptique_rs90.query_status` (re-read a state without running anything)
+- Your existing switches and automations keep working: entity IDs are preserved, even when a macro becomes a sequence
 
-```yaml
-automation:
-  trigger:
-    - platform: event
-      event_type: haptique_rs90_key_pressed
-      event_data:
-        button: 13
+### 2. Launch RS90 apps 📱
+
+Also from [@ccs777](https://github.com/ccs777) (PR #39):
+
+- One button per app installed on the RS90, **disabled by default**: enable only the ones you want in Settings → Entities
+- New action `haptique_rs90.launch_app`
+- New sensor **Last Reported App**: the last app the RS90 reported, shown by its name (e.g. `Kore`), even when the app was opened on the RS90 screen
+
+### 3. Know what your macros really did 📊
+
+New sensor **Last Macro Result**:
+
+```
+CANAL · OFF · skipped (already_in_requested_state)
 ```
 
-**Benefits:**
-- ✅ Works with repeated button presses
-- ✅ Dual functionality: RS90 macro + HA automation simultaneously
-- ✅ Full event data: remote_id, device_id, button, timestamp
+- Macro name, action, status and error in one line, full details in attributes
+- **One logbook entry per result**, even when the same result repeats, shown on the macro's own logbook too
+- Survives Home Assistant restarts
+- New event `haptique_rs90_macro_result` for automations, e.g. get notified when a macro is skipped or fails (see the [README](README.md#macro-results))
+
+### 4. A real icon 🎨
+
+The integration finally shows its own icon and logo (light and dark themes) in Home Assistant **2026.3+**.
 
 ---
 
-### 2. Device Triggers (No YAML Needed!) 🎮
+## 🐛 Fixes
 
-**Create automations visually** in the Home Assistant UI:
-
-1. Add Automation → Add Trigger → **Device**
-2. Select **RS90 Remote**
-3. Choose **Button pressed** → Select button (1-24)
-4. Add actions → Save
-
-**That's it!** No YAML, no complexity.
-
-**Benefits:**
-- ✅ 24 buttons available in dropdown
-- ✅ Native Home Assistant automation builder
-- ✅ Perfect for beginners
+- Ready for the next Home Assistant releases: deprecated device-registry calls replaced (would break in HA 2027.8 and 2027.10, #37)
+- The device page no longer shows a fake "Firmware: 1.0"
+- `• RGB Ring Light` renamed to `RGB Ring Light`
+- Action descriptions no longer break in French
 
 ---
 
-### 3. Macro Status Synchronization 🔄
+## ⚠️ Known firmware limitations
 
-**Problem solved:** Macro switches didn't update when triggered from RS90 remote.
-
-**Now:** Switches accurately show macro state from any trigger source!
-
-**Technical:**
-- New MQTT topic: `macro/{name}/status` (published by RS90)
-- Clean command/state separation
-- Requires upcoming RS90 firmware update
-
-**⚠️ Note:** Contact Haptique support for firmware availability.
+Reported to Haptique, not fixable in the integration:
+- A macro started **from the RS90 screen** is not published over MQTT
+- When switching macros, the previous one can stay **ON**, and turning it off later returns `skipped`
+- Leaving an app is not reported, so Last Reported App keeps the last opened app
+- Off its dock, the RS90 sleeps and goes offline: commands can't reach it until it wakes up
 
 ---
 
-### 4. Smart Battery Refresh 🔋
+## 🚀 Upgrade
 
-**Multiple improvements:**
+- **HACS**: open HACS → Haptique RS90 → **Update**, then restart Home Assistant
+- **Manual**: download [v1.8.0](https://github.com/daangel27/haptique_rs90/releases/tag/v1.8.0), replace `custom_components/haptique_rs90/`, restart
 
-**Automatic refresh on reconnection:**
-- RS90 wakes from sleep → Battery level requested immediately
-- Up to 6x more frequent updates when off charging dock
-
-**Throttle protection:**
-- Minimum 5 minutes between refreshes
-- Prevents spam during unstable connections
-
-**Reduced interval:**
-- Periodic refresh: Every 30 minutes (was 60 minutes)
-
-**Refresh frequency:**
-- On dock (always online): Every 30 min
-- Off dock (sleep/wake ~10 min): Every ~10 min on wake
-- Unstable (<5 min reconnect): Max 1 per 5 min (throttled)
-
----
-
-### 5. MQTT RemoteID Exposed 📍
-
-**Easy access for debugging:**
-
-```yaml
-sensor.rs90_info_summary:
-  rs90_id: "9b974..."              # HA Device ID
-  rs90_remote_id: "3d5d95aa3a7f7b20"  # MQTT RemoteID ✨
-```
-
-Find your MQTT RemoteID instantly for manual MQTT operations.
-
----
-
-## 🎉 Game-Changer: Dual Functionality
-
-**A single RS90 button press now does TWO things:**
-
-1. ✅ **Executes RS90 macro** (IR/RF control)
-2. ✅ **Triggers Home Assistant automation** (smart home control)
-
-**Example:** Press Button 13
-- 📺 Turns on TV via IR (RS90 macro)
-- 💡 Dims lights (HA automation)
-- 🔊 Sets Sonos mode (HA automation)
-- 🌡️ Adjusts thermostat (HA automation)
-
-**All from ONE button press!**
-
----
-
-## 🔧 Other Improvements
-
-- ✅ Battery refresh added to `refresh_lists` service
-- ✅ Enhanced logging for battery updates
-- ✅ Improved coordinator with device_id tracking
-- ✅ Better error messages
-
----
-
-## ⚠️ Breaking Changes
-
-**None!** This release is fully backward compatible with v1.5.1.
-
-All existing automations, scripts, and configurations continue to work.
-
----
-
-## 📋 Requirements
-
-- **Home Assistant:** 2024.1.0 or newer
-- **MQTT:** Configured and working
-- **RS90 Firmware:** Latest version recommended
-  - Macro status sync requires upcoming firmware update
-  - All other features work with current firmware
-
----
-
-## 🚀 Upgrade Steps
-
-### If using HACS:
-
-1. Open **HACS** → **Integrations**
-2. Find **Haptique RS90**
-3. Click **Update**
-4. Restart Home Assistant
-
-### If using manual installation:
-
-1. Download [v1.7.0](https://github.com/daangel27/haptique_rs90/releases/tag/v1.7.0)
-2. Extract to `/config/custom_components/haptique_rs90/`
-3. Restart Home Assistant
-
-**That's it!** No configuration changes needed.
-
----
-
-## 💡 Getting Started with New Features
-
-### Try Device Triggers (Easy)
-
-1. **Settings** → **Automations** → **Add Automation**
-2. **Add Trigger** → **Device** → Select RS90
-3. **Button pressed** → Choose button number
-4. Add action → Save
-5. Press button on RS90 → Automation triggers! 🎉
-
-### Try Events (Advanced)
-
-```yaml
-automation:
-  - alias: "Multi-action button"
-    trigger:
-      - platform: event
-        event_type: haptique_rs90_key_pressed
-        event_data:
-          button: 13
-    action:
-      - service: light.toggle
-        target:
-          entity_id: light.living_room
-      - service: notify.mobile_app
-        data:
-          message: "Button 13 pressed!"
-```
-
-### Monitor Battery Better
-
-Battery now updates:
-- ✅ Every 30 minutes (automatic)
-- ✅ On RS90 wake from sleep (automatic)
-- ✅ Via service call (manual)
-
-No action needed - just enjoy more frequent updates!
-
----
-
-## 📚 Documentation
-
-- **[README.md](README.md)** - Complete integration guide
-- **[CHANGELOG.md](CHANGELOG.md)** - Detailed technical changes
-- **[GitHub Releases](https://github.com/daangel27/haptique_rs90/releases)** - Download and release notes
+New app buttons are disabled: enable the apps you want in **Settings → Devices & services → Entities**.
 
 ---
 
 ## 🙏 Credits
 
-Special thanks to:
-- **Haptique Support** for implementing the `/status` topic and excellent collaboration
-- **@Benz63Amg** for reporting issue #35 and validating the solution
-- **Home Assistant Community** for feedback and testing
+- [@ccs777](https://github.com/ccs777) for PR #38 and #39
+- **Claude** (Anthropic), AI pair programmer on this release: code, tests, reviews, documentation and icon
+- **Haptique Support** for the Standard MQTT firmware
 
----
-
-## 🆘 Need Help?
-
-- 📖 [Full Documentation](README.md)
-- 🐛 [Report Issues](https://github.com/daangel27/haptique_rs90/issues)
-- 💬 [Discussions](https://github.com/daangel27/haptique_rs90/discussions)
-
----
-
-**Enjoy v1.7.0!** 🎉
+**Enjoy v1.8.0!** 🎉
