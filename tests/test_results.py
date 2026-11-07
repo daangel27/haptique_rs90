@@ -112,3 +112,49 @@ async def test_setup_clears_stale_firmware_version(hass, coordinator):
         sw_version=None,
     )
     assert device.sw_version is None
+
+
+async def test_logbook_describes_every_result(hass, coordinator, publish):
+    """Repeated identical results each get their own logbook entry."""
+    from custom_components.haptique_rs90.logbook import (
+        async_describe_events,
+        result_message,
+    )
+
+    described = {}
+    async_describe_events(
+        hass, lambda domain, event_type, fn: described.update({event_type: fn})
+    )
+    describe = described[RESULT_EVENT]
+
+    registry = er.async_get(hass)
+    switch = registry.async_get_or_create(
+        "switch",
+        "haptique_rs90",
+        "remote-1_macro_m1",
+        config_entry=coordinator.entry,
+        capabilities={"haptique_target_kind": "macro"},
+    )
+    events = async_capture_events(hass, RESULT_EVENT)
+    await inventory(hass, "macro", MACROS)
+    for _ in range(2):
+        await coordinator.async_trigger_target("macro", "m1", "off")
+        await message(
+            hass,
+            "macro/m1/result",
+            '{"status":"skipped","error":"already_in_requested_state"}',
+        )
+    assert len(events) == 2
+    for event in events:
+        entry = describe(event)
+        assert entry["name"] == "RS90 CANAL"
+        assert entry["message"] == "OFF: skipped (already_in_requested_state)"
+        assert entry["entity_id"] == switch.entity_id
+
+    # Unknown target switch and no action (run started on the RS90 screen).
+    await message(hass, "macro/m2/result", '{"status":"executed"}')
+    entry = describe(events[-1])
+    assert entry["name"] == "RS90 KODI"
+    assert entry["message"] == "result: executed"
+    assert "entity_id" not in entry
+    assert result_message({}) == "result: unknown"

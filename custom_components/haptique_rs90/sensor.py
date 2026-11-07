@@ -483,27 +483,32 @@ class HaptiqueRS90ActiveAppSensor(HaptiqueRS90SensorBase):
     def available(self) -> bool:
         return self.coordinator.data["status"] == "online"
 
-    def _app_name(self) -> str | None:
-        package_id = self.coordinator.data["active_app"]
-        return next(
-            (
-                item["name"]
-                for item in self.coordinator.data["apps"]
-                if item["id"] == package_id
-            ),
-            None,
+    def _app(self) -> dict | None:
+        """Resolve the reported app.
+
+        The firmware reports the package ID when an app is opened over MQTT,
+        but the app label (e.g. "Chrome") when it is opened on the RS90 screen.
+        """
+        reported = self.coordinator.data["active_app"]
+        if not reported:
+            return None
+        apps = self.coordinator.data["apps"]
+        return next((item for item in apps if item["id"] == reported), None) or next(
+            (item for item in apps if item["name"] == reported), None
         )
 
     @property
     def native_value(self) -> str | None:
-        """Show the app label; fall back to the package ID if it is unlisted."""
-        return self._app_name() or self.coordinator.data["active_app"]
+        """Show the app label; fall back to the raw value if it is unlisted."""
+        app = self._app()
+        return app["name"] if app else self.coordinator.data["active_app"]
 
     @property
     def extra_state_attributes(self):
+        app = self._app()
         return {
-            "app_package_id": self.coordinator.data["active_app"],
-            "app_name": self._app_name(),
+            "app_package_id": app["id"] if app else self.coordinator.data["active_app"],
+            "app_name": app["name"] if app else None,
         }
 
 

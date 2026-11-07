@@ -23,11 +23,12 @@ Requires the RS90 **Standard MQTT** firmware (tested on 4.1.2 / 4.2).
 - One launch button per installed RS90 app (`app/list`), **disabled by default**
 - New action: `haptique_rs90.launch_app`
 - New sensor **Last Reported App**: shows the app label (e.g. `Kore`), package ID in `app_package_id`
+  - Also resolves apps opened on the RS90 screen, which the firmware reports by label instead of package ID
 
 #### Last Macro Result sensor and event
 - New sensor **Last Macro Result**, e.g. `CANAL · OFF · skipped (already_in_requested_state)`
   - Attributes: `target_name`, `target_id`, `target_kind`, `action`, `status`, `error`, `timestamp`
-  - Every new result changes the state, so the logbook keeps a readable history
+  - Every result also gets its own logbook entry, even when identical to the previous one, attached to the macro/sequence switch
   - Last value is restored after a Home Assistant restart
 - New event `haptique_rs90_macro_result` with the same data, for automations (e.g. notify on `skipped` / `failed`)
 - Retained results replayed on reconnect are not reported as new runs
