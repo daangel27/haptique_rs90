@@ -1,85 +1,93 @@
-# Available services for Haptique RS90 integration
-
 trigger_macro:
   name: Trigger macro
-  description: Triggers a specific macro on the Haptique RS90 remote
+  description: Request ON/OFF execution of a macro or migrated sequence. Firmware
+    feedback determines state.
   fields:
     rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)
+      description: Select your Haptique RS90 remote (find it in Settings > Devices
+        & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute
+        rs90_id)
       required: true
-      example: "6f99751e78b5a07de72d549143e2975c"
-      selector:
+      example: 6f99751e78b5a07de72d549143e2975c
+      selector: &id001
         device:
           integration: haptique_rs90
     rs90_macro_id:
       name: Macro ID
-      description: The stable ID of the macro. Find it in sensor.rs90_info_summary attributes (macros dictionary) or switch.macro_{name} attributes. This ID never changes even if you rename the macro in Haptique Config.
+      description: The stable ID of the macro. Find it in sensor.rs90_info_summary
+        attributes (macros dictionary) or switch.macro_{name} attributes. This ID
+        never changes even if you rename the macro in Haptique Config.
       required: true
-      example: "692eb1561bddd5814022960c"
+      example: 692eb1561bddd5814022960c
       selector:
-        text:
+        text: null
     action:
       name: Action
       description: Action to perform (on or off)
       required: false
-      default: "on"
-      example: "on"
-      selector:
+      default: 'on'
+      example: 'on'
+      selector: &id002
         select:
           options:
-            - "on"
-            - "off"
-
+          - 'on'
+          - 'off'
 trigger_device_command:
   name: Trigger device command
   description: Sends a specific command to a device via the RS90 remote
   fields:
     rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote (find it in Settings > Devices & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute rs90_id)
+      description: Select your Haptique RS90 remote (find it in Settings > Devices
+        & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute
+        rs90_id)
       required: true
-      example: "6f99751e78b5a07de72d549143e2975c"
+      example: 6f99751e78b5a07de72d549143e2975c
       selector:
         device:
           integration: haptique_rs90
     rs90_device_id:
       name: Device ID
-      description: The stable ID of the device. Find it in sensor.rs90_info_summary attributes (devices dictionary) or sensor.commands_{name} attributes. This ID never changes even if you rename the device in Haptique Config.
+      description: The stable ID of the device. Find it in sensor.rs90_info_summary
+        attributes (devices dictionary) or sensor.commands_{name} attributes. This
+        ID never changes even if you rename the device in Haptique Config.
       required: true
-      example: "692ead781bddd58140228e33"
+      example: 692ead781bddd58140228e33
       selector:
-        text:
+        text: null
     command_name:
       name: Command name
-      description: The exact command name to send (check the device commands sensor to see available commands)
+      description: The exact command name to send (check the device commands sensor
+        to see available commands)
       required: true
-      example: "POWER"
+      example: POWER
       selector:
-        text:
-
+        text: null
 refresh_lists:
   name: Refresh lists
-  description: Force refresh of device and macro lists from the RS90 remote. Use this if devices or macros don't appear after adding them in Haptique Config.
+  description: Request fresh discovery, battery and persisted macro/sequence state.
+    Older firmware may ignore discovery/refresh.
   fields:
     rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary attribute rs90_id)
+      description: Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary
+        attribute rs90_id)
       required: true
-      example: "6f99751e78b5a07de72d549143e2975c"
+      example: 6f99751e78b5a07de72d549143e2975c
       selector:
         device:
           integration: haptique_rs90
-
 trigger_rgb_light:
   name: Trigger RGB Ring Light
   description: Activate the RGB ring light animation with custom duration
   fields:
     rs90_id:
       name: RS90 Remote
-      description: Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary attribute rs90_id)
+      description: Select your Haptique RS90 remote (or get the ID from sensor.rs90_info_summary
+        attribute rs90_id)
       required: true
-      example: "9b974dab9a7649e13baeb921d4c9bb85"
+      example: 9b974dab9a7649e13baeb921d4c9bb85
       selector:
         device:
           integration: haptique_rs90
@@ -95,3 +103,51 @@ trigger_rgb_light:
           max: 10
           step: 1
           mode: slider
+trigger_sequence:
+  name: Trigger sequence
+  description: Request ON/OFF execution of a command sequence using its stable ID.
+  fields:
+    rs90_id: &id003
+      name: RS90 Remote
+      description: Select your Haptique RS90 remote (find it in Settings > Devices
+        & Services > Haptique RS90, or get the ID from sensor.rs90_info_summary attribute
+        rs90_id)
+      required: true
+      example: 6f99751e78b5a07de72d549143e2975c
+      selector: *id001
+    rs90_sequence_id:
+      name: Target ID
+      description: Request ON/OFF execution of a command sequence using its stable
+        ID.
+      required: true
+      selector:
+        text: {}
+    action:
+      name: Action
+      description: Action to perform (on or off)
+      required: false
+      default: 'on'
+      example: 'on'
+      selector: *id002
+query_status:
+  name: Query persisted status
+  description: Request the persisted execution state of a macro or sequence. This
+    is not a physical equipment power measurement.
+  fields:
+    rs90_id: *id003
+    target_kind:
+      name: Target kind
+      description: Target kind
+      required: true
+      selector:
+        select:
+          options:
+          - macro
+          - sequence
+    target_id:
+      name: Target ID
+      description: Request the persisted execution state of a macro or sequence. This
+        is not a physical equipment power measurement.
+      required: true
+      selector:
+        text: {}

@@ -1,57 +1,108 @@
-# Services disponibles pour l'intégration Haptique RS90
-
 trigger_macro:
   name: Déclencher une macro
-  description: Déclenche une macro spécifique sur la télécommande Haptique RS90
+  description: Demander l’exécution ON/OFF d’une macro ou séquence migrée. Le retour
+    du firmware détermine l’état.
   fields:
     rs90_id:
       name: Télécommande RS90
-      description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
-      example: "6f99751e78b5a07de72d549143e2975c"
+      description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans
+        Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis
+        sensor.rs90_info_summary attribut rs90_id)
+      example: 6f99751e78b5a07de72d549143e2975c
     rs90_macro_id:
       name: ID de la macro
-      description: L'identifiant stable de la macro. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire macros) ou dans switch.macro_{nom} attributs. Cet ID ne change jamais même si vous renommez la macro dans Haptique Config.
-      example: "692eb1561bddd5814022960c"
+      description: L'identifiant stable de la macro. Trouvez-le dans sensor.rs90_info_summary
+        attributs (dictionnaire macros) ou dans switch.macro_{nom} attributs. Cet
+        ID ne change jamais même si vous renommez la macro dans Haptique Config.
+      example: 692eb1561bddd5814022960c
     action:
       name: Action
       description: Action à effectuer (on ou off)
-      example: "on"
-
+      example: 'on'
 trigger_device_command:
   name: Déclencher une commande appareil
   description: Envoie une commande spécifique à un appareil via la télécommande RS90
   fields:
     rs90_id:
       name: Télécommande RS90
-      description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
-      example: "6f99751e78b5a07de72d549143e2975c"
+      description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans
+        Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis
+        sensor.rs90_info_summary attribut rs90_id)
+      example: 6f99751e78b5a07de72d549143e2975c
     rs90_device_id:
       name: ID de l'appareil
-      description: L'identifiant stable de l'appareil. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire devices) ou dans sensor.commands_{nom} attributs. Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config.
-      example: "692ead781bddd58140228e33"
+      description: L'identifiant stable de l'appareil. Trouvez-le dans sensor.rs90_info_summary
+        attributs (dictionnaire devices) ou dans sensor.commands_{nom} attributs.
+        Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config.
+      example: 692ead781bddd58140228e33
     command_name:
       name: Nom de la commande
-      description: Le nom exact de la commande à envoyer (consultez le capteur de commandes de l'appareil pour voir les commandes disponibles)
-      example: "POWER"
-
+      description: Le nom exact de la commande à envoyer (consultez le capteur de
+        commandes de l'appareil pour voir les commandes disponibles)
+      example: POWER
 refresh_lists:
   name: Actualiser les listes
-  description: Force l'actualisation des listes d'appareils et de macros depuis la télécommande RS90. Utilisez ceci si les appareils ou macros n'apparaissent pas après les avoir ajoutés dans Haptique Config.
+  description: Demander la découverte, la batterie et les états mémorisés. Un ancien
+    firmware peut ignorer discovery/refresh.
   fields:
     rs90_id:
       name: Télécommande RS90
-      description: Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
-      example: "6f99751e78b5a07de72d549143e2975c"
-
+      description: Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID
+        depuis sensor.rs90_info_summary attribut rs90_id)
+      example: 6f99751e78b5a07de72d549143e2975c
 trigger_rgb_light:
   name: Déclencher l'anneau RGB
   description: Active l'animation de l'anneau RGB avec une durée personnalisée
   fields:
     rs90_id:
       name: Télécommande RS90
-      description: Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)
-      example: "9b974dab9a7649e13baeb921d4c9bb85"
+      description: Sélectionnez votre télécommande Haptique RS90 (ou obtenez l'ID
+        depuis sensor.rs90_info_summary attribut rs90_id)
+      example: 9b974dab9a7649e13baeb921d4c9bb85
     duration:
       name: Durée
       description: Durée en secondes (1-10)
       example: 5
+trigger_sequence:
+  name: Déclencher une séquence
+  description: Demander l’exécution ON/OFF d’une séquence avec son identifiant stable.
+  fields:
+    rs90_id: &id001
+      name: Télécommande RS90
+      description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans
+        Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis
+        sensor.rs90_info_summary attribut rs90_id)
+      example: 6f99751e78b5a07de72d549143e2975c
+    rs90_sequence_id:
+      name: Identifiant de la cible
+      description: Demander l’exécution ON/OFF d’une séquence avec son identifiant
+        stable.
+      required: true
+      selector:
+        text: {}
+    action:
+      name: Action
+      description: Action à effectuer (on ou off)
+      example: 'on'
+query_status:
+  name: Interroger l’état mémorisé
+  description: Demander l’état d’exécution mémorisé d’une macro ou séquence. Ce n’est
+    pas une mesure de l’alimentation des appareils.
+  fields:
+    rs90_id: *id001
+    target_kind:
+      name: Type de cible
+      description: Type de cible
+      required: true
+      selector:
+        select:
+          options:
+          - macro
+          - sequence
+    target_id:
+      name: Identifiant de la cible
+      description: Demander l’état d’exécution mémorisé d’une macro ou séquence. Ce
+        n’est pas une mesure de l’alimentation des appareils.
+      required: true
+      selector:
+        text: {}
