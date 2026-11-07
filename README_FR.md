@@ -192,7 +192,7 @@ Tout décocher masque l'appareil. Rechargez le tableau de bord pour voir le chan
 
 Quand vous ajoutez, renommez ou supprimez un appareil, une macro, une séquence ou une application sur la RS90, l'intégration le reçoit par MQTT et le tableau de bord suit à la prochaine ouverture (ou au rechargement) : nouvel appareil → nouvel onglet, appareil supprimé → onglet retiré, nouvelle macro → nouveau bouton. Un appareil dont vous avez choisi les boutons garde votre sélection ; les nouvelles commandes d'un appareil laissé sur **Show all commands** apparaissent toutes seules.
 
-> ℹ️ La RS90 doit être **en ligne** pour publier ses changements ; à son réveil, l'intégration lui redemande ses listes. Si quelque chose n'apparaît toujours pas, appuyez sur le bouton **Synchroniser avec la RS90** (page de l'appareil RS90, ou section État du tableau de bord).
+> ℹ️ La RS90 doit être **en ligne** pour publier ses changements ; à son réveil, l'intégration lui redemande ses listes. Si quelque chose n'apparaît toujours pas, appuyez sur le bouton **Synchroniser** (page de l'appareil RS90, ou section État du tableau de bord).
 
 <details>
 <summary>Avancé : options YAML de la stratégie</summary>
@@ -315,7 +315,14 @@ Plus de détails : [Macros, séquences et applications Standard MQTT](documentat
 
 ## 😴 Mise en veille
 
-Hors de son socle, la RS90 se met en veille au bout d'un moment et apparaît **hors ligne** : ses entités deviennent indisponibles et les commandes MQTT ne lui parviennent plus. Reposez-la sur son socle ou réveillez-la (touchez l'écran ou appuyez sur une touche).
+Hors de son socle, la RS90 se met en veille au bout d'un moment et apparaît **hors ligne** : ses entités deviennent indisponibles et les commandes MQTT ne lui parviennent plus. Reposez-la sur son socle, réveillez-la à la main (touchez l'écran ou appuyez sur une touche), ou laissez Home Assistant la réveiller :
+
+1. Donnez à la RS90 une **adresse IP fixe** (réservation DHCP dans votre box ou routeur)
+2. **Paramètres** → **Appareils et services** → **Haptique RS90 Remote** → ⚙️ **Configurer** → **Réveiller la RS90**
+3. Saisissez son **adresse IP**. Le bouton **Réveiller** de la RS90 devient disponible.
+4. Facultatif : cochez **La réveiller automatiquement avant d'envoyer une commande**. Les macros, applications et commandes (tableau de bord compris) fonctionnent alors pendant la veille : Home Assistant la réveille d'abord, ce qui ajoute quelques secondes.
+
+Home Assistant envoie quelques paquets à l'adresse IP de la RS90 jusqu'à ce qu'elle repasse en ligne (20 secondes au maximum). Seule l'adresse IP est nécessaire : la RS90 utilise par défaut une adresse MAC Wi-Fi aléatoire, et l'adresse MAC contenue dans le paquet n'a pas d'importance.
 
 ---
 

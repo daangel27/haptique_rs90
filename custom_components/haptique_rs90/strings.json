@@ -24,7 +24,8 @@
         "title": "Haptique RS90 options",
         "menu_options": {
           "name": "Rename the remote",
-          "dashboard_device": "Dashboard: choose command buttons"
+          "dashboard_device": "Dashboard: choose command buttons",
+          "wake": "Wake the RS90 up"
         }
       },
       "name": {
@@ -47,10 +48,25 @@
           "show_all": "Show all commands (and new ones automatically)",
           "commands": "Commands"
         }
+      },
+      "wake": {
+        "title": "Wake the RS90 up",
+        "description": "Off its dock the RS90 sleeps and stops receiving commands. Home Assistant can wake it up by sending packets to its IP address.\n\nTip: give the RS90 a fixed IP address (DHCP reservation) in your router.",
+        "data": {
+          "wake_host": "RS90 IP address",
+          "wake_auto": "Wake it up automatically before sending a command"
+        },
+        "data_description": {
+          "wake_host": "Leave empty to disable. Enables the Wake up button of the RS90.",
+          "wake_auto": "Macros, apps and device commands then work even while the RS90 sleeps (a few seconds slower)."
+        }
       }
     },
     "abort": {
       "no_devices": "No device received from the RS90 yet. Make sure it is online, then try again."
+    },
+    "error": {
+      "invalid_ip": "Enter an IPv4 address, e.g. 192.168.1.50"
     }
   },
   "services": {
@@ -176,7 +192,10 @@
     },
     "button": {
       "refresh_lists": {
-        "name": "Sync with RS90"
+        "name": "Sync"
+      },
+      "wake": {
+        "name": "Wake up"
       }
     }
   }

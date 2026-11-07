@@ -16,6 +16,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     CONF_REMOTE_ID,
+    CONF_WAKE_AUTO,
+    CONF_WAKE_HOST,
     DOMAIN,
     STATE_OFFLINE,
     STATE_ONLINE,
@@ -30,6 +32,7 @@ from .const import (
     TOPIC_TEST_STATUS,
 )
 from .targets import TargetManager, parse_inventory, valid_reference
+from .wake import async_wake
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -69,6 +72,9 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self._last_battery_refresh: float = 0  # Timestamp of last battery refresh
         self._battery_refresh_min_interval = 300  # 5 minutes minimum between refreshes
         self._last_discovery_refresh: float = float("-inf")
+        # Set while the RS90 reports online; used to wait for a wake-up.
+        self._online = asyncio.Event()
+        self._wake_lock = asyncio.Lock()
 
         # LED light auto-off timer
         self._led_light_timer: callable | None = None
@@ -281,6 +287,11 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         status = payload.strip()
         old_status = self.data.get("status")
 
+        if status == STATE_ONLINE:
+            self._online.set()
+        else:
+            self._online.clear()
+
         if status != old_status:
             _LOGGER.info("Status changed: %s → %s", old_status, status)
             self.data["status"] = status
@@ -409,11 +420,40 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self.data["active_app"] = payload or None
         self.async_set_updated_data(self.data)
 
+    @property
+    def wake_host(self) -> str | None:
+        """IP address used to wake the RS90 up, if configured."""
+        return (self.entry.options.get(CONF_WAKE_HOST) or "").strip() or None
+
+    @property
+    def auto_wake(self) -> bool:
+        """Wake the RS90 up automatically before sending it a command."""
+        return bool(self.wake_host and self.entry.options.get(CONF_WAKE_AUTO))
+
+    async def async_wake(self) -> bool:
+        """Wake the RS90 up; True once it reports online."""
+        if not self.wake_host:
+            raise HomeAssistantError(
+                "Set the RS90 IP address in the integration options to wake it up"
+            )
+        async with self._wake_lock:
+            return await async_wake(self.hass, self.wake_host, self._online)
+
+    async def _async_ensure_awake(self) -> None:
+        """Before a command: wake a sleeping RS90 up when auto-wake is on."""
+        if self.data.get("status") == STATE_ONLINE or not self.auto_wake:
+            return
+        if not await self.async_wake():
+            raise HomeAssistantError("The RS90 did not wake up")
+        # Let the RS90 resubscribe to its command topics.
+        await asyncio.sleep(1)
+
     async def async_launch_app(self, package_id: str) -> None:
         if self._closed or not self._app_feedback_ready:
             raise HomeAssistantError("App feedback is not available")
         if package_id not in {item["id"] for item in self.data["apps"]}:
             raise HomeAssistantError("Installed app package ID not found")
+        await self._async_ensure_awake()
         await mqtt.async_publish(
             self.hass,
             f"{self.base_topic}/app/{package_id}/open",
@@ -558,6 +598,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             raise HomeAssistantError("Action must be on or off")
         if action == "off" and target.get("supportsOff") is False:
             raise HomeAssistantError("This macro does not support off")
+        await self._async_ensure_awake()
         # The result feedback does not echo the action, so remember it.
         self.targets.note_request(kind, target_id, action)
         await mqtt.async_publish(
@@ -582,6 +623,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self, device_name: str, command_name: str
     ) -> None:
         """Trigger a device command."""
+        await self._async_ensure_awake()
         topic = f"{self.base_topic}/device/{device_name}/trigger"
         _LOGGER.debug("Triggering command %s for device %s", command_name, device_name)
         _LOGGER.debug(

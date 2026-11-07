@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import logging
 from typing import Any
 
@@ -13,7 +14,14 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
-from .const import CONF_DASHBOARD_COMMANDS, CONF_NAME, CONF_REMOTE_ID, DOMAIN
+from .const import (
+    CONF_DASHBOARD_COMMANDS,
+    CONF_NAME,
+    CONF_REMOTE_ID,
+    CONF_WAKE_AUTO,
+    CONF_WAKE_HOST,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -131,7 +139,7 @@ class HaptiqueRS90OptionsFlow(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Choose what to configure."""
         return self.async_show_menu(
-            step_id="init", menu_options=["name", "dashboard_device"]
+            step_id="init", menu_options=["name", "dashboard_device", "wake"]
         )
 
     def _save(self, **changes: Any) -> FlowResult:
@@ -247,3 +255,46 @@ class HaptiqueRS90OptionsFlow(config_entries.OptionsFlow):
                 }
             ),
         )
+
+    async def async_step_wake(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """IP address used to wake the RS90 up, and automatic wake-up."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            host = (user_input.get(CONF_WAKE_HOST) or "").strip()
+            if host and not _valid_ipv4(host):
+                errors[CONF_WAKE_HOST] = "invalid_ip"
+            else:
+                return self._save(
+                    **{
+                        CONF_WAKE_HOST: host,
+                        CONF_WAKE_AUTO: bool(host and user_input.get(CONF_WAKE_AUTO)),
+                    }
+                )
+        options = self._config_entry.options
+        return self.async_show_form(
+            step_id="wake",
+            errors=errors,
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_WAKE_HOST,
+                        description={
+                            "suggested_value": options.get(CONF_WAKE_HOST, "")
+                        },
+                    ): str,
+                    vol.Optional(
+                        CONF_WAKE_AUTO, default=options.get(CONF_WAKE_AUTO, False)
+                    ): bool,
+                }
+            ),
+        )
+
+
+def _valid_ipv4(value: str) -> bool:
+    """An IPv4 address (the RS90 has no reliable host name)."""
+    try:
+        return isinstance(ipaddress.ip_address(value), ipaddress.IPv4Address)
+    except ValueError:
+        return False

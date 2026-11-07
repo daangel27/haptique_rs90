@@ -236,6 +236,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register services
     await async_setup_services(hass)
 
+    # Options (wake-up address, dashboard buttons) apply without a reload.
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
+
     # Dashboard strategy (frontend). Never block the integration on it.
     try:
         if "websocket_api" in hass.config.components:
@@ -268,3 +271,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle removal of an entry."""
     _LOGGER.debug("Removing Haptique RS90 Remote integration")
+
+
+async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Refresh entity availability after the options change."""
+    if coordinator := hass.data.get(DOMAIN, {}).get(entry.entry_id):
+        coordinator.async_update_listeners()

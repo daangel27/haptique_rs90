@@ -192,7 +192,7 @@ Untick everything to hide a device. Reload the dashboard to see the change.
 
 When you add, rename or remove a device, a macro, a sequence or an app on the RS90, the integration receives it over MQTT and the dashboard follows the next time you open (or reload) it: new device → new view, removed device → view gone, new macro → new button. A device with a custom button selection keeps it; new commands of a device left on **Show all commands** appear by themselves.
 
-> ℹ️ The RS90 must be **online** to publish its changes; when it wakes up, the integration asks it for its lists again. If something still doesn't show up, press the **Sync with RS90** button (RS90 device page, or the Status section of the dashboard).
+> ℹ️ The RS90 must be **online** to publish its changes; when it wakes up, the integration asks it for its lists again. If something still doesn't show up, press the **Sync** button (RS90 device page, or the Status section of the dashboard).
 
 <details>
 <summary>Advanced: YAML options of the strategy</summary>
@@ -315,7 +315,14 @@ More details: [Standard MQTT macros, sequences and apps](documentation/STANDARD_
 
 ## 😴 Sleep mode
 
-Off its dock, the RS90 goes to sleep after a while and shows as **offline**: its entities become unavailable and MQTT commands can't reach it. Put it back on the dock or wake it up (touch the screen or press a key).
+Off its dock, the RS90 goes to sleep after a while and shows as **offline**: its entities become unavailable and MQTT commands can't reach it. Put it back on the dock, wake it up by hand (touch the screen or press a key), or let Home Assistant wake it up:
+
+1. Give the RS90 a **fixed IP address** (DHCP reservation in your router)
+2. **Settings** → **Devices & services** → **Haptique RS90 Remote** → ⚙️ **Configure** → **Wake the RS90 up**
+3. Enter its **IP address**. The **Wake up** button of the RS90 becomes available.
+4. Optional: tick **Wake it up automatically before sending a command**. Macros, apps and device commands (dashboard included) then work while the RS90 sleeps: Home Assistant wakes it up first, which adds a few seconds.
+
+Home Assistant sends a few packets to the RS90's IP address until it reports online again (up to 20 seconds). Only the IP address is needed: the RS90 uses a random Wi-Fi MAC address by default, and the MAC address inside the packet doesn't matter.
 
 ---
 

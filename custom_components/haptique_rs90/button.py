@@ -28,6 +28,7 @@ async def async_setup_entry(
     entities = [
         HaptiqueRS90RGBButton(coordinator, entry),
         HaptiqueRS90RefreshButton(coordinator, entry),
+        HaptiqueRS90WakeButton(coordinator, entry),
     ]
 
     async_add_entities(entities)
@@ -76,6 +77,29 @@ class HaptiqueRS90RefreshButton(CoordinatorEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.coordinator.async_force_refresh_lists()
+
+
+class HaptiqueRS90WakeButton(CoordinatorEntity, ButtonEntity):
+    """Wake a sleeping RS90 up (needs its IP address in the options)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "wake"
+    _attr_icon = "mdi:alarm"
+
+    def __init__(
+        self, coordinator: HaptiqueRS90Coordinator, entry: ConfigEntry
+    ) -> None:
+        super().__init__(coordinator)
+        remote_id = entry.data[CONF_REMOTE_ID]
+        self._attr_unique_id = f"{remote_id}_wake"
+        self._attr_device_info = {"identifiers": {(DOMAIN, remote_id)}}
+
+    @property
+    def available(self) -> bool:
+        return self.coordinator.wake_host is not None
+
+    async def async_press(self) -> None:
+        await self.coordinator.async_wake()
 
 
 class HaptiqueRS90RGBButton(CoordinatorEntity, ButtonEntity):
@@ -133,7 +157,8 @@ class HaptiqueRS90AppButton(CoordinatorEntity, ButtonEntity):
 
     @property
     def available(self) -> bool:
-        return self.coordinator.data["status"] == "online" and self._package_id in {
+        awake = self.coordinator.data["status"] == "online" or self.coordinator.auto_wake
+        return awake and self._package_id in {
             item["id"] for item in self.coordinator.data["apps"]
         }
 
