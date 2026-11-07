@@ -160,7 +160,16 @@ function remoteView(hass, remote, t, multi) {
       type: "grid",
       cards: [
         { type: "heading", heading: t.status, heading_style: "title", icon: "mdi:information-outline" },
-        ...remote.status.map((entity) => ({ type: "tile", entity, name: shortName(hass, entity) })),
+        ...remote.status.map((entity) =>
+          entity.startsWith("button.")
+            ? {
+                type: "tile",
+                entity,
+                name: shortName(hass, entity),
+                tap_action: { action: "perform-action", perform_action: "button.press", target: { entity_id: entity } },
+              }
+            : { type: "tile", entity, name: shortName(hass, entity) },
+        ),
       ],
     });
   }

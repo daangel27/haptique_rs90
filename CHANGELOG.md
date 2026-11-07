@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - RS90 view: macros as ON/OFF buttons (green = ON), sequences, apps and status
   - One view per RS90 device, commands grouped like a remote (power, navigation pad, volume & channels, playback, keypad, inputs, more), 3D style with card-mod
   - Rebuilt every time it opens, so new, renamed or removed devices, macros and apps show up by themselves; removed macros and apps are left out
+- **Refresh lists** button (configuration entity): asks the RS90 to publish its devices, macros, sequences and apps again, without using an action
+- When the RS90 wakes up, the integration asks for its lists again (at most every 5 minutes), so changes made while it slept are picked up
 - **Integration options** become a menu: rename the remote, or choose the command buttons shown for each device (all by default, none hides the device)
 
 ### 🐛 Fixes

@@ -68,6 +68,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self._battery_refresh_interval = 1800  # 30 minutes in seconds
         self._last_battery_refresh: float = 0  # Timestamp of last battery refresh
         self._battery_refresh_min_interval = 300  # 5 minutes minimum between refreshes
+        self._last_discovery_refresh: float = float("-inf")
 
         # LED light auto-off timer
         self._led_light_timer: callable | None = None
@@ -291,6 +292,20 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 _LOGGER.info("RS90 reconnected - requesting battery update")
                 self._create_task(self._request_battery_update_now())
                 self._create_task(self.targets.async_query_all())
+                # Catch up on changes made on the RS90 while it was offline
+                # (at most every 5 minutes: the RS90 wakes up often).
+                now = time.monotonic()
+                if now - self._last_discovery_refresh >= 300:
+                    self._last_discovery_refresh = now
+                    self._create_task(
+                        mqtt.async_publish(
+                            self.hass,
+                            f"{self.base_topic}/discovery/refresh",
+                            "",
+                            qos=0,
+                            retain=False,
+                        )
+                    )
         else:
             _LOGGER.debug("Status unchanged: %s", status)
 

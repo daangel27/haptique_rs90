@@ -173,6 +173,11 @@
       "last_macro_result": {
         "name": "Last Macro Result"
       }
+    },
+    "button": {
+      "refresh_lists": {
+        "name": "Refresh lists"
+      }
     }
   }
 }

@@ -173,6 +173,11 @@
       "last_macro_result": {
         "name": "Dernier résultat de macro"
       }
+    },
+    "button": {
+      "refresh_lists": {
+        "name": "Rafraîchir les listes"
+      }
     }
   }
 }

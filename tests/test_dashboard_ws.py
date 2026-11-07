@@ -100,3 +100,24 @@ async def test_removed_targets_and_apps_left_out(hass, coordinator, remote):
         registry.async_get_entity_id("switch", "haptique_rs90", "remote-1_macro_m1")
     ]
     assert layout["apps"] == []  # Kore is no longer installed
+
+
+async def test_refresh_button_and_reconnect_catch_up(hass, coordinator, publish):
+    from custom_components.haptique_rs90.button import HaptiqueRS90RefreshButton
+
+    button = HaptiqueRS90RefreshButton(coordinator, coordinator.entry)
+    await button.async_press()
+    topics = [call.args[1] for call in publish.call_args_list]
+    assert topics[0].endswith("/discovery/refresh")
+
+    def refreshes():
+        return sum(
+            call.args[1].endswith("/discovery/refresh")
+            for call in publish.call_args_list
+        )
+
+    before = refreshes()
+    for status in ("offline", "online", "offline", "online"):
+        await message(hass, "status", status)
+    # Only the first reconnection within 5 minutes asks for a new snapshot.
+    assert refreshes() == before + 1
