@@ -14,6 +14,7 @@ from typing import Any
 
 from homeassistant.components.logbook import (
     LOGBOOK_ENTRY_ENTITY_ID,
+    LOGBOOK_ENTRY_ICON,
     LOGBOOK_ENTRY_MESSAGE,
     LOGBOOK_ENTRY_NAME,
 )
@@ -32,6 +33,52 @@ def result_message(data: dict[str, Any]) -> str:
     action = data.get("action")
     prefix = action.upper() if action else "result"
     return f"{prefix}: {status}"
+
+
+# First matching prefix wins; checked on the upper-cased command name.
+_COMMAND_ICONS = (
+    ("POWER", "mdi:power"),
+    ("VOLUME_UP", "mdi:volume-plus"),
+    ("VOL_UP", "mdi:volume-plus"),
+    ("VOLUME_DOWN", "mdi:volume-minus"),
+    ("VOL_DOWN", "mdi:volume-minus"),
+    ("MUTE", "mdi:volume-mute"),
+    ("CHANNEL", "mdi:television-guide"),
+    ("CH_", "mdi:television-guide"),
+    ("UP", "mdi:arrow-up-bold"),
+    ("DOWN", "mdi:arrow-down-bold"),
+    ("LEFT", "mdi:arrow-left-bold"),
+    ("RIGHT", "mdi:arrow-right-bold"),
+    ("OK", "mdi:checkbox-blank-circle-outline"),
+    ("SELECT", "mdi:checkbox-blank-circle-outline"),
+    ("ENTER", "mdi:checkbox-blank-circle-outline"),
+    ("RETURN", "mdi:keyboard-return"),
+    ("BACK", "mdi:keyboard-return"),
+    ("HOME", "mdi:home"),
+    ("MENU", "mdi:menu"),
+    ("INFO", "mdi:information-outline"),
+    ("PLAY", "mdi:play-pause"),
+    ("PAUSE", "mdi:pause"),
+    ("STOP", "mdi:stop"),
+    ("REWIND", "mdi:rewind"),
+    ("FAST_FORWARD", "mdi:fast-forward"),
+    ("FORWARD", "mdi:fast-forward"),
+    ("INPUT", "mdi:import"),
+    ("SOURCE", "mdi:import"),
+)
+
+_WAKE_ICONS = {"sent": "mdi:alarm", "woke": "mdi:alarm-check"}
+
+
+def command_icon(command: str | None) -> str:
+    """Pick an icon for a device command, e.g. mdi:power for POWER_OFF."""
+    name = (command or "").upper()
+    if name.isdigit():
+        return "mdi:dialpad"
+    for prefix, icon in _COMMAND_ICONS:
+        if name.startswith(prefix):
+            return icon
+    return "mdi:remote"
 
 
 def wake_message(data: dict[str, Any]) -> str:
@@ -101,6 +148,7 @@ def async_describe_events(
         return {
             LOGBOOK_ENTRY_NAME: f"RS90 {data.get('device') or 'device'}",
             LOGBOOK_ENTRY_MESSAGE: f"{data.get('command')} sent",
+            LOGBOOK_ENTRY_ICON: command_icon(data.get("command")),
         }
 
     async_describe_event(DOMAIN, COMMAND_EVENT, async_describe_command)
@@ -110,6 +158,9 @@ def async_describe_events(
         return {
             LOGBOOK_ENTRY_NAME: "RS90",
             LOGBOOK_ENTRY_MESSAGE: wake_message(event.data),
+            LOGBOOK_ENTRY_ICON: _WAKE_ICONS.get(
+                event.data.get("result"), "mdi:alarm-off"
+            ),
         }
 
     async_describe_event(DOMAIN, WAKE_EVENT, async_describe_wake)

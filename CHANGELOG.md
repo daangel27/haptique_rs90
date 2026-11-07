@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Wake the RS90 up**: enter its IP address in the options to get a **Wake up** button, and optionally wake it up automatically before macros, apps and device commands (UDP packets to its IP until it reports online, up to 20 s; works with the RS90's random MAC address)
 - With auto-wake, the RGB ring light and **Sync** buttons also wake the RS90 up, and **Last Reported App** keeps its last value while the RS90 sleeps
 - Commands pressed while the RS90 wakes up are sent one by one once it is ready (4 s after it reports online), so none is lost
-- The device **Activity** shows each device command sent (e.g. `RS90 KODI · DOWN sent`) and each wake-up (`wake-up sent`, `woke up in 18 s` or `did not wake up`)
+- The device **Activity** shows, with an icon, each device command sent (e.g. `RS90 KODI · DOWN sent`) and each wake-up (`wake-up sent`, `woke up in 18 s` or `did not wake up`)
 - **Sync** button (configuration entity): asks the RS90 to publish its devices, commands, macros, sequences and apps again, plus battery and macro states, without using an action
 - When the RS90 wakes up, the integration asks for its lists again (at most every 5 minutes), so changes made while it slept are picked up
 - **Integration options** become a menu: rename the remote, or choose the command buttons shown for each device (all by default, none hides the device)

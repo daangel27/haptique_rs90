@@ -148,3 +148,14 @@ async def test_queued_commands_after_wake(hass, coordinator, publish):
     assert wake_message(wakes[1]).startswith("woke up in")
     commands = [e.data["command"] for e in events if e.event_type == COMMAND_EVENT]
     assert commands == ["DOWN1", "DOWN2", "DOWN3"]
+
+
+def test_logbook_icons():
+    from custom_components.haptique_rs90.logbook import command_icon
+
+    assert command_icon("POWER") == "mdi:power"
+    assert command_icon("VOLUME_DOWN") == "mdi:volume-minus"
+    assert command_icon("DOWN") == "mdi:arrow-down-bold"
+    assert command_icon("INPUT_CBL_SAT") == "mdi:import"
+    assert command_icon("7") == "mdi:dialpad"
+    assert command_icon("ECO_MODE_TOGGLE") == "mdi:remote"
