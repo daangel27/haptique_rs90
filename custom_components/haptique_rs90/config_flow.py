@@ -13,7 +13,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
-from .const import DOMAIN, CONF_REMOTE_ID, CONF_NAME
+from .const import CONF_DASHBOARD_COMMANDS, CONF_NAME, CONF_REMOTE_ID, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -124,33 +124,126 @@ class HaptiqueRS90OptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         self._config_entry = config_entry
+        self._device_id: str | None = None
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage the options."""
+        """Choose what to configure."""
+        return self.async_show_menu(
+            step_id="init", menu_options=["name", "dashboard_device"]
+        )
+
+    def _save(self, **changes: Any) -> FlowResult:
+        """Store options without losing the ones set in other steps."""
+        return self.async_create_entry(
+            title="", data={**self._config_entry.options, **changes}
+        )
+
+    async def async_step_name(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Rename the remote."""
         if user_input is not None:
-            # Update config entry with new name
             self.hass.config_entries.async_update_entry(
                 self._config_entry,
-                data={
-                    **self._config_entry.data,
-                    CONF_NAME: user_input[CONF_NAME],
-                },
+                data={**self._config_entry.data, CONF_NAME: user_input[CONF_NAME]},
             )
-            return self.async_create_entry(title="", data={})
+            return self._save()
 
         return self.async_show_form(
-            step_id="init",
+            step_id="name",
             data_schema=vol.Schema(
                 {
                     vol.Required(
                         CONF_NAME,
                         default=self._config_entry.data.get(
                             CONF_NAME,
-                            f"RS90 {self._config_entry.data[CONF_REMOTE_ID][:8]}"
+                            f"RS90 {self._config_entry.data[CONF_REMOTE_ID][:8]}",
                         ),
                     ): str,
+                }
+            ),
+        )
+
+    def _inventory(self) -> tuple[list[dict], dict[str, list]]:
+        coordinator = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id)
+        data = (coordinator.data if coordinator else None) or {}
+        return data.get("devices", []), data.get("device_commands", {})
+
+    async def async_step_dashboard_device(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Pick the RS90 device whose dashboard buttons to choose."""
+        devices, _ = self._inventory()
+        if not devices:
+            return self.async_abort(reason="no_devices")
+        if user_input is not None:
+            self._device_id = user_input["device"]
+            return await self.async_step_dashboard_commands()
+
+        return self.async_show_form(
+            step_id="dashboard_device",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("device"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                selector.SelectOptionDict(
+                                    value=device["id"], label=device["name"]
+                                )
+                                for device in sorted(
+                                    devices, key=lambda d: str(d["name"]).lower()
+                                )
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    )
+                }
+            ),
+        )
+
+    async def async_step_dashboard_commands(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Choose the command buttons shown for one device."""
+        devices, commands = self._inventory()
+        device = next((d for d in devices if d["id"] == self._device_id), None)
+        if device is None:
+            return self.async_abort(reason="no_devices")
+        available = list(
+            dict.fromkeys(
+                cmd["id"] for cmd in commands.get(device["name"], []) if cmd.get("id")
+            )
+        )
+        selection = dict(self._config_entry.options.get(CONF_DASHBOARD_COMMANDS, {}))
+
+        if user_input is not None:
+            chosen = user_input.get("commands", [])
+            if user_input.get("show_all") or set(chosen) == set(available):
+                selection.pop(self._device_id, None)
+            else:
+                selection[self._device_id] = [c for c in available if c in chosen]
+            return self._save(**{CONF_DASHBOARD_COMMANDS: selection})
+
+        current = selection.get(self._device_id, available)
+        return self.async_show_form(
+            step_id="dashboard_commands",
+            description_placeholders={"device": device["name"]},
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "show_all", default=self._device_id not in selection
+                    ): bool,
+                    vol.Optional(
+                        "commands", default=[c for c in current if c in available]
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=available,
+                            multiple=True,
+                            mode=selector.SelectSelectorMode.LIST,
+                        )
+                    ),
                 }
             ),
         )

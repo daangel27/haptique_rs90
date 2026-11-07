@@ -22,11 +22,35 @@
     "step": {
       "init": {
         "title": "Options Haptique RS90",
-        "description": "Modifier les parametres de la telecommande",
+        "menu_options": {
+          "name": "Renommer la télécommande",
+          "dashboard_device": "Tableau de bord : choisir les boutons de commandes"
+        }
+      },
+      "name": {
+        "title": "Renommer la télécommande",
         "data": {
-          "name": "Nom de la telecommande"
+          "name": "Nom de la télécommande"
+        }
+      },
+      "dashboard_device": {
+        "title": "Boutons de commandes du tableau de bord",
+        "description": "Choisissez l'appareil RS90 dont vous voulez sélectionner les boutons pour le tableau de bord Haptique RS90.",
+        "data": {
+          "device": "Appareil"
+        }
+      },
+      "dashboard_commands": {
+        "title": "Boutons pour {device}",
+        "description": "Cochez les commandes à afficher comme boutons dans la vue {device} du tableau de bord Haptique RS90. Décochez tout pour masquer cet appareil.",
+        "data": {
+          "show_all": "Afficher toutes les commandes (et les nouvelles automatiquement)",
+          "commands": "Commandes"
         }
       }
+    },
+    "abort": {
+      "no_devices": "Aucun appareil reçu de la RS90 pour l'instant. Vérifiez qu'elle est en ligne, puis réessayez."
     }
   },
   "services": {

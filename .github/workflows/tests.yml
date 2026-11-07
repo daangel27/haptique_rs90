@@ -59,4 +59,4 @@ jobs:
           cache-dependency-path: requirements_test.txt
       - run: python -m pip install -r requirements_test.txt
       - run: python -m pytest -q
-      - run: python -m ruff check custom_components/haptique_rs90/targets.py custom_components/haptique_rs90/switch.py custom_components/haptique_rs90/button.py custom_components/haptique_rs90/coordinator.py custom_components/haptique_rs90/__init__.py custom_components/haptique_rs90/sensor.py custom_components/haptique_rs90/logbook.py tests
+      - run: python -m ruff check custom_components/haptique_rs90/targets.py custom_components/haptique_rs90/switch.py custom_components/haptique_rs90/button.py custom_components/haptique_rs90/coordinator.py custom_components/haptique_rs90/__init__.py custom_components/haptique_rs90/sensor.py custom_components/haptique_rs90/logbook.py custom_components/haptique_rs90/frontend.py custom_components/haptique_rs90/websocket.py tests

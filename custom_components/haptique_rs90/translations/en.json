@@ -21,12 +21,36 @@
   "options": {
     "step": {
       "init": {
-        "title": "Haptique RS90 Options",
-        "description": "Modify remote settings",
+        "title": "Haptique RS90 options",
+        "menu_options": {
+          "name": "Rename the remote",
+          "dashboard_device": "Dashboard: choose command buttons"
+        }
+      },
+      "name": {
+        "title": "Rename the remote",
         "data": {
           "name": "Remote name"
         }
+      },
+      "dashboard_device": {
+        "title": "Dashboard command buttons",
+        "description": "Choose the RS90 device whose buttons you want to pick for the Haptique RS90 dashboard.",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "dashboard_commands": {
+        "title": "Buttons for {device}",
+        "description": "Tick the commands to show as buttons in the {device} view of the Haptique RS90 dashboard. Untick everything to hide this device.",
+        "data": {
+          "show_all": "Show all commands (and new ones automatically)",
+          "commands": "Commands"
+        }
       }
+    },
+    "abort": {
+      "no_devices": "No device received from the RS90 yet. Make sure it is online, then try again."
     }
   },
   "services": {

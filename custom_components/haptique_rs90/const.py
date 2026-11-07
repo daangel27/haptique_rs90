@@ -32,3 +32,7 @@ CONF_NAME = "name"
 STATE_ONLINE = "online"
 STATE_OFFLINE = "offline"
 
+
+# Options: dashboard command buttons chosen per RS90 device ID.
+# A device absent from the mapping shows all its commands; an empty list hides it.
+CONF_DASHBOARD_COMMANDS = "dashboard_commands"
