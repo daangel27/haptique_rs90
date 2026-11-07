@@ -5,7 +5,7 @@ Créez une télécommande dans votre tableau de bord, avec **un bouton par comma
 [English](README.md) | **Français**
 
 ![Exemple de carte de boutons](../documentation/screenshots/device_buttons_card.png)
-*Exemple : une télécommande complète pour un décodeur*
+*Exemple : la carte KODI générée avec `example_kodi.yaml`*
 
 > ℹ️ C'est un **modèle** : les tableaux de bord de Home Assistant ne savent pas l'exécuter directement. On le calcule une fois dans **Outils de développement → Modèle**, puis on colle le résultat dans une carte. À refaire si les commandes de l'appareil changent.
 
