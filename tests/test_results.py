@@ -93,3 +93,23 @@ async def test_last_macro_result_sensor_state(hass, coordinator, publish):
         assert hass.states.get(sensor_id).state == "KODI · executed"
     finally:
         await hass.config_entries.async_unload_platforms(coordinator.entry, platforms)
+
+
+async def test_setup_clears_stale_firmware_version(hass, coordinator):
+    from homeassistant.helpers import device_registry as dr
+
+    registry = dr.async_get(hass)
+    registry.async_get_or_create(
+        config_entry_id=coordinator.entry.entry_id,
+        identifiers={("haptique_rs90", "remote-1")},
+        sw_version="1.0",
+    )
+    registry.async_get_or_create(
+        config_entry_id=coordinator.entry.entry_id,
+        identifiers={("haptique_rs90", "remote-1")},
+        manufacturer="Haptique",
+        model="RS90",
+        sw_version=None,
+    )
+    device = registry.async_get_device(identifiers={("haptique_rs90", "remote-1")})
+    assert device.sw_version is None

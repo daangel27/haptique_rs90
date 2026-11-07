@@ -211,6 +211,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         name=entry.data.get("name", f"Haptique RS90 {entry.data['remote_id'][:8]}"),
         manufacturer="Haptique",
         model="RS90",
+        # Clear the stale hard-coded "1.0" stored by earlier versions: the RS90
+        # does not publish its firmware version over MQTT.
+        sw_version=None,
     )
 
     # Store HA device ID in coordinator for event firing
