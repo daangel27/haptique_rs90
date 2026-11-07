@@ -90,3 +90,37 @@ a draft until discovery, real macro/sequence ON/OFF, state queries, execution
 errors, sleep/reconnection and command replay prevention have been checked
 against an RS90 with the merged Standard MQTT firmware. Record the firmware
 and Home Assistant versions before declaring release readiness.
+
+## Installed app controls
+
+The app contribution depends on the macro/sequence contribution. Firmware
+publishes `app/list` as `[{id:packageId,name:label}]` and the integration adds
+one launch button per package. Package IDs determine identity and routing;
+duplicate or changed labels do not affect the controls. Removed apps become
+unavailable and their registered buttons survive reinstallation.
+
+New app buttons are disabled by default, including system apps. Enable only
+the apps you want under Settings > Devices & services > Entities. Existing
+entity enable/disable choices and the RGB Ring Light button are unchanged.
+
+```yaml
+action: haptique_rs90.launch_app
+data:
+  rs90_id: YOUR_HOME_ASSISTANT_DEVICE_ID
+  app_package_id: com.spotify.music
+```
+
+The action publishes non-retained `open` to `app/{packageId}/open` at QoS 1.
+The button's `last_result` records `launched` or an error such as
+`launch_failed`, `activity_unavailable` or `app_not_found`. `launched` confirms
+Android accepted the intent; it does not confirm playback or loading completion.
+An error never changes the Last Reported App sensor.
+
+Last Reported App shows the package received on retained `active_app` and
+includes its label when known. This is the last firmware observation, not
+continuous tracking of every later manual app transition. Info Summary adds
+`apps_by_id` and `apps_count`. `refresh_lists` refreshes app discovery through
+`discovery/refresh`; the firmware also supports `app/list/get`.
+
+Live acceptance must additionally verify normal and Android TV app discovery,
+launch success/error replies and the reported package on the real device.

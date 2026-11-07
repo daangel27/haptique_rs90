@@ -3,7 +3,8 @@
 ## Contribution Standard MQTT (brouillon)
 
 Ajoute les macros réelles, les séquences, l’interrogation des états mémorisés et
-l’actualisation de la découverte. Les identités des interrupteurs existants sont
+l’actualisation de la découverte, les boutons d’ouverture des applications et
+un capteur indiquant la dernière application signalée. Les identités des interrupteurs existants sont
 conservées lors de la migration. Seul le retour du firmware confirme l’état.
 Voir le [guide Standard MQTT](documentation/STANDARD_MQTT.md), notamment les
 vérifications encore nécessaires sur une télécommande réelle.

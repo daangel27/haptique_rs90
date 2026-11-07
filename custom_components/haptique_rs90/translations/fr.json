@@ -125,6 +125,27 @@
           "description": "Demander l’état d’exécution mémorisé d’une macro ou séquence. Ce n’est pas une mesure de l’alimentation des appareils."
         }
       }
+    },
+    "launch_app": {
+      "name": "Ouvrir une application",
+      "description": "Ouvrir une application installée avec son nom de paquet. Le retour confirme l’acceptation Android, pas la lecture.",
+      "fields": {
+        "rs90_id": {
+          "name": "Télécommande RS90",
+          "description": "Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis sensor.rs90_info_summary attribut rs90_id)"
+        },
+        "app_package_id": {
+          "name": "Nom de paquet",
+          "description": "Nom de paquet indiqué dans apps_by_id, par exemple com.spotify.music."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_app": {
+        "name": "Dernière application signalée"
+      }
     }
   }
 }

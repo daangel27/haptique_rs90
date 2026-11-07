@@ -29,7 +29,7 @@ from .const import (
     TOPIC_STATUS,
     TOPIC_TEST_STATUS,
 )
-from .targets import TargetManager, parse_inventory
+from .targets import TargetManager, parse_inventory, valid_reference
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,6 +82,9 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             "macros": [],
             "sequences": [],
             "sequence_states": {},
+            "apps": [],
+            "app_results": {},
+            "active_app": None,
             "device_commands": {},
             "test_status": None,
             "macro_states": {},  # Store macro states (on/off) from MQTT only
@@ -89,6 +92,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             "led_light_duration": 5,  # Default duration in seconds
         }
 
+        self._app_feedback_ready = False
         self.targets = TargetManager(self)
         _LOGGER.info("Coordinator initialized - updates via MQTT only")
 
@@ -156,6 +160,38 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         await self._subscribe(
             f"{self.base_topic}/{TOPIC_TEST_STATUS}", self._handle_test_status
         )
+
+        await self._subscribe(f"{self.base_topic}/app/list", self._handle_app_list)
+        await self._subscribe(f"{self.base_topic}/active_app", self._handle_active_app)
+
+        @callback
+        def app_status(msg):
+            if self._closed:
+                return
+            package_id = msg.topic.removeprefix(f"{self.base_topic}/app/").removesuffix(
+                "/status"
+            )
+            if package_id not in {item["id"] for item in self.data["apps"]}:
+                return
+            if msg.payload == "launched":
+                outcome = {"status": "launched"}
+            elif msg.payload.startswith("ERROR:"):
+                outcome = {
+                    "status": "error",
+                    "error": msg.payload.removeprefix("ERROR:"),
+                }
+            else:
+                return
+            self.data["app_results"][package_id] = outcome
+            self.async_set_updated_data(self.data)
+
+        # One owned wildcard subscription covers package feedback before any launch,
+        # including apps discovered after platform setup. Removed packages are ignored.
+        unsubscribe = await mqtt.async_subscribe(
+            self.hass, f"{self.base_topic}/app/+/status", app_status, qos=0
+        )
+        self._subscriptions.append(unsubscribe)
+        self._app_feedback_ready = True
 
         # Request initial battery level by publishing to battery/status
         # This triggers the remote to publish the value on battery_level
@@ -333,6 +369,42 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             _LOGGER.warning("Invalid %s inventory: %s", kind, err)
             return
         self.targets.update_inventory(kind, records)
+
+    @callback
+    def _handle_app_list(self, payload: str) -> None:
+        try:
+            apps = parse_inventory(payload)
+        except (ValueError, TypeError) as err:
+            _LOGGER.warning("Invalid app inventory: %s", err)
+            return
+        self.data["apps"] = apps
+        package_ids = {item["id"] for item in apps}
+        self.data["app_results"] = {
+            package_id: result
+            for package_id, result in self.data["app_results"].items()
+            if package_id in package_ids
+        }
+        self.async_set_updated_data(self.data)
+
+    @callback
+    def _handle_active_app(self, payload: str) -> None:
+        if payload and not valid_reference(payload):
+            return
+        self.data["active_app"] = payload or None
+        self.async_set_updated_data(self.data)
+
+    async def async_launch_app(self, package_id: str) -> None:
+        if self._closed or not self._app_feedback_ready:
+            raise HomeAssistantError("App feedback is not available")
+        if package_id not in {item["id"] for item in self.data["apps"]}:
+            raise HomeAssistantError("Installed app package ID not found")
+        await mqtt.async_publish(
+            self.hass,
+            f"{self.base_topic}/app/{package_id}/open",
+            "open",
+            qos=1,
+            retain=False,
+        )
 
     @callback
     def _handle_battery(self, payload: str) -> None:

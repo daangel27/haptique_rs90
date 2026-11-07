@@ -2,8 +2,8 @@
 
 ## Standard MQTT contribution (draft)
 
-Adds real-macro and sequence switches, persisted-state queries and fresh discovery
-requests. Existing registered macro switches are preserved during sequence migration.
+Adds real-macro and sequence switches, persisted-state queries, installed-app
+launch buttons, a last-reported-app sensor and fresh discovery requests. Existing registered macro switches are preserved during sequence migration.
 State remains unknown until firmware feedback arrives; execution requests are never
 retained. See [Standard MQTT controls and acceptance](documentation/STANDARD_MQTT.md)
 for actions, firmware compatibility and the outstanding live-device checks.

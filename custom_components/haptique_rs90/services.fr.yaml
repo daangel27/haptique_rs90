@@ -3,7 +3,7 @@ trigger_macro:
   description: Demander l’exécution ON/OFF d’une macro ou séquence migrée. Le retour
     du firmware détermine l’état.
   fields:
-    rs90_id:
+    rs90_id: &id002
       name: Télécommande RS90
       description: Sélectionnez votre télécommande Haptique RS90 (trouvez-la dans
         Paramètres > Appareils et services > Haptique RS90, ou obtenez l'ID depuis
@@ -103,6 +103,18 @@ query_status:
       name: Identifiant de la cible
       description: Demander l’état d’exécution mémorisé d’une macro ou séquence. Ce
         n’est pas une mesure de l’alimentation des appareils.
+      required: true
+      selector:
+        text: {}
+launch_app:
+  name: Ouvrir une application
+  description: Ouvrir une application installée avec son nom de paquet. Le retour
+    confirme l’acceptation Android, pas la lecture.
+  fields:
+    rs90_id: *id002
+    app_package_id:
+      name: Nom de paquet
+      description: Nom de paquet indiqué dans apps_by_id, par exemple com.spotify.music.
       required: true
       selector:
         text: {}

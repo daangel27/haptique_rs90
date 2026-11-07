@@ -38,6 +38,7 @@ async def async_setup_entry(
         HaptiqueRS90BatterySensor(coordinator, entry),
         HaptiqueRS90LastKeySensor(coordinator, entry),
         HaptiqueRS90RunningMacroSensor(coordinator, entry),
+        HaptiqueRS90ActiveAppSensor(coordinator, entry),
     ]
 
     # Track device command sensors by device ID
@@ -458,8 +459,44 @@ class RS90InfoSummarySensor(HaptiqueRS90SensorBase):
                 item["id"]: item["name"] for item in self.coordinator.data["sequences"]
             },
             "sequences_count": len(self.coordinator.data["sequences"]),
+            "apps_by_id": {
+                item["id"]: item["name"] for item in self.coordinator.data["apps"]
+            },
+            "apps_count": len(self.coordinator.data["apps"]),
             # RS90 Remote info
             "rs90_id": ha_device_id,  # HA Device ID for service calls
             "rs90_remote_id": self._entry.data["remote_id"],  # MQTT RemoteID
             "rs90_device_name": device_name,
+        }
+
+
+class HaptiqueRS90ActiveAppSensor(HaptiqueRS90SensorBase):
+    """Last package reported by firmware, not continuous foreground tracking."""
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "active_app")
+        self._attr_translation_key = "active_app"
+        self._attr_icon = "mdi:application"
+
+    @property
+    def available(self) -> bool:
+        return self.coordinator.data["status"] == "online"
+
+    @property
+    def native_value(self) -> str | None:
+        return self.coordinator.data["active_app"]
+
+    @property
+    def extra_state_attributes(self):
+        package_id = self.native_value
+        return {
+            "app_package_id": package_id,
+            "app_name": next(
+                (
+                    item["name"]
+                    for item in self.coordinator.data["apps"]
+                    if item["id"] == package_id
+                ),
+                None,
+            ),
         }

@@ -83,7 +83,16 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             hass, call.data["rs90_id"]
         ).async_control_led_light("on", call.data["duration"])
 
+    async def launch_app(call):
+        await _coordinator_for_device(hass, call.data["rs90_id"]).async_launch_app(
+            call.data["app_package_id"]
+        )
+
     services = {
+        "launch_app": (
+            launch_app,
+            {**remote, vol.Required("app_package_id"): cv.string},
+        ),
         "trigger_macro": (
             trigger_macro,
             {**remote, **action, vol.Required("rs90_macro_id"): cv.string},

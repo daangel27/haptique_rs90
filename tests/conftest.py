@@ -4,8 +4,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 from homeassistant.config_entries import ConfigEntryState, current_entry
+from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.haptique_rs90 import async_setup_services
 from custom_components.haptique_rs90.coordinator import HaptiqueRS90Coordinator
 
 
@@ -44,3 +46,14 @@ async def coordinator(hass, mqtt_mock, mqtt_client_mock):
 def publish():
     with patch("homeassistant.components.mqtt.async_publish") as mock:
         yield mock
+
+
+@pytest.fixture
+async def remote(hass, coordinator):
+    device = dr.async_get(hass).async_get_or_create(
+        config_entry_id=coordinator.entry.entry_id,
+        identifiers={("haptique_rs90", "remote-1")},
+    )
+    coordinator.device_id = device.id
+    await async_setup_services(hass)
+    return device.id
