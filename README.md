@@ -80,8 +80,8 @@ Since **Home Assistant 2026.11**, HACS is built into Home Assistant as the **Mar
 
 **Home Assistant 2026.11 or newer (Marketplace)**
 1. Go to **Settings** → **Marketplace**
-2. Click **⋮** (three dots) → **Custom repositories**
-3. Add `https://github.com/daangel27/haptique_rs90` with the category `Integration`
+2. Click **Add from link** (top right)
+3. Paste `https://github.com/daangel27/haptique_rs90` in **GitHub link** and click **Add**
 4. Open **Haptique RS90** and select **Install**: the setup starts right away, no restart needed
 
 **Older versions (HACS)**
