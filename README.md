@@ -1,19 +1,10 @@
 # Haptique RS90 - Home Assistant Integration
 
-## Standard MQTT contribution (draft)
-
-Adds real-macro and sequence switches, persisted-state queries, installed-app
-launch buttons, a last-reported-app sensor and fresh discovery requests. Existing registered macro switches are preserved during sequence migration.
-State remains unknown until firmware feedback arrives; execution requests are never
-retained. See [Standard MQTT controls and acceptance](documentation/STANDARD_MQTT.md)
-for actions, firmware compatibility and the outstanding live-device checks.
-
-
-[![Version](https://img.shields.io/badge/version-1.7.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
+[![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)](https://github.com/daangel27/haptique_rs90/releases)
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Home Assistant integration for the **Haptique RS90** universal remote via MQTT.
+Home Assistant integration for the **Haptique RS90** universal remote via MQTT: macros, sequences, installed apps, device commands, key presses and RGB ring light.
 
 **English** | [Français](README_FR.md)
 
@@ -21,19 +12,26 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT.
 
 ## 📸 Screenshots
 
+<p align="center">
+<img src="documentation/screenshots/device_info.png" alt="Device page" width="90%" />
+<br/><em>Device page: macros, sequences, app buttons and RGB ring light</em>
+</p>
+
 <table>
 <tr>
-<td width="30%">
-<img src="documentation/screenshots/device_info.png" alt="Device Info" />
-<p align="center"><em>Device Information & Controls</em></p>
+<td width="34%" valign="top">
+<img src="documentation/screenshots/integration.png" alt="Integration" />
+<p align="center"><em>Integration with its icon</em></p>
+<img src="documentation/screenshots/macro_result.png" alt="Last Macro Result" />
+<p align="center"><em>Last Macro Result with its history</em></p>
 </td>
-<td width="30%">
-<img src="documentation/screenshots/device_list.png" alt="Device List" />
-<p align="center"><em>Device List</em></p>
+<td width="33%" valign="top">
+<img src="documentation/screenshots/sensors.png" alt="Sensors" />
+<p align="center"><em>Sensors and command lists</em></p>
 </td>
-<td width="50%">
-<img src="documentation/screenshots/device_commands.png" alt="Device Commands" />
-<p align="center"><em>Device Commands List</em></p>
+<td width="33%" valign="top">
+<img src="documentation/screenshots/device_commands.png" alt="Device commands" />
+<p align="center"><em>Commands of a device</em></p>
 </td>
 </tr>
 </table>
@@ -42,38 +40,31 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT.
 
 ## ✨ Features
 
-### Core Features
-- 🎛️ **Macro switches**: Control your macros with visible ON/OFF state
-- 📋 **Battery sensor**: Monitor remote battery level with optimized refresh
-- 📌 **Connection status**: Real-time online/offline detection
-- 🎮 **Key detection**: Event-based button press detection (every press triggers)
-- 🎯 **Device triggers**: Native Home Assistant automation UI support (24 buttons)
-- 🔄 **RGB Ring Light**: Button and service to trigger animation
+### Control
+- 🎛️ **Macro and sequence switches**: ON/OFF from Home Assistant, state confirmed by the RS90 firmware
+- 📱 **App buttons**: launch any app installed on the RS90 (disabled by default, enable the ones you want)
+- 📡 **Device commands**: send any IR/IP command of any configured device
+- 🌈 **RGB Ring Light**: button and action to trigger an animation
 
-### Advanced Features
-- 📱 **Device list**: View all configured devices with command sensors
-- 📊 **Info Summary sensor**: All IDs in one place for easy service calls
-- 🔄 **100% MQTT-driven**: No polling, pure event-driven updates
-- 🎯 **QoS optimized**: QoS 0 for monitoring, QoS 1 for control commands
-- 🚀 **Auto-discovery**: Automatic Remote ID detection
-- 🌐 **Multi-language**: English and French
+### Monitoring
+- 📊 **Last Macro Result**: last execution result with macro name, action and status (e.g. `CANAL · OFF · skipped (already_in_requested_state)`), with one logbook entry per result
+- 📲 **Last Reported App**: last app reported by the RS90, shown by name
+- 🔋 **Battery** and 📌 **Connection** sensors
+- 🎮 **Key presses**: an event on every press, plus native device triggers (24 buttons) for the automation editor
 
-### What's New in v1.7.0
-- ⚡ **Event-based key press**: Every button press fires an event (including repeated presses)
-- 🎮 **Device triggers**: 24 buttons available in automation UI (no YAML needed)
-- 🔄 **Macro status sync**: Accurate macro state when triggered from RS90 remote (requires firmware update)
-- 🔋 **Smart battery refresh**: Automatic refresh on reconnection + throttle protection
-- 📍 **MQTT RemoteID exposed**: Easy access for debugging
+### Under the hood
+- 🔄 **100% MQTT, event-driven**: no polling
+- 🆔 **Stable IDs**: entities survive renames in the Haptique app
+- 🚀 **Auto-discovery** of the remote
+- 🌐 **English and French**
 
 ---
 
 ## 📋 Requirements
 
-- Home Assistant 2024.1.0 or higher
-- **Configured MQTT broker** (Mosquitto recommended)
-- **Haptique RS90 remote configured and connected to MQTT**
-- **RS90 Firmware**: Latest version recommended for all features
-  - Macro status sync requires upcoming firmware update (contact Haptique support)
+- **Home Assistant 2024.8** or newer (the integration icon needs **2026.3** or newer)
+- **MQTT broker** configured in Home Assistant (Mosquitto recommended)
+- **Haptique RS90** connected to that broker, with the **Standard MQTT firmware** (tested on **4.1.2** and **4.2**)
 
 ---
 
@@ -86,195 +77,172 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT.
 **Manual steps** (if the button doesn't work):
 
 1. Open **HACS** in Home Assistant
-2. Click **Integrations**
-3. Click **⋮** (three dots) → **Custom repositories**
-4. Add repository:
+2. Click **⋮** (three dots) → **Custom repositories**
+3. Add repository:
    - **URL**: `https://github.com/daangel27/haptique_rs90`
    - **Category**: `Integration`
-5. Click **Add**
-6. Search for **"Haptique RS90"**
-7. Click **Download**
-8. Restart Home Assistant
+4. Search for **"Haptique RS90"** and click **Download**
+5. Restart Home Assistant
 
 ### Manual Installation
 
 1. Download the [latest release](https://github.com/daangel27/haptique_rs90/releases)
-2. Extract to `/config/custom_components/haptique_rs90/`
+2. Copy `custom_components/haptique_rs90/` to `/config/custom_components/haptique_rs90/`
 3. Restart Home Assistant
 
 ---
 
 ## ⚙️ Configuration
 
-### Prerequisites
-
 Before adding the integration, make sure:
-1. ✅ **MQTT broker is configured** in Home Assistant
-2. ✅ **RS90 is configured** to connect to your MQTT broker (via Haptique Config app)
-3. ✅ **RS90 is online** and publishing to MQTT
+1. ✅ The **MQTT broker** is configured in Home Assistant
+2. ✅ The **RS90 is connected** to that broker (Haptique Config app)
+3. ✅ The **RS90 is online** (on its dock, see [Sleep mode](#-sleep-mode))
 
-### Quick Setup
+Then:
+1. Go to **Settings** → **Devices & Services** → **Add Integration**
+2. Search for **Haptique RS90**
+3. The integration **discovers your remote automatically** 🎉
+4. Give it a name (optional) and click **Submit**
 
-1. Go to **Settings** → **Devices & Services**
-2. Click **Add Integration**
-3. Search for **Haptique RS90**
-4. **The integration will automatically discover your remote** 🎉
-5. Give it a name (optional, default: "RS90 {ID}")
-6. Click **Submit**
-
-That's it! All entities are created automatically.
+All entities are created automatically.
 
 ---
 
 ## 📊 Created Entities
 
-### Sensors
+| Entity | Description |
+|--------|-------------|
+| **Macro switches** (one per macro) | Turn a macro ON/OFF. State comes from the firmware (`ON` / `OFF` / unknown) |
+| **Sequence switches** (one per sequence) | Run a sequence ON/OFF |
+| **App buttons** (one per installed app) | Launch the app. **Disabled by default**: enable them in Settings → Entities |
+| **RGB Ring Light** button | Trigger the ring light animation |
+| **Last Macro Result** sensor | Last result, e.g. `CANAL · ON · executed`. Attributes: `target_name`, `target_id`, `target_kind`, `action`, `status`, `error`, `timestamp`. Restored after restart |
+| **Last Reported App** sensor | Last app reported by the RS90 (name), package in `app_package_id` |
+| **Battery** sensor | Battery level (%), refreshed every 30 min and on reconnection |
+| **Connection** binary sensor | Online / offline |
+| **Last Key Pressed** sensor | Last pressed button |
+| **Commands - {device}** sensors | Number of commands, full list in attributes |
+| **Info Summary** sensor | All IDs (devices, macros, sequences, apps) in one place, see [Finding the IDs](#-finding-the-ids-the-info-summary-sensor) |
 
-| Entity | Description | Update Frequency |
-|--------|-------------|------------------|
-| `sensor.rs90_battery` | Battery level (0-100%) | Every 30 min + on reconnection |
-| `sensor.rs90_info_summary` | All IDs in one place | Static |
-
-### Binary Sensors
-
-| Entity | Description | States |
-|--------|-------------|-------|
-| `binary_sensor.rs90_connection` | Connection status | ON (online) / OFF (offline) |
-| `binary_sensor.rs90_last_key_pressed` | Last pressed key | Button number |
-
-### Switches
-
-| Entity | Description | Actions |
-|--------|-------------|---------|
-| `switch.macro_{name}` | Macro control | ON / OFF / TOGGLE |
-
-**Features:**
-- ✅ Visible state (ON = active, OFF = inactive)
-- ✅ State syncs when triggered from RS90 remote (with firmware update)
-- ✅ Dynamic icon (▶️ / ⏹️)
-
-### Buttons
-
-| Entity | Description | Action |
-|--------|-------------|--------|
-| `button.rgb_ring_light` | RGB animation trigger | Activate 5 seconds |
+> ℹ️ Macro states are what the RS90 reports, **not** a measurement of the TV or amplifier power.
 
 ---
 
-## 🎯 New in v1.7.0: Event-Based Automations
+## 🎯 Automations
 
-### Using Events (Advanced)
+### Key presses
 
-Every button press fires an event:
+Every button press fires `haptique_rs90_key_pressed` (data: `remote_id`, `device_id`, `button`, `timestamp`):
 
 ```yaml
-automation:
-  - alias: "Button 13 - Toggle lights"
-    trigger:
-      - platform: event
-        event_type: haptique_rs90_key_pressed
-        event_data:
-          button: 13
-    action:
-      - service: light.toggle
-        target:
-          entity_id: light.living_room
+triggers:
+  - trigger: event
+    event_type: haptique_rs90_key_pressed
+    event_data:
+      button: 13
+actions:
+  - action: light.toggle
+    target:
+      entity_id: light.living_room
 ```
 
-**Event data includes:**
-- `remote_id`: MQTT RemoteID
-- `device_id`: Home Assistant Device ID
-- `button`: Button number (1-24)
-- `timestamp`: Press timestamp
+No YAML needed with **device triggers**: **Add Trigger** → **Device** → your RS90 → **Button pressed** → button 1-24.
 
-### Using Device Triggers (Easy - UI Only)
+<img src="documentation/screenshots/device_trigger.png" alt="Device trigger" width="60%" />
 
-**No YAML needed!** Create automations directly in the UI:
+### Macro results
 
-1. **Add Automation** → **Add Trigger** → **Device**
-2. Select **RS90 Remote**
-3. Choose **Button pressed**
-4. Select button number (1-24)
-5. Add actions
-6. Save
+Every macro/sequence result fires `haptique_rs90_macro_result` (data: `device_id`, `remote_id`, `target_kind`, `target_id`, `target_name`, `action`, `status`, `error`, `timestamp`). Example: get notified when a macro was skipped or failed:
 
-**Generated YAML:**
 ```yaml
-trigger:
-  - platform: device
-    device_id: [your_rs90_id]
-    domain: haptique_rs90
-    type: button_pressed
-    button: 13
+triggers:
+  - trigger: event
+    event_type: haptique_rs90_macro_result
+conditions:
+  - condition: template
+    value_template: "{{ trigger.event.data.status in ['skipped', 'failed', 'rejected'] }}"
+actions:
+  - action: notify.notify
+    data:
+      message: >
+        RS90 {{ trigger.event.data.target_name }}
+        {{ trigger.event.data.action | upper }}:
+        {{ trigger.event.data.status }} {{ trigger.event.data.error or '' }}
 ```
-
-**Benefits:**
-- ✅ Fires on every press (including repeated presses)
-- ✅ Works simultaneously with RS90 macros
-- ✅ Visual automation builder compatible
 
 ---
 
-## 🔧 Available Services
+## 🔧 Available Actions
 
-### `haptique_rs90.trigger_macro`
+### 🆔 Finding the IDs: the Info Summary sensor
 
-Trigger a macro on/off.
+All the IDs needed by the actions are gathered in the **Info Summary** sensor (`sensor.<name>_info_summary`): open it from the device page, then **Attributes** (or Developer tools → States).
+
+<table>
+<tr>
+<td width="40%"><img src="documentation/screenshots/info_summary.png" alt="Info Summary" /></td>
+<td valign="top">
+
+| Attribute | Use it for |
+|-----------|------------|
+| **Rs90 ID** | `rs90_id` in every action (Home Assistant device ID) |
+| **Rs90 remote ID** | The MQTT ID of the remote (`Haptique/<remote ID>/…` topics) |
+| **Macros** / **Macros by ID** | `rs90_macro_id` |
+| **Sequences** / **Sequences by ID** | `rs90_sequence_id` |
+| **Devices** / **Devices by ID** | `rs90_device_id` |
+| **Apps by ID** | `app_package_id` |
+
+The state shows the totals (e.g. `5 devices, 3 macros, 3 sequences`). The *by ID* lists stay readable even when two items share the same name.
+
+</td>
+</tr>
+</table>
+
+In the action editor you can also simply pick the RS90 with the device selector for `rs90_id`. Macro and sequence IDs are also in each switch's attributes.
+
+
+| Action | Description |
+|--------|-------------|
+| `haptique_rs90.trigger_macro` | Turn a macro ON/OFF (`rs90_macro_id`, `action`) |
+| `haptique_rs90.trigger_sequence` | Run a sequence ON/OFF (`rs90_sequence_id`, `action`) |
+| `haptique_rs90.query_status` | Ask the RS90 for the current state of a macro or sequence, without running it |
+| `haptique_rs90.trigger_device_command` | Send a device command (`rs90_device_id`, `command_name`) |
+| `haptique_rs90.launch_app` | Launch an installed app (`app_package_id`) |
+| `haptique_rs90.trigger_rgb_light` | Trigger the RGB ring light (`duration` 1-10 s) |
+| `haptique_rs90.refresh_lists` | Refresh devices, macros, sequences, apps and battery |
 
 ```yaml
-service: haptique_rs90.trigger_macro
+action: haptique_rs90.trigger_macro
 data:
-  rs90_id: "9b974dab9a7649e13baeb921d4c9bb85"  # From device page or Info Summary
-  rs90_macro_id: "692eb1561bddd5814022960c"     # From switch attributes or Info Summary
+  rs90_id: 9b974dab9a7649e13baeb921d4c9bb85
+  rs90_macro_id: 6ae380a69f93a9111666b754
   action: "on"
 ```
 
-**Find IDs:**
-- `rs90_id`: Device page URL or `sensor.rs90_info_summary` attribute
-- `rs90_macro_id`: `switch.macro_{name}` attributes or Info Summary
-
-### `haptique_rs90.trigger_device_command`
-
-Send a command to a device.
-
 ```yaml
-service: haptique_rs90.trigger_device_command
+action: haptique_rs90.launch_app
 data:
-  rs90_id: "9b974dab9a7649e13baeb921d4c9bb85"
-  rs90_device_id: "692ead781bddd58140228e33"  # From sensor attributes or Info Summary
-  command_name: "POWER"
+  rs90_id: 9b974dab9a7649e13baeb921d4c9bb85
+  app_package_id: org.xbmc.kore
 ```
 
-### `haptique_rs90.refresh_lists`
+More details: [Standard MQTT macros, sequences and apps](documentation/STANDARD_MQTT.md) · [Finding the device ID](documentation/GUIDE_DEVICE_ID.md)
 
-Force refresh of devices, macros, and battery.
+---
 
-```yaml
-service: haptique_rs90.refresh_lists
-data:
-  rs90_id: "9b974dab9a7649e13baeb921d4c9bb85"
-```
+## 😴 Sleep mode
 
-### `haptique_rs90.trigger_rgb_light`
-
-Trigger RGB ring light animation.
-
-```yaml
-service: haptique_rs90.trigger_rgb_light
-data:
-  rs90_id: "9b974dab9a7649e13baeb921d4c9bb85"
-  duration: 5  # 1-10 seconds
-```
+Off its dock, the RS90 goes to sleep after a while and shows as **offline**: its entities become unavailable and MQTT commands can't reach it. Put it back on the dock or wake it up (touch the screen or press a key).
 
 ---
 
 ## 🛠️ Troubleshooting
 
 ### Remote not detected
-
-1. Verify **MQTT broker is configured** (Settings > Devices & Services > MQTT)
-2. Check **RS90 is configured** to connect to MQTT (Haptique Config app)
-3. Verify **RS90 is online** (check in Haptique Config app)
+1. Check the **MQTT broker** in Settings → Devices & Services → MQTT
+2. Check the RS90 **MQTT settings** in the Haptique Config app
+3. Check the RS90 is **online** (on its dock)
 4. Enable debug logs:
 
 ```yaml
@@ -283,59 +251,46 @@ logger:
     custom_components.haptique_rs90: debug
 ```
 
-### Macro switches don't reflect correct state
+### Macro state looks wrong
+Known firmware limitations (reported to Haptique):
+- A macro started **from the RS90 screen** is not published over MQTT, so Home Assistant doesn't see it
+- When switching from one macro to another, the previous one can stay **ON**; turning it off later returns `skipped (already_in_requested_state)`
 
-**If using firmware without `/status` topic:**
-- Macro state only updates when triggered via Home Assistant
-- Triggering from RS90 remote won't sync state
-- **Solution:** Update RS90 firmware when available (contact Haptique support)
+Use **Last Macro Result** and the logbook to see what the RS90 actually did, and `haptique_rs90.query_status` to re-read a state.
 
-**If using updated firmware:**
-- Check MQTT Explorer for `macro/{name}/status` topics
-- Verify topic publishes "ON"/"OFF" (uppercase)
-
-### Battery shows 0 or outdated
-
-Battery refreshes:
-- Every 30 minutes (periodic)
-- On RS90 reconnection (wake from sleep)
-- Via `refresh_lists` service (manual)
-
-If RS90 is frequently disconnecting (<5 min), refresh is throttled to once per 5 minutes.
+### Last Reported App doesn't change when leaving an app
+The firmware only reports the app that was opened, not when you leave it.
 
 ---
 
 ## 📚 Documentation
 
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
-- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed setup instructions
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history
+- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.8.0
+- **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, sequences, apps and actions in detail
+- **[Device ID guide](documentation/GUIDE_DEVICE_ID.md)** - Finding the RS90 device ID
 - **[Templates](templates/)** - Dashboard card templates
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome!
-
-1. Fork the project
-2. Create a branch (`git checkout -b feature/improvement`)
-3. Commit changes (`git commit -m 'Add feature'`)
-4. Push (`git push origin feature/improvement`)
-5. Open a Pull Request
+Contributions are welcome: fork the project, create a branch, and open a Pull Request.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
+MIT License. See [LICENSE](LICENSE).
 
 ---
 
 ## 🙏 Acknowledgments
 
-- [Cantata Communication Solutions](https://github.com/Cantata-Communication-Solutions) for creating the **Haptique RS90** remote
-- **Haptique Support** for excellent collaboration on firmware features
-- Home Assistant community for feedback and testing
+- [Cantata Communication Solutions](https://github.com/Cantata-Communication-Solutions) for the **Haptique RS90** remote, and **Haptique Support** for the collaboration on firmware features
+- [@ccs777](https://github.com/ccs777) for the Standard MQTT macros, sequences and apps support (PR #38, #39)
+- **[Claude](https://claude.ai)** (Anthropic), AI pair programmer on this project: code, tests, reviews, documentation and icon
+- The Home Assistant community for feedback and testing
 
 ---
 
@@ -347,7 +302,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ---
 
-**Version:** 1.7.0  
-**Author:** daangel27  
-**Last updated:** January 2026  
+**Version:** 1.8.0
+**Authors:** daangel27, with Claude (Anthropic)
+**Last updated:** November 2026
 **Languages:** English, Français

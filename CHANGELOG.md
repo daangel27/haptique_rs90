@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.8.0] - Unreleased
+## [1.8.0] - 2026-11-07
 
 Requires the RS90 **Standard MQTT** firmware (tested on 4.1.2 / 4.2).
 
@@ -41,10 +41,11 @@ Requires the RS90 **Standard MQTT** firmware (tested on 4.1.2 / 4.2).
 - Remove hard-coded `sw_version: 1.0` (device page showed "Firmware: 1.0" whatever the RS90 version)
 - Rename `• RGB Ring Light` to `RGB Ring Light`
 - French translation placeholders (`{name}`) no longer break service descriptions
+- Remove deprecated `device_registry.async_get_device` call from the Info Summary sensor (stops working in HA 2027.8), fixes #37
 
 ---
 
-## [1.7.0] - 2025-01-XX
+## [1.7.0] - 2026-01-27
 
 ### ✨ New Features
 
@@ -155,7 +156,7 @@ sensor.rs90_info_summary:
 
 ---
 
-## [1.5.1] - 2024-12-XX
+## [1.5.1] - 2025-12-27
 
 ### Previous stable release
 

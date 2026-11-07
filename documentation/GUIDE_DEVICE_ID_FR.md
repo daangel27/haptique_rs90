@@ -13,6 +13,17 @@ Le `device_id` est l'**identifiant unique Home Assistant** de votre télécomman
 
 ---
 
+## Le plus rapide : le capteur Info Summary
+
+Ouvrez le capteur **Info Summary** de votre RS90 (page de l'appareil → Capteurs → Info Summary → Attributs) :
+- **Rs90 ID** est l'identifiant d'appareil Home Assistant (`rs90_id`)
+- **Rs90 remote ID** est l'identifiant MQTT
+- les identifiants des macros, séquences, appareils et applications y figurent aussi (attributs *by ID*)
+
+Voir [Retrouver les identifiants](../README_FR.md#-retrouver-les-identifiants--le-capteur-info-summary) dans le README.
+
+---
+
 ## Méthode 1 : Interface graphique (Recommandé)
 
 ### Dans l'UI des Services

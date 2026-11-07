@@ -7,7 +7,49 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [1.7.0] - 2025-01-XX
+## [1.8.0] - 2026-11-07
+
+Nécessite le firmware **Standard MQTT** de la RS90 (testé en 4.1.2 / 4.2).
+
+### ✨ Nouvelles fonctionnalités
+
+#### Macros et séquences Standard MQTT (PR #38, merci @ccs777)
+- Les macros et les séquences sont découvertes séparément (`macro/list`, `sequence/list`) et déclenchées par **identifiant stable**
+- L'état des macros (ON/OFF/UNKNOWN) vient du retour du firmware (`macro/<id>/status`), sans état supposé
+- Nouvelles actions : `haptique_rs90.trigger_sequence`, `haptique_rs90.query_status`
+- Les interrupteurs de macros existants gardent leur entity ID quand une macro devient une séquence ou est renommée
+
+#### Applications installées (PR #39, merci @ccs777)
+- Un bouton de lancement par application installée sur la RS90 (`app/list`), **désactivé par défaut**
+- Nouvelle action : `haptique_rs90.launch_app`
+- Nouveau capteur **Last Reported App** : affiche le nom de l'application (ex. `Kore`), package dans `app_package_id`
+  - Reconnaît aussi les applications ouvertes depuis l'écran de la RS90, que le firmware signale par leur nom au lieu du package
+
+#### Capteur et événement Last Macro Result
+- Nouveau capteur **Last Macro Result**, ex. `CANAL · OFF · skipped (already_in_requested_state)`
+  - Attributs : `target_name`, `target_id`, `target_kind`, `action`, `status`, `error`, `timestamp`
+  - Chaque résultat a sa propre ligne dans le journal, même identique au précédent, rattachée à l'interrupteur de la macro/séquence
+  - Dernière valeur restaurée après un redémarrage de Home Assistant
+- Nouvel événement `haptique_rs90_macro_result` avec les mêmes données, pour les automatisations (ex. notification sur `skipped` / `failed`)
+- Les résultats retenus renvoyés à la reconnexion ne sont pas comptés comme de nouvelles exécutions
+
+#### Icône et logo de l'intégration
+- Nouvelle icône et nouveau logo (clair et sombre), dans `brand/` pour que Home Assistant 2026.3+ les affiche ; l'ancien `icon.png` à la racine n'a jamais été utilisé par Home Assistant
+
+### 🐛 Corrections
+- Remplacement de `DeviceEntry.config_entries`, déprécié, par `config_entry_id` (cassé en HA 2027.10), avec repli pour les anciennes versions de HA
+- Suppression du `sw_version: 1.0` codé en dur (la page de l'appareil affichait « Firmware : 1.0 » quelle que soit la version de la RS90)
+- `• RGB Ring Light` renommé en `RGB Ring Light`
+- Les paramètres de traduction (`{name}`) ne cassent plus les descriptions des actions
+- Suppression de l'appel déprécié `device_registry.async_get_device` dans le capteur Info Summary (cassé en HA 2027.8), corrige #37
+
+### 🙏 Remerciements
+- @ccs777 pour les PR #38 et #39
+- Claude (Anthropic), binôme IA sur cette version
+
+---
+
+## [1.7.0] - 2026-01-27
 
 ### ✨ Nouvelles fonctionnalités
 
@@ -118,7 +160,7 @@ sensor.rs90_info_summary:
 
 ---
 
-## [1.5.1] - 2024-12-XX
+## [1.5.1] - 2025-12-27
 
 ### Version stable précédente
 
