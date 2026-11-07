@@ -31,7 +31,11 @@ def _coordinator_for_device(
     """Use the HA device selector and report invalid calls to the caller."""
     device = dr.async_get(hass).async_get(device_id)
     if device:
-        for entry_id in device.config_entries:
+        # HA 2026.x+ exposes a single owning entry; older releases only
+        # provide the (now deprecated) config_entries set.
+        entry_id = getattr(device, "config_entry_id", None)
+        entry_ids = [entry_id] if entry_id else list(device.config_entries)
+        for entry_id in entry_ids:
             if coordinator := hass.data.get(DOMAIN, {}).get(entry_id):
                 return coordinator
     raise ServiceValidationError("Configured RS90 device not found")
@@ -207,7 +211,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         name=entry.data.get("name", f"Haptique RS90 {entry.data['remote_id'][:8]}"),
         manufacturer="Haptique",
         model="RS90",
-        sw_version="1.0",
+        # Clear the stale hard-coded "1.0" stored by earlier versions: the RS90
+        # does not publish its firmware version over MQTT.
+        sw_version=None,
     )
 
     # Store HA device ID in coordinator for event firing

@@ -16,6 +16,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import CONF_REMOTE_ID, DOMAIN
@@ -39,6 +40,7 @@ async def async_setup_entry(
         HaptiqueRS90LastKeySensor(coordinator, entry),
         HaptiqueRS90RunningMacroSensor(coordinator, entry),
         HaptiqueRS90ActiveAppSensor(coordinator, entry),
+        HaptiqueRS90LastMacroResultSensor(coordinator, entry),
     ]
 
     # Track device command sensors by device ID
@@ -193,7 +195,6 @@ class HaptiqueRS90SensorBase(CoordinatorEntity, SensorEntity):
             "name": entry.data.get("name", f"Haptique RS90 {self._remote_id[:8]}"),
             "manufacturer": "Haptique",
             "model": "RS90",
-            "sw_version": "1.0",
         }
 
     @property
@@ -482,21 +483,91 @@ class HaptiqueRS90ActiveAppSensor(HaptiqueRS90SensorBase):
     def available(self) -> bool:
         return self.coordinator.data["status"] == "online"
 
+    def _app(self) -> dict | None:
+        """Resolve the reported app.
+
+        The firmware reports the package ID when an app is opened over MQTT,
+        but the app label (e.g. "Chrome") when it is opened on the RS90 screen.
+        """
+        reported = self.coordinator.data["active_app"]
+        if not reported:
+            return None
+        apps = self.coordinator.data["apps"]
+        return next((item for item in apps if item["id"] == reported), None) or next(
+            (item for item in apps if item["name"] == reported), None
+        )
+
     @property
     def native_value(self) -> str | None:
-        return self.coordinator.data["active_app"]
+        """Show the app label; fall back to the raw value if it is unlisted."""
+        app = self._app()
+        return app["name"] if app else self.coordinator.data["active_app"]
 
     @property
     def extra_state_attributes(self):
-        package_id = self.native_value
+        app = self._app()
         return {
-            "app_package_id": package_id,
-            "app_name": next(
-                (
-                    item["name"]
-                    for item in self.coordinator.data["apps"]
-                    if item["id"] == package_id
-                ),
-                None,
-            ),
+            "app_package_id": app["id"] if app else self.coordinator.data["active_app"],
+            "app_name": app["name"] if app else None,
         }
+
+
+class HaptiqueRS90LastMacroResultSensor(HaptiqueRS90SensorBase, RestoreEntity):
+    """Last macro/sequence execution result reported by the firmware.
+
+    Each new result changes the state, so the logbook keeps a readable history
+    (e.g. ``CANAL · OFF · skipped (already_in_requested_state)``).
+    """
+
+    _RESULT_ATTRIBUTES = (
+        "target_name",
+        "target_id",
+        "target_kind",
+        "action",
+        "status",
+        "error",
+        "timestamp",
+    )
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry, "last_macro_result")
+        self._attr_translation_key = "last_macro_result"
+        self._attr_icon = "mdi:playlist-check"
+        self._restored_state: str | None = None
+        self._restored_attributes: dict[str, Any] = {}
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        if (last_state := await self.async_get_last_state()) is not None:
+            if last_state.state not in ("unknown", "unavailable"):
+                self._restored_state = last_state.state
+            self._restored_attributes = {
+                key: last_state.attributes.get(key)
+                for key in self._RESULT_ATTRIBUTES
+                if key in last_state.attributes
+            }
+
+    @property
+    def _record(self) -> dict[str, Any] | None:
+        return self.coordinator.data.get("last_target_result")
+
+    @property
+    def native_value(self) -> str | None:
+        record = self._record
+        if not record:
+            return self._restored_state
+        parts = [record["target_name"]]
+        if record.get("action"):
+            parts.append(record["action"].upper())
+        status = record.get("status") or "unknown"
+        if record.get("error"):
+            status = f"{status} ({record['error']})"
+        parts.append(status)
+        return " · ".join(parts)[:255]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        record = self._record
+        if not record:
+            return self._restored_attributes
+        return {key: record.get(key) for key in self._RESULT_ATTRIBUTES}

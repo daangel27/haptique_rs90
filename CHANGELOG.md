@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.0] - Unreleased
+
+Requires the RS90 **Standard MQTT** firmware (tested on 4.1.2 / 4.2).
+
+### ✨ New Features
+
+#### Standard MQTT macros and sequences (PR #38, thanks @ccs777)
+- Macros and sequences are discovered separately (`macro/list`, `sequence/list`) and triggered by **stable ID**
+- Macro state (ON/OFF/UNKNOWN) comes from firmware feedback (`macro/<id>/status`), no optimistic state
+- New actions: `haptique_rs90.trigger_sequence`, `haptique_rs90.query_status`
+- Existing macro switches keep their entity IDs when a macro becomes a sequence or is renamed
+
+#### Installed apps (PR #39, thanks @ccs777)
+- One launch button per installed RS90 app (`app/list`), **disabled by default**
+- New action: `haptique_rs90.launch_app`
+- New sensor **Last Reported App**: shows the app label (e.g. `Kore`), package ID in `app_package_id`
+  - Also resolves apps opened on the RS90 screen, which the firmware reports by label instead of package ID
+
+#### Last Macro Result sensor and event
+- New sensor **Last Macro Result**, e.g. `CANAL · OFF · skipped (already_in_requested_state)`
+  - Attributes: `target_name`, `target_id`, `target_kind`, `action`, `status`, `error`, `timestamp`
+  - Every result also gets its own logbook entry, even when identical to the previous one, attached to the macro/sequence switch
+  - Last value is restored after a Home Assistant restart
+- New event `haptique_rs90_macro_result` with the same data, for automations (e.g. notify on `skipped` / `failed`)
+- Retained results replayed on reconnect are not reported as new runs
+
+#### Integration icon and logo
+- New icon and logo (light and dark), shipped in `brand/` so Home Assistant 2026.3+ shows them; the old root `icon.png` was never used by Home Assistant
+
+### 🐛 Fixes
+- Replace deprecated `DeviceEntry.config_entries` with `config_entry_id` (breaks in HA 2027.10), with fallback for older HA
+- Remove hard-coded `sw_version: 1.0` (device page showed "Firmware: 1.0" whatever the RS90 version)
+- Rename `• RGB Ring Light` to `RGB Ring Light`
+- French translation placeholders (`{name}`) no longer break service descriptions
+
+---
+
 ## [1.7.0] - 2025-01-XX
 
 ### ✨ New Features

@@ -40,7 +40,7 @@
         },
         "rs90_macro_id": {
           "name": "ID de la macro",
-          "description": "L'identifiant stable de la macro. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire macros) ou dans switch.macro_{name} attributs. Cet ID ne change jamais même si vous renommez la macro dans Haptique Config."
+          "description": "L'identifiant stable de la macro. Trouvez-le dans les attributs de sensor.rs90_info_summary (dictionnaire macros) ou dans l'attribut rs90_macro_id du switch de la macro. Cet ID ne change jamais même si vous renommez la macro dans Haptique Config."
         },
         "action": {
           "name": "Action",
@@ -58,7 +58,7 @@
         },
         "rs90_device_id": {
           "name": "ID de l'appareil",
-          "description": "L'identifiant stable de l'appareil. Trouvez-le dans sensor.rs90_info_summary attributs (dictionnaire devices) ou dans sensor.commands_{name} attributs. Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config."
+          "description": "L'identifiant stable de l'appareil. Trouvez-le dans les attributs de sensor.rs90_info_summary (dictionnaire devices) ou dans l'attribut rs90_device_id du capteur de commandes de l'appareil. Cet ID ne change jamais même si vous renommez l'appareil dans Haptique Config."
         },
         "command_name": {
           "name": "Nom de la commande",
@@ -145,6 +145,9 @@
     "sensor": {
       "active_app": {
         "name": "Dernière application signalée"
+      },
+      "last_macro_result": {
+        "name": "Dernier résultat de macro"
       }
     }
   }

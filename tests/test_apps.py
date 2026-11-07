@@ -167,9 +167,25 @@ async def test_registered_app_button_rename_remove_readd_and_active_sensor(
             "open",
         )
         await message(hass, "active_app", "com.spotify.music")
-        assert hass.states.get(sensor_id).state == "com.spotify.music"
+        assert hass.states.get(sensor_id).state == "Spotify"
         assert hass.states.get(sensor_id).attributes["app_name"] == "Spotify"
+        assert (
+            hass.states.get(sensor_id).attributes["app_package_id"]
+            == "com.spotify.music"
+        )
+        # Apps opened on the RS90 screen are reported by label, not package.
+        await message(hass, "active_app", "Spotify")
+        assert hass.states.get(sensor_id).state == "Spotify"
+        assert (
+            hass.states.get(sensor_id).attributes["app_package_id"]
+            == "com.spotify.music"
+        )
+        await message(hass, "active_app", "Unlisted")
+        assert hass.states.get(sensor_id).state == "Unlisted"
+        assert hass.states.get(sensor_id).attributes["app_name"] is None
+        await message(hass, "active_app", "com.spotify.music")
         await inventory(hass, "app", [{"id": "com.spotify.music", "name": "Renamed"}])
+        assert hass.states.get(sensor_id).state == "Renamed"
         assert (
             registry.async_get_entity_id(
                 "button", "haptique_rs90", "remote-1_app_com.spotify.music"

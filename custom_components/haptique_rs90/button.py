@@ -67,7 +67,7 @@ class HaptiqueRS90RGBButton(CoordinatorEntity, ButtonEntity):
 
         # Entity configuration
         self._attr_has_entity_name = True
-        self._attr_name = "• RGB Ring Light"
+        self._attr_name = "RGB Ring Light"
         self._attr_unique_id = f"{self._remote_id}_rgb_button"
         self._attr_icon = "mdi:lightbulb-on"
 
