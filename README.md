@@ -340,6 +340,24 @@ Each wake-up shows in the RS90's **Activity** (`wake-up sent`, then `woke up in 
 
 ## 🛠️ Troubleshooting
 
+### See what the integration does
+Everything the integration sends to the RS90 is listed in Home Assistant's **Activity**, so you can check what happened, or what didn't:
+
+- each **device command** sent, e.g. `Commands - AMPLI → VOLUME_DOWN sent`
+- each **wake-up**: `wake-up sent`, then `woke up in 8 s`, `did not wake up`, or `already awake`
+- each **macro / sequence result**, e.g. `KODI → ON: executed` or `ON: failed (execution_failed)`
+- button presses (Wake up, Sync, apps…) with the user who pressed them, connection changes, macro states
+
+Where to look:
+- the **Activity** card on the RS90 device page (**Settings** → **Devices & services** → **Haptique RS90 Remote** → the RS90)
+- the **Activity** panel in the sidebar: **Add target** → the **RS90** device. To narrow it down, pick a single entity instead, e.g. **Commands - AMPLI** for the commands sent to the amplifier, or **Wake up** for wake-ups
+
+A command shown as `sent` has left Home Assistant: if the device didn't react, the problem is on the RS90 side (sleep, duplicate command names, see below).
+
+<p align="center">
+<img src="documentation/screenshots/activity_panel.png" alt="Activity panel filtered on the RS90" width="70%" />
+</p>
+
 ### Remote not detected
 1. Check the **MQTT broker** in Settings → Devices & Services → MQTT
 2. Check the RS90 **MQTT settings** in the Haptique Config app

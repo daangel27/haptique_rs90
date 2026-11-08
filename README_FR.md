@@ -340,6 +340,24 @@ Chaque réveil apparaît dans l'**Activité** de la RS90 (`wake-up sent`, puis `
 
 ## 🛠️ Dépannage
 
+### Voir ce que fait l'intégration
+Tout ce que l'intégration envoie à la RS90 apparaît dans l'**Activité** de Home Assistant : vous pouvez vérifier ce qui s'est passé, ou pas :
+
+- chaque **commande d'appareil** envoyée, ex. `Commands - AMPLI → VOLUME_DOWN sent`
+- chaque **réveil** : `wake-up sent`, puis `woke up in 8 s`, `did not wake up` ou `already awake`
+- chaque **résultat de macro / séquence**, ex. `KODI → ON: executed` ou `ON: failed (execution_failed)`
+- les appuis sur les boutons (Wake up, Sync, applications…) avec l'utilisateur qui a appuyé, les changements de connexion, l'état des macros
+
+Où regarder :
+- la carte **Activité** de la page de l'appareil RS90 (**Paramètres** → **Appareils et services** → **Haptique RS90 Remote** → la RS90)
+- le panneau **Activité** de la barre latérale : **Add target** → l'appareil **RS90**. Pour affiner, choisissez plutôt une seule entité, ex. **Commands - AMPLI** pour les commandes envoyées à l'ampli, ou **Wake up** pour les réveils
+
+Une commande affichée `sent` est bien partie de Home Assistant : si l'appareil n'a pas réagi, le problème est côté RS90 (veille, commandes en double, voir plus bas).
+
+<p align="center">
+<img src="documentation/screenshots/activity_panel.png" alt="Panneau Activité filtré sur la RS90" width="70%" />
+</p>
+
 ### Télécommande non détectée
 1. Vérifiez le **broker MQTT** dans Paramètres → Appareils et services → MQTT
 2. Vérifiez les **réglages MQTT** de la RS90 dans l'application Haptique Config
