@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.9.0] - Unreleased
+## [1.9.0] - 2026-11-08
 
 ### ✨ New Features
 - **Haptique RS90 dashboard** (dashboard strategy shipped with the integration, Home Assistant 2026.5+ lists it under *Community dashboards*):

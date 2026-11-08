@@ -7,7 +7,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [1.9.0] - Non publiée
+## [1.9.0] - 2026-11-08
 
 ### ✨ Nouvelles fonctionnalités
 - **Tableau de bord Haptique RS90** (stratégie de tableau de bord fournie par l'intégration, listée sous *Community dashboards* dans Home Assistant 2026.5+) :
