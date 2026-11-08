@@ -21,6 +21,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Bouton **Synchroniser** (entité de configuration) : demande à la RS90 de republier ses appareils, commandes, macros, séquences et applications, ainsi que la batterie et l'état des macros, sans passer par une action
 - Au réveil de la RS90, l'intégration lui redemande ses listes (au plus toutes les 5 minutes) : les changements faits pendant sa veille sont rattrapés
 - Les **options de l'intégration** deviennent un menu : renommer la télécommande, ou choisir les boutons de commandes affichés pour chaque appareil : toutes (par défaut, les nouvelles ajoutées automatiquement), seulement celles cochées (avec les raccourcis **Tout cocher** / **Tout décocher**), ou aucune pour masquer l'appareil
+- Les interrupteurs de séquences ont leurs propres icônes (liste de lecture) pour les distinguer des macros (lecture / stop)
 
 ### 🐛 Corrections
 - Renommer la télécommande n'efface plus les autres options

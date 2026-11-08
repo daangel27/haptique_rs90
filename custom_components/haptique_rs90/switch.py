@@ -141,7 +141,10 @@ class HaptiqueRS90MacroSwitch(CoordinatorEntity, SwitchEntity):
     def available(self) -> bool:
         return (
             # With auto-wake, a sleeping RS90 is woken up by the command itself.
-            (self.coordinator.data.get("status") == "online" or self.coordinator.auto_wake)
+            (
+                self.coordinator.data.get("status") == "online"
+                or self.coordinator.auto_wake
+            )
             and self.coordinator.targets.target(self._target_kind, self._switch_id)
             is not None
             and not self.coordinator.targets.conflicting(self._switch_id)
@@ -154,6 +157,8 @@ class HaptiqueRS90MacroSwitch(CoordinatorEntity, SwitchEntity):
 
     @property
     def icon(self) -> str:
+        if self._target_kind == "sequence":
+            return "mdi:playlist-check" if self.is_on else "mdi:playlist-play"
         return "mdi:stop-circle" if self.is_on else "mdi:play-circle"
 
     @property

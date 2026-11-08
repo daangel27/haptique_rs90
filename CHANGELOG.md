@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Sync** button (configuration entity): asks the RS90 to publish its devices, commands, macros, sequences and apps again, plus battery and macro states, without using an action
 - When the RS90 wakes up, the integration asks for its lists again (at most every 5 minutes), so changes made while it slept are picked up
 - **Integration options** become a menu: rename the remote, or choose the command buttons shown for each device: all (default, new ones added automatically), only the ones you tick (with **Tick all** / **Untick all** shortcuts), or none to hide the device
+- Sequence switches get their own icons (playlist) so they stand out from macros (play / stop)
 
 ### 🐛 Fixes
 - Renaming the remote no longer wipes the other options

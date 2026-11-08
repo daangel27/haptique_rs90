@@ -121,3 +121,17 @@ async def test_refresh_button_and_reconnect_catch_up(hass, coordinator, publish)
         await message(hass, "status", status)
     # Only the first reconnection within 5 minutes asks for a new snapshot.
     assert refreshes() == before + 1
+
+
+async def test_switch_icons_tell_sequences_from_macros(hass, coordinator):
+    """Sequences use playlist icons, macros play/stop circles."""
+    from custom_components.haptique_rs90.switch import HaptiqueRS90MacroSwitch
+
+    macro = HaptiqueRS90MacroSwitch.__new__(HaptiqueRS90MacroSwitch)
+    sequence = HaptiqueRS90MacroSwitch.__new__(HaptiqueRS90MacroSwitch)
+    for switch, kind in ((macro, "macro"), (sequence, "sequence")):
+        switch._target_kind = kind
+        switch._switch_id = "x"
+        switch.coordinator = coordinator
+    assert macro.icon == "mdi:play-circle"
+    assert sequence.icon == "mdi:playlist-play"
