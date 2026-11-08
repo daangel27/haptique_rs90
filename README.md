@@ -45,6 +45,7 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 ## ✨ Features
 
 ### Control
+- 📺 **Ready-made dashboard**: an RS90 view and a remote for each device, always up to date (see [Dashboard](#-dashboard))
 - 🎛️ **Macro and sequence switches**: ON/OFF from Home Assistant, state confirmed by the RS90 firmware
 - 📱 **App buttons**: launch any app installed on the RS90 (disabled by default, enable the ones you want)
 - 📡 **Device commands**: send any IR/IP command of any configured device
@@ -136,6 +137,80 @@ All entities are created automatically.
 | **Info Summary** sensor | All IDs (devices, macros, sequences, apps) in one place, see [Finding the IDs](#-finding-the-ids-the-info-summary-sensor) |
 
 > ℹ️ Macro states are what the RS90 reports, **not** a measurement of the TV or amplifier power.
+
+---
+
+## 📺 Dashboard
+
+The integration ships a ready-made **Haptique RS90 dashboard**, built from your remote every time you open it: nothing to copy, nothing to keep up to date.
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_rs90.png" alt="RS90 view" width="90%" />
+<br/><em>RS90 view: macros (green when ON), sequences, apps and status</em>
+</p>
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_device.png" alt="Device view" width="90%" />
+<br/><em>One view per device, laid out like a remote</em>
+</p>
+
+### Create it
+
+1. **Settings** → **Dashboards** → **Add dashboard**
+2. Under **Community dashboards**, pick **Haptique RS90** (Home Assistant 2026.5+)
+3. Give it a title and an icon (e.g. `mdi:remote`), then **Create**
+
+On older versions, create an empty dashboard, open **⋮ → Raw configuration editor** and paste:
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+```
+
+### What you get
+
+- **RS90 view**: macros as ON/OFF buttons (green = ON), sequences, apps and the status sensors
+- **One view per device** (TV, AMPLI, KODI…), commands grouped like a remote: power, navigation pad, volume & channels, playback, keypad, inputs, more
+- Pressing a button sends the command through `haptique_rs90.trigger_device_command`
+- The 3D button style uses **card-mod** (Marketplace / HACS). Without it, buttons work but look plain.
+
+### Choose the buttons of each device
+
+By default every command is shown. To keep only the ones you use:
+
+1. **Settings** → **Devices & services** → **Haptique RS90 Remote** → ⚙️ **Configure**
+2. **Dashboard: choose command buttons** → pick the device
+3. Choose **Only the commands I choose** → **Submit**
+4. Tick the commands you want → **Submit**. The list starts empty; to tick or untick everything at once, pick **Tick all** or **Untick all** in **Shortcut** and **Submit**
+
+Choose **All commands** to go back to every command, or **None: hide this device** to remove its view. Reload the dashboard to see the change.
+
+<p align="center">
+<img src="documentation/screenshots/options_menu.png" alt="Integration options" width="30%" />
+<img src="documentation/screenshots/options_mode.png" alt="Choose which buttons" width="30%" />
+<img src="documentation/screenshots/options_commands.png" alt="Choose the command buttons" width="30%" />
+</p>
+
+### Always up to date
+
+When you add, rename or remove a device, a macro, a sequence or an app on the RS90, the integration receives it over MQTT and the dashboard follows the next time you open (or reload) it: new device → new view, removed device → view gone, new macro → new button. A device with a custom button selection keeps it; new commands of a device left on **All commands** appear by themselves.
+
+> ℹ️ The RS90 must be **online** to publish its changes; when it wakes up, the integration asks it for its lists again. If something still doesn't show up, press the **Sync** button (RS90 device page, or the Status section of the dashboard).
+
+<details>
+<summary>Advanced: YAML options of the strategy</summary>
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+  hide_devices: [XBOX]          # views not to show
+  devices:                      # only these device views, with these commands
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    TV: all
+```
+
+The selection made in the integration options applies first.
+</details>
 
 ---
 
@@ -243,11 +318,45 @@ More details: [Standard MQTT macros, sequences and apps](documentation/STANDARD_
 
 ## 😴 Sleep mode
 
-Off its dock, the RS90 goes to sleep after a while and shows as **offline**: its entities become unavailable and MQTT commands can't reach it. Put it back on the dock or wake it up (touch the screen or press a key).
+Off its dock, the RS90 goes to sleep after a while and shows as **offline**: its entities become unavailable and MQTT commands can't reach it. Put it back on the dock, wake it up by hand (touch the screen or press a key), or let Home Assistant wake it up:
+
+1. Give the RS90 a **fixed IP address** (DHCP reservation in your router)
+2. **Settings** → **Devices & services** → **Haptique RS90 Remote** → ⚙️ **Configure** → **Wake the RS90 up**
+3. Enter its **IP address**. The **Wake up** button of the RS90 becomes available.
+4. Optional: tick **Wake it up automatically before sending a command**. Macros, apps and device commands (dashboard included) then work while the RS90 sleeps: Home Assistant wakes it up first, which adds a few seconds.
+
+Home Assistant sends a few packets to the RS90's IP address until it reports online again (up to 20 seconds). Only the IP address is needed: the RS90 uses a random Wi-Fi MAC address by default, and the MAC address inside the packet doesn't matter.
+
+<p align="center">
+<img src="documentation/screenshots/options_wake.png" alt="Wake the RS90 up options" width="45%" />
+<img src="documentation/screenshots/activity_wake.png" alt="Wake-up and commands in the activity" width="45%" />
+</p>
+
+Each wake-up shows in the RS90's **Activity** (`wake-up sent`, then `woke up in 8 s` or `did not wake up`), along with every device command sent. After a wake-up, Home Assistant waits 4 seconds and then sends the commands pressed meanwhile, one by one.
+
+> ⚠️ Right after waking up, the RS90 can still miss a command sent to a network-controlled device (e.g. Kodi) when several are pressed in a row. Infrared devices are not affected. Leave the RS90 on its dock when every command must go through.
 
 ---
 
 ## 🛠️ Troubleshooting
+
+### See what the integration does
+Everything the integration sends to the RS90 is listed in Home Assistant's **Activity**, so you can check what happened, or what didn't:
+
+- each **device command** sent, e.g. `Commands - AMPLI → VOLUME_DOWN sent`
+- each **wake-up**: `wake-up sent`, then `woke up in 8 s`, `did not wake up`, or `already awake`
+- each **macro / sequence result**, e.g. `KODI → ON: executed` or `ON: failed (execution_failed)`
+- button presses (Wake up, Sync, apps…) with the user who pressed them, connection changes, macro states
+
+Where to look:
+- the **Activity** card on the RS90 device page (**Settings** → **Devices & services** → **Haptique RS90 Remote** → the RS90)
+- the **Activity** panel in the sidebar: **Add target** → the **RS90** device. To narrow it down, pick a single entity instead, e.g. **Commands - AMPLI** for the commands sent to the amplifier, or **Wake up** for wake-ups
+
+A command shown as `sent` has left Home Assistant: if the device didn't react, the problem is on the RS90 side (sleep, duplicate command names, see below).
+
+<p align="center">
+<img src="documentation/screenshots/activity_panel.png" alt="Activity panel filtered on the RS90" width="70%" />
+</p>
 
 ### Remote not detected
 1. Check the **MQTT broker** in Settings → Devices & Services → MQTT
@@ -267,6 +376,9 @@ Known firmware limitations (reported to Haptique):
 - When switching from one macro to another, the previous one can stay **ON**; turning it off later returns `skipped (already_in_requested_state)`
 
 Use **Last Macro Result** and the logbook to see what the RS90 actually did, and `haptique_rs90.query_status` to re-read a state.
+
+### A device command does nothing
+The Activity shows `RS90 <device> <command> sent`, but the device doesn't react: check that the device doesn't have **two commands with the same name** (shown twice in its **Commands** sensor, e.g. two `POWER`). Commands are sent by name, so the RS90 always uses the same one, which may be a discrete *Power on* that does nothing when the device is already on. Rename one of them in the Haptique app (e.g. `POWER_ON` / `POWER_OFF`).
 
 ### Last Reported App doesn't change when leaving an app
 The firmware only reports the app that was opened, not when you leave it.

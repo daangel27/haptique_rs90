@@ -12,10 +12,14 @@ from homeassistant.components import mqtt
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
+    COMMAND_EVENT,
     CONF_REMOTE_ID,
+    CONF_WAKE_AUTO,
+    CONF_WAKE_HOST,
     DOMAIN,
     STATE_OFFLINE,
     STATE_ONLINE,
@@ -28,8 +32,10 @@ from .const import (
     TOPIC_MACRO_LIST,
     TOPIC_STATUS,
     TOPIC_TEST_STATUS,
+    WAKE_EVENT,
 )
 from .targets import TargetManager, parse_inventory, valid_reference
+from .wake import QUEUE_GAP, WAKE_SETTLE, async_wake
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -68,6 +74,13 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self._battery_refresh_interval = 1800  # 30 minutes in seconds
         self._last_battery_refresh: float = 0  # Timestamp of last battery refresh
         self._battery_refresh_min_interval = 300  # 5 minutes minimum between refreshes
+        self._last_discovery_refresh: float = float("-inf")
+        # Set while the RS90 reports online; used to wait for a wake-up.
+        self._online = asyncio.Event()
+        self._wake_lock = asyncio.Lock()
+        # Commands wait until this monotonic time after a wake-up, so the RS90
+        # has resubscribed and queued commands go out one by one.
+        self._send_not_before = float("-inf")
 
         # LED light auto-off timer
         self._led_light_timer: callable | None = None
@@ -280,6 +293,11 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         status = payload.strip()
         old_status = self.data.get("status")
 
+        if status == STATE_ONLINE:
+            self._online.set()
+        else:
+            self._online.clear()
+
         if status != old_status:
             _LOGGER.info("Status changed: %s → %s", old_status, status)
             self.data["status"] = status
@@ -291,6 +309,20 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 _LOGGER.info("RS90 reconnected - requesting battery update")
                 self._create_task(self._request_battery_update_now())
                 self._create_task(self.targets.async_query_all())
+                # Catch up on changes made on the RS90 while it was offline
+                # (at most every 5 minutes: the RS90 wakes up often).
+                now = time.monotonic()
+                if now - self._last_discovery_refresh >= 300:
+                    self._last_discovery_refresh = now
+                    self._create_task(
+                        mqtt.async_publish(
+                            self.hass,
+                            f"{self.base_topic}/discovery/refresh",
+                            "",
+                            qos=0,
+                            retain=False,
+                        )
+                    )
         else:
             _LOGGER.debug("Status unchanged: %s", status)
 
@@ -394,11 +426,101 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self.data["active_app"] = payload or None
         self.async_set_updated_data(self.data)
 
+    @property
+    def wake_host(self) -> str | None:
+        """IP address used to wake the RS90 up, if configured."""
+        return (self.entry.options.get(CONF_WAKE_HOST) or "").strip() or None
+
+    @property
+    def auto_wake(self) -> bool:
+        """Wake the RS90 up automatically before sending it a command."""
+        return bool(self.wake_host and self.entry.options.get(CONF_WAKE_AUTO))
+
+    async def async_wake(self) -> bool:
+        """Wake the RS90 up; True once it reports online."""
+        if not self.wake_host:
+            raise HomeAssistantError(
+                "Set the RS90 IP address in the integration options to wake it up"
+            )
+        async with self._wake_lock:
+            return await self._async_wake_locked(manual=True)
+
+    async def _async_wake_locked(self, manual: bool = False) -> bool:
+        """Wake the RS90 (caller holds the wake lock) and log it."""
+        if self._online.is_set():
+            if manual:
+                self._fire_activity(WAKE_EVENT, {"result": "awake"}, self._wake_entity)
+            return True
+        self._fire_activity(WAKE_EVENT, {"result": "sent"}, self._wake_entity)
+        started = time.monotonic()
+        woke = await async_wake(self.hass, self.wake_host, self._online)
+        self._fire_activity(
+            WAKE_EVENT,
+            {
+                "result": "woke" if woke else "failed",
+                "seconds": round(time.monotonic() - started),
+            },
+            self._wake_entity,
+        )
+        if woke:
+            self._send_not_before = time.monotonic() + WAKE_SETTLE
+        return woke
+
+    @property
+    def _wake_entity(self) -> tuple[str, str]:
+        return ("button", f"{self.remote_id}_wake")
+
+    def _fire_activity(
+        self,
+        event_type: str,
+        data: dict[str, Any],
+        entity: tuple[str, str] | None = None,
+    ) -> None:
+        """Fire an event that the logbook shows in the device activity.
+
+        The entity_id (found from its unique_id) lets the Activity panel find
+        the entry when it is filtered on the RS90 device or on that entity.
+        `entity` is the (platform, unique_id) of the entity to attach it to.
+        """
+        event = {"remote_id": self.remote_id, "device_id": self.device_id, **data}
+        if entity and (
+            entity_id := er.async_get(self.hass).async_get_entity_id(
+                entity[0], DOMAIN, entity[1]
+            )
+        ):
+            event["entity_id"] = entity_id
+        self.hass.bus.async_fire(event_type, event)
+
+    async def _async_ensure_awake(self) -> None:
+        """Before a command: wake a sleeping RS90 up when auto-wake is on.
+
+        Commands pressed while a wake-up is in progress queue on the wake lock
+        and are released one by one once the RS90 has settled.
+        """
+        if not self.auto_wake:
+            return
+        if (
+            self.data.get("status") == STATE_ONLINE
+            and not self._wake_lock.locked()
+            and time.monotonic() >= self._send_not_before
+        ):
+            return
+        async with self._wake_lock:
+            if self.data.get("status") != STATE_ONLINE and not self._online.is_set():
+                if not await self._async_wake_locked():
+                    raise HomeAssistantError("The RS90 did not wake up")
+            delay = self._send_not_before - time.monotonic()
+            if delay > 0:
+                await asyncio.sleep(delay)
+            # Space out the next queued command.
+            self._send_not_before = time.monotonic() + QUEUE_GAP
+
     async def async_launch_app(self, package_id: str) -> None:
         if self._closed or not self._app_feedback_ready:
             raise HomeAssistantError("App feedback is not available")
         if package_id not in {item["id"] for item in self.data["apps"]}:
             raise HomeAssistantError("Installed app package ID not found")
+        await self._async_ensure_awake()
         await mqtt.async_publish(
             self.hass,
             f"{self.base_topic}/app/{package_id}/open",
@@ -543,6 +665,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             raise HomeAssistantError("Action must be on or off")
         if action == "off" and target.get("supportsOff") is False:
             raise HomeAssistantError("This macro does not support off")
+        await self._async_ensure_awake()
         # The result feedback does not echo the action, so remember it.
         self.targets.note_request(kind, target_id, action)
         await mqtt.async_publish(
@@ -567,6 +690,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         self, device_name: str, command_name: str
     ) -> None:
         """Trigger a device command."""
+        await self._async_ensure_awake()
         topic = f"{self.base_topic}/device/{device_name}/trigger"
         _LOGGER.debug("Triggering command %s for device %s", command_name, device_name)
         _LOGGER.debug(
@@ -575,6 +699,21 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             command_name,
         )
         await mqtt.async_publish(self.hass, topic, command_name, qos=1, retain=False)
+        rs90_device_id = next(
+            (
+                d.get("id")
+                for d in self.data.get("devices", [])
+                if d.get("name") == device_name
+            ),
+            None,
+        )
+        self._fire_activity(
+            COMMAND_EVENT,
+            {"device": device_name, "command": command_name},
+            ("sensor", f"{self.remote_id}_commands_{rs90_device_id}")
+            if rs90_device_id
+            else None,
+        )
 
     async def async_control_led_light(self, state: str, duration: int = 5) -> None:
         """Control RGB ring light animation.
@@ -588,6 +727,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             - No MQTT OFF command sent (RS90 handles auto-off internally)
             - Local timer tracks state for Home Assistant UI only
         """
+        await self._async_ensure_awake()
         topic = f"{self.base_topic}/{TOPIC_LED_LIGHT}"
 
         # Cancel existing timer if any
@@ -705,6 +845,7 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
 
     async def async_force_refresh_lists(self) -> None:
         """Request a new remote snapshot, battery and confirmed target states."""
+        await self._async_ensure_awake()
         await mqtt.async_publish(
             self.hass, f"{self.base_topic}/discovery/refresh", "", qos=0, retain=False
         )

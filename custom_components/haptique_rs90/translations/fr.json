@@ -22,11 +22,59 @@
     "step": {
       "init": {
         "title": "Options Haptique RS90",
-        "description": "Modifier les parametres de la telecommande",
+        "menu_options": {
+          "name": "Renommer la télécommande",
+          "dashboard_device": "Tableau de bord : choisir les boutons de commandes",
+          "wake": "Réveiller la RS90"
+        }
+      },
+      "name": {
+        "title": "Renommer la télécommande",
         "data": {
-          "name": "Nom de la telecommande"
+          "name": "Nom de la télécommande"
+        }
+      },
+      "dashboard_device": {
+        "title": "Boutons de commandes du tableau de bord",
+        "description": "Choisissez l'appareil RS90 dont vous voulez sélectionner les boutons pour le tableau de bord Haptique RS90.",
+        "data": {
+          "device": "Appareil"
+        }
+      },
+      "dashboard_commands": {
+        "title": "Boutons pour {device}",
+        "description": "Quels boutons de commandes afficher dans la vue {device} du tableau de bord Haptique RS90 ?",
+        "data": {
+          "mode": "Boutons"
+        }
+      },
+      "dashboard_pick": {
+        "title": "Boutons pour {device}",
+        "description": "Cochez les commandes à afficher comme boutons, puis **Valider**.\n\nPour tout cocher ou tout décocher d'un coup, choisissez-le dans **Raccourci** et **Validez** : la liste revient mise à jour.",
+        "data": {
+          "shortcut": "Raccourci",
+          "commands": "Commandes"
+        }
+      },
+      "wake": {
+        "title": "Réveiller la RS90",
+        "description": "Hors de son socle, la RS90 se met en veille et ne reçoit plus les commandes. Home Assistant peut la réveiller en envoyant des paquets à son adresse IP.\n\nConseil : donnez une adresse IP fixe à la RS90 (réservation DHCP) dans votre box ou routeur.",
+        "data": {
+          "wake_host": "Adresse IP de la RS90",
+          "wake_auto": "La réveiller automatiquement avant d'envoyer une commande"
+        },
+        "data_description": {
+          "wake_host": "Laissez vide pour désactiver. Active le bouton Réveiller de la RS90.",
+          "wake_auto": "Les macros, applications et commandes fonctionnent alors même quand la RS90 dort (quelques secondes de plus)."
         }
       }
+    },
+    "abort": {
+      "no_devices": "Aucun appareil reçu de la RS90 pour l'instant. Vérifiez qu'elle est en ligne, puis réessayez."
+    },
+    "error": {
+      "invalid_ip": "Saisissez une adresse IPv4, par exemple 192.168.1.50",
+      "no_commands": "Cochez au moins une commande, ou choisissez de masquer cet appareil."
     }
   },
   "services": {
@@ -148,6 +196,30 @@
       },
       "last_macro_result": {
         "name": "Dernier résultat de macro"
+      }
+    },
+    "button": {
+      "refresh_lists": {
+        "name": "Synchroniser"
+      },
+      "wake": {
+        "name": "Réveiller"
+      }
+    }
+  },
+  "selector": {
+    "dashboard_mode": {
+      "options": {
+        "all": "Toutes les commandes (les nouvelles sont ajoutées automatiquement)",
+        "choose": "Seulement celles que je choisis",
+        "hide": "Aucune : masquer cet appareil"
+      }
+    },
+    "dashboard_shortcut": {
+      "options": {
+        "none": "—",
+        "tick_all": "Tout cocher",
+        "untick_all": "Tout décocher"
       }
     }
   }

@@ -14,6 +14,8 @@ from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN
 from .coordinator import HaptiqueRS90Coordinator
+from .frontend import async_register_frontend
+from .websocket import async_register_websocket
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -234,6 +236,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register services
     await async_setup_services(hass)
 
+    # Options (wake-up address, dashboard buttons) apply without a reload.
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
+
+    # Dashboard strategy (frontend). Never block the integration on it.
+    try:
+        if "websocket_api" in hass.config.components:
+            async_register_websocket(hass)
+        await async_register_frontend(hass)
+    except Exception:  # noqa: BLE001
+        _LOGGER.warning("Could not register the Haptique RS90 dashboard strategy", exc_info=True)
+
     return True
 
 
@@ -258,3 +271,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle removal of an entry."""
     _LOGGER.debug("Removing Haptique RS90 Remote integration")
+
+
+async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Refresh entity availability after the options change."""
+    if coordinator := hass.data.get(DOMAIN, {}).get(entry.entry_id):
+        coordinator.async_update_listeners()

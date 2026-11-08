@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] - 2026-11-08
+
+### ✨ New Features
+- **Haptique RS90 dashboard** (dashboard strategy shipped with the integration, Home Assistant 2026.5+ lists it under *Community dashboards*):
+  - RS90 view: macros as ON/OFF buttons (green = ON), sequences, apps and status
+  - One view per RS90 device, commands grouped like a remote (power, navigation pad, volume & channels, playback, keypad, inputs, more), 3D style with card-mod
+  - Rebuilt every time it opens, so new, renamed or removed devices, macros and apps show up by themselves; removed macros and apps are left out
+- **Wake the RS90 up**: enter its IP address in the options to get a **Wake up** button, and optionally wake it up automatically before macros, apps and device commands (UDP packets to its IP until it reports online, up to 20 s; works with the RS90's random MAC address)
+- With auto-wake, the RGB ring light and **Sync** buttons also wake the RS90 up, and **Last Reported App** keeps its last value while the RS90 sleeps
+- Commands pressed while the RS90 wakes up are sent one by one once it is ready (4 s after it reports online) instead of all at once
+- The device **Activity** shows, with an icon, each device command sent (e.g. `RS90 KODI → DOWN sent`) and each wake-up (`wake-up sent`, `woke up in 18 s`, `did not wake up`, or `already awake` when **Wake up** is pressed while it is awake). These entries, and the macro results, are attached to an entity (Commands sensor, Wake up button, macro switch), so the **Activity** panel shows them when filtered on the RS90 or on that entity
+- **Sync** button (configuration entity): asks the RS90 to publish its devices, commands, macros, sequences and apps again, plus battery and macro states, without using an action
+- When the RS90 wakes up, the integration asks for its lists again (at most every 5 minutes), so changes made while it slept are picked up
+- **Integration options** become a menu: rename the remote, or choose the command buttons shown for each device: all (default, new ones added automatically), only the ones you tick (with **Tick all** / **Untick all** shortcuts), or none to hide the device
+- Sequence switches get their own icons (playlist) so they stand out from macros (play / stop)
+
+### 🐛 Fixes
+- Renaming the remote no longer wipes the other options
+- The dashboard script URL carries a hash of the file, so browsers load the new version after an update
+
+---
+
 ## [1.8.1] - 2026-11-07
 
 Maintenance release: no change in behaviour.

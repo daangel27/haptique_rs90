@@ -7,6 +7,8 @@ Créez une télécommande dans votre tableau de bord, avec **un bouton par comma
 ![Exemple de carte de boutons](../documentation/screenshots/device_buttons_card.png)
 *Exemple : la carte KODI générée avec `example_kodi.yaml`*
 
+> 💡 **Depuis la 1.9.0**, le [tableau de bord Haptique RS90](../README_FR.md#-tableau-de-bord) intégré le fait automatiquement pour chaque appareil et reste à jour. Ce modèle reste utile pour placer les boutons d'un appareil dans votre propre tableau de bord.
+
 > ℹ️ C'est un **modèle** : les tableaux de bord de Home Assistant ne savent pas l'exécuter directement. On le calcule une fois dans **Outils de développement → Modèle**, puis on colle le résultat dans une carte. À refaire si les commandes de l'appareil changent.
 
 ---

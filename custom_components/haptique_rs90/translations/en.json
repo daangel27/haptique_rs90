@@ -21,12 +21,60 @@
   "options": {
     "step": {
       "init": {
-        "title": "Haptique RS90 Options",
-        "description": "Modify remote settings",
+        "title": "Haptique RS90 options",
+        "menu_options": {
+          "name": "Rename the remote",
+          "dashboard_device": "Dashboard: choose command buttons",
+          "wake": "Wake the RS90 up"
+        }
+      },
+      "name": {
+        "title": "Rename the remote",
         "data": {
           "name": "Remote name"
         }
+      },
+      "dashboard_device": {
+        "title": "Dashboard command buttons",
+        "description": "Choose the RS90 device whose buttons you want to pick for the Haptique RS90 dashboard.",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "dashboard_commands": {
+        "title": "Buttons for {device}",
+        "description": "Which command buttons should the {device} view of the Haptique RS90 dashboard show?",
+        "data": {
+          "mode": "Buttons"
+        }
+      },
+      "dashboard_pick": {
+        "title": "Buttons for {device}",
+        "description": "Tick the commands to show as buttons, then **Submit**.\n\nTo tick or untick everything at once, pick it in **Shortcut** and **Submit**: the list comes back updated.",
+        "data": {
+          "shortcut": "Shortcut",
+          "commands": "Commands"
+        }
+      },
+      "wake": {
+        "title": "Wake the RS90 up",
+        "description": "Off its dock the RS90 sleeps and stops receiving commands. Home Assistant can wake it up by sending packets to its IP address.\n\nTip: give the RS90 a fixed IP address (DHCP reservation) in your router.",
+        "data": {
+          "wake_host": "RS90 IP address",
+          "wake_auto": "Wake it up automatically before sending a command"
+        },
+        "data_description": {
+          "wake_host": "Leave empty to disable. Enables the Wake up button of the RS90.",
+          "wake_auto": "Macros, apps and device commands then work even while the RS90 sleeps (a few seconds slower)."
+        }
       }
+    },
+    "abort": {
+      "no_devices": "No device received from the RS90 yet. Make sure it is online, then try again."
+    },
+    "error": {
+      "invalid_ip": "Enter an IPv4 address, e.g. 192.168.1.50",
+      "no_commands": "Tick at least one command, or choose to hide this device."
     }
   },
   "services": {
@@ -148,6 +196,30 @@
       },
       "last_macro_result": {
         "name": "Last Macro Result"
+      }
+    },
+    "button": {
+      "refresh_lists": {
+        "name": "Sync"
+      },
+      "wake": {
+        "name": "Wake up"
+      }
+    }
+  },
+  "selector": {
+    "dashboard_mode": {
+      "options": {
+        "all": "All commands (new ones are added automatically)",
+        "choose": "Only the commands I choose",
+        "hide": "None: hide this device"
+      }
+    },
+    "dashboard_shortcut": {
+      "options": {
+        "none": "—",
+        "tick_all": "Tick all",
+        "untick_all": "Untick all"
       }
     }
   }

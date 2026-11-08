@@ -148,13 +148,13 @@ async def test_logbook_describes_every_result(hass, coordinator, publish):
     for event in events:
         entry = describe(event)
         assert entry["name"] == "RS90 CANAL"
-        assert entry["message"] == "OFF: skipped (already_in_requested_state)"
+        assert entry["message"] == "→ OFF: skipped (already_in_requested_state)"
         assert entry["entity_id"] == switch.entity_id
 
     # Unknown target switch and no action (run started on the RS90 screen).
     await message(hass, "macro/m2/result", '{"status":"executed"}')
     entry = describe(events[-1])
     assert entry["name"] == "RS90 KODI"
-    assert entry["message"] == "result: executed"
+    assert entry["message"] == "→ result: executed"
     assert "entity_id" not in entry
     assert result_message({}) == "result: unknown"

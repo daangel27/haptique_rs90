@@ -45,6 +45,7 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 ## ✨ Fonctionnalités
 
 ### Contrôle
+- 📺 **Tableau de bord prêt à l'emploi** : un onglet RS90 et une télécommande par appareil, toujours à jour (voir [Tableau de bord](#-tableau-de-bord))
 - 🎛️ **Interrupteurs de macros et de séquences** : ON/OFF depuis Home Assistant, état confirmé par le firmware de la RS90
 - 📱 **Boutons d'applications** : lancent n'importe quelle application installée sur la RS90 (désactivés par défaut, activez ceux qui vous intéressent)
 - 📡 **Commandes des appareils** : envoient n'importe quelle commande IR/IP d'un appareil configuré
@@ -136,6 +137,80 @@ Toutes les entités sont créées automatiquement.
 | Capteur **Info Summary** | Tous les identifiants (appareils, macros, séquences, applications) au même endroit, voir [Retrouver les identifiants](#-retrouver-les-identifiants--le-capteur-info-summary) |
 
 > ℹ️ L'état d'une macro est ce que la RS90 signale, **pas** une mesure de l'alimentation de la TV ou de l'ampli.
+
+---
+
+## 📺 Tableau de bord
+
+L'intégration fournit un **tableau de bord Haptique RS90** prêt à l'emploi, reconstruit à partir de votre télécommande à chaque ouverture : rien à copier, rien à tenir à jour.
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_rs90.png" alt="Onglet RS90" width="90%" />
+<br/><em>Onglet RS90 : macros (vertes quand elles sont ON), séquences, applications et état</em>
+</p>
+
+<p align="center">
+<img src="documentation/screenshots/dashboard_device.png" alt="Onglet d'un appareil" width="90%" />
+<br/><em>Un onglet par appareil, disposé comme une télécommande</em>
+</p>
+
+### Le créer
+
+1. **Paramètres** → **Tableaux de bord** → **Ajouter un tableau de bord**
+2. Sous **Community dashboards**, choisissez **Haptique RS90** (Home Assistant 2026.5+)
+3. Donnez-lui un titre et une icône (ex. `mdi:remote`), puis **Créer**
+
+Sur les versions plus anciennes, créez un tableau de bord vide, ouvrez **⋮ → Éditeur de configuration brute** et collez :
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+```
+
+### Ce qu'on obtient
+
+- **Onglet RS90** : les macros en boutons ON/OFF (vert = ON), les séquences, les applications et les capteurs d'état
+- **Un onglet par appareil** (TV, AMPLI, KODI…), commandes regroupées comme sur une télécommande : alimentation, croix de navigation, volume et chaînes, lecture, pavé numérique, entrées, autres
+- Un appui sur un bouton envoie la commande via `haptique_rs90.trigger_device_command`
+- Le style de boutons 3D utilise **card-mod** (Marketplace / HACS). Sans lui, les boutons fonctionnent mais sont plus simples.
+
+### Choisir les boutons de chaque appareil
+
+Par défaut, toutes les commandes sont affichées. Pour ne garder que celles que vous utilisez :
+
+1. **Paramètres** → **Appareils et services** → **Haptique RS90 Remote** → ⚙️ **Configurer**
+2. **Dashboard: choose command buttons** → choisissez l'appareil
+3. Choisissez **Only the commands I choose** (Seulement celles que je choisis) → **Valider**
+4. Cochez les commandes voulues → **Valider**. La liste part vide ; pour tout cocher ou tout décocher d'un coup, choisissez **Tick all** ou **Untick all** dans **Shortcut** (Raccourci) et **Valider**
+
+Choisissez **All commands** (Toutes les commandes) pour revenir à toutes les commandes, ou **None: hide this device** (Aucune : masquer cet appareil) pour retirer son onglet. Rechargez le tableau de bord pour voir le changement.
+
+<p align="center">
+<img src="documentation/screenshots/options_menu.png" alt="Options de l'intégration" width="30%" />
+<img src="documentation/screenshots/options_mode.png" alt="Choisir quels boutons" width="30%" />
+<img src="documentation/screenshots/options_commands.png" alt="Choisir les boutons de commandes" width="30%" />
+</p>
+
+### Toujours à jour
+
+Quand vous ajoutez, renommez ou supprimez un appareil, une macro, une séquence ou une application sur la RS90, l'intégration le reçoit par MQTT et le tableau de bord suit à la prochaine ouverture (ou au rechargement) : nouvel appareil → nouvel onglet, appareil supprimé → onglet retiré, nouvelle macro → nouveau bouton. Un appareil dont vous avez choisi les boutons garde votre sélection ; les nouvelles commandes d'un appareil laissé sur **All commands** apparaissent toutes seules.
+
+> ℹ️ La RS90 doit être **en ligne** pour publier ses changements ; à son réveil, l'intégration lui redemande ses listes. Si quelque chose n'apparaît toujours pas, appuyez sur le bouton **Synchroniser** (page de l'appareil RS90, ou section État du tableau de bord).
+
+<details>
+<summary>Avancé : options YAML de la stratégie</summary>
+
+```yaml
+strategy:
+  type: custom:haptique-rs90
+  hide_devices: [XBOX]          # onglets à ne pas afficher
+  devices:                      # uniquement ces onglets, avec ces commandes
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    TV: all
+```
+
+La sélection faite dans les options de l'intégration s'applique en premier.
+</details>
 
 ---
 
@@ -243,11 +318,45 @@ Plus de détails : [Macros, séquences et applications Standard MQTT](documentat
 
 ## 😴 Mise en veille
 
-Hors de son socle, la RS90 se met en veille au bout d'un moment et apparaît **hors ligne** : ses entités deviennent indisponibles et les commandes MQTT ne lui parviennent plus. Reposez-la sur son socle ou réveillez-la (touchez l'écran ou appuyez sur une touche).
+Hors de son socle, la RS90 se met en veille au bout d'un moment et apparaît **hors ligne** : ses entités deviennent indisponibles et les commandes MQTT ne lui parviennent plus. Reposez-la sur son socle, réveillez-la à la main (touchez l'écran ou appuyez sur une touche), ou laissez Home Assistant la réveiller :
+
+1. Donnez à la RS90 une **adresse IP fixe** (réservation DHCP dans votre box ou routeur)
+2. **Paramètres** → **Appareils et services** → **Haptique RS90 Remote** → ⚙️ **Configurer** → **Réveiller la RS90**
+3. Saisissez son **adresse IP**. Le bouton **Réveiller** de la RS90 devient disponible.
+4. Facultatif : cochez **La réveiller automatiquement avant d'envoyer une commande**. Les macros, applications et commandes (tableau de bord compris) fonctionnent alors pendant la veille : Home Assistant la réveille d'abord, ce qui ajoute quelques secondes.
+
+Home Assistant envoie quelques paquets à l'adresse IP de la RS90 jusqu'à ce qu'elle repasse en ligne (20 secondes au maximum). Seule l'adresse IP est nécessaire : la RS90 utilise par défaut une adresse MAC Wi-Fi aléatoire, et l'adresse MAC contenue dans le paquet n'a pas d'importance.
+
+<p align="center">
+<img src="documentation/screenshots/options_wake.png" alt="Options de réveil de la RS90" width="45%" />
+<img src="documentation/screenshots/activity_wake.png" alt="Réveil et commandes dans l'activité" width="45%" />
+</p>
+
+Chaque réveil apparaît dans l'**Activité** de la RS90 (`wake-up sent`, puis `woke up in 8 s` ou `did not wake up`), comme chaque commande envoyée à un appareil. Après un réveil, Home Assistant attend 4 secondes puis envoie une par une les commandes appuyées entre-temps.
+
+> ⚠️ Juste après son réveil, la RS90 peut encore rater une commande destinée à un appareil piloté par le réseau (ex. Kodi) quand plusieurs sont appuyées d'affilée. Les appareils infrarouges ne sont pas concernés. Laissez la RS90 sur son socle si chaque commande doit passer.
 
 ---
 
 ## 🛠️ Dépannage
+
+### Voir ce que fait l'intégration
+Tout ce que l'intégration envoie à la RS90 apparaît dans l'**Activité** de Home Assistant : vous pouvez vérifier ce qui s'est passé, ou pas :
+
+- chaque **commande d'appareil** envoyée, ex. `Commands - AMPLI → VOLUME_DOWN sent`
+- chaque **réveil** : `wake-up sent`, puis `woke up in 8 s`, `did not wake up` ou `already awake`
+- chaque **résultat de macro / séquence**, ex. `KODI → ON: executed` ou `ON: failed (execution_failed)`
+- les appuis sur les boutons (Wake up, Sync, applications…) avec l'utilisateur qui a appuyé, les changements de connexion, l'état des macros
+
+Où regarder :
+- la carte **Activité** de la page de l'appareil RS90 (**Paramètres** → **Appareils et services** → **Haptique RS90 Remote** → la RS90)
+- le panneau **Activité** de la barre latérale : **Add target** → l'appareil **RS90**. Pour affiner, choisissez plutôt une seule entité, ex. **Commands - AMPLI** pour les commandes envoyées à l'ampli, ou **Wake up** pour les réveils
+
+Une commande affichée `sent` est bien partie de Home Assistant : si l'appareil n'a pas réagi, le problème est côté RS90 (veille, commandes en double, voir plus bas).
+
+<p align="center">
+<img src="documentation/screenshots/activity_panel.png" alt="Panneau Activité filtré sur la RS90" width="70%" />
+</p>
 
 ### Télécommande non détectée
 1. Vérifiez le **broker MQTT** dans Paramètres → Appareils et services → MQTT
@@ -267,6 +376,9 @@ Limitations connues du firmware (signalées à Haptique) :
 - En passant d'une macro à une autre, la précédente peut rester **ON** ; l'éteindre ensuite renvoie `skipped (already_in_requested_state)`
 
 Utilisez **Last Macro Result** et le journal pour voir ce que la RS90 a réellement fait, et `haptique_rs90.query_status` pour relire un état.
+
+### Une commande d'appareil ne fait rien
+L'Activité affiche `RS90 <appareil> <commande> sent`, mais l'appareil ne réagit pas : vérifiez qu'il n'a pas **deux commandes du même nom** (affichées deux fois dans son capteur **Commands**, ex. deux `POWER`). Les commandes sont envoyées par leur nom : la RS90 utilise donc toujours la même, qui peut être un *Power on* discret sans effet quand l'appareil est déjà allumé. Renommez l'une d'elles dans l'application Haptique (ex. `POWER_ON` / `POWER_OFF`).
 
 ### Last Reported App ne change pas quand on quitte une application
 Le firmware signale seulement l'application ouverte, pas le moment où on la quitte.
