@@ -43,9 +43,16 @@
       },
       "dashboard_commands": {
         "title": "Boutons pour {device}",
-        "description": "Cochez les commandes à afficher comme boutons dans la vue {device} du tableau de bord Haptique RS90. Décochez tout pour masquer cet appareil.",
+        "description": "Quels boutons de commandes afficher dans la vue {device} du tableau de bord Haptique RS90 ?",
         "data": {
-          "show_all": "Afficher toutes les commandes (et les nouvelles automatiquement)",
+          "mode": "Boutons"
+        }
+      },
+      "dashboard_pick": {
+        "title": "Boutons pour {device}",
+        "description": "Cochez les commandes à afficher comme boutons, puis **Valider**.\n\nPour tout cocher ou tout décocher d'un coup, choisissez-le dans **Raccourci** et **Validez** : la liste revient mise à jour.",
+        "data": {
+          "shortcut": "Raccourci",
           "commands": "Commandes"
         }
       },
@@ -66,7 +73,8 @@
       "no_devices": "Aucun appareil reçu de la RS90 pour l'instant. Vérifiez qu'elle est en ligne, puis réessayez."
     },
     "error": {
-      "invalid_ip": "Saisissez une adresse IPv4, par exemple 192.168.1.50"
+      "invalid_ip": "Saisissez une adresse IPv4, par exemple 192.168.1.50",
+      "no_commands": "Cochez au moins une commande, ou choisissez de masquer cet appareil."
     }
   },
   "services": {
@@ -196,6 +204,22 @@
       },
       "wake": {
         "name": "Réveiller"
+      }
+    }
+  },
+  "selector": {
+    "dashboard_mode": {
+      "options": {
+        "all": "Toutes les commandes (les nouvelles sont ajoutées automatiquement)",
+        "choose": "Seulement celles que je choisis",
+        "hide": "Aucune : masquer cet appareil"
+      }
+    },
+    "dashboard_shortcut": {
+      "options": {
+        "none": "—",
+        "tick_all": "Tout cocher",
+        "untick_all": "Tout décocher"
       }
     }
   }

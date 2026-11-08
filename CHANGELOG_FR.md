@@ -20,7 +20,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - L'**Activité** de l'appareil affiche, avec une icône, chaque commande envoyée (ex. `RS90 KODI → DOWN sent`) et chaque réveil (`wake-up sent`, `woke up in 18 s` ou `did not wake up`)
 - Bouton **Synchroniser** (entité de configuration) : demande à la RS90 de republier ses appareils, commandes, macros, séquences et applications, ainsi que la batterie et l'état des macros, sans passer par une action
 - Au réveil de la RS90, l'intégration lui redemande ses listes (au plus toutes les 5 minutes) : les changements faits pendant sa veille sont rattrapés
-- Les **options de l'intégration** deviennent un menu : renommer la télécommande, ou choisir les boutons de commandes affichés pour chaque appareil (tous par défaut, aucun masque l'appareil)
+- Les **options de l'intégration** deviennent un menu : renommer la télécommande, ou choisir les boutons de commandes affichés pour chaque appareil : toutes (par défaut, les nouvelles ajoutées automatiquement), seulement celles cochées (avec les raccourcis **Tout cocher** / **Tout décocher**), ou aucune pour masquer l'appareil
 
 ### 🐛 Corrections
 - Renommer la télécommande n'efface plus les autres options

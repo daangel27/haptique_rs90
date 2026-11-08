@@ -180,9 +180,10 @@ Par défaut, toutes les commandes sont affichées. Pour ne garder que celles que
 
 1. **Paramètres** → **Appareils et services** → **Haptique RS90 Remote** → ⚙️ **Configurer**
 2. **Dashboard: choose command buttons** → choisissez l'appareil
-3. Décochez **Show all commands**, cochez les commandes voulues et **Valider**
+3. Choisissez **Only the commands I choose** (Seulement celles que je choisis) → **Valider**
+4. Cochez les commandes voulues → **Valider**. La liste part vide ; pour tout cocher ou tout décocher d'un coup, choisissez **Tick all** ou **Untick all** dans **Shortcut** (Raccourci) et **Valider**
 
-Tout décocher masque l'appareil. Rechargez le tableau de bord pour voir le changement.
+Choisissez **All commands** (Toutes les commandes) pour revenir à toutes les commandes, ou **None: hide this device** (Aucune : masquer cet appareil) pour retirer son onglet. Rechargez le tableau de bord pour voir le changement.
 
 <p align="center">
 <img src="documentation/screenshots/options_menu.png" alt="Options de l'intégration" width="45%" />
@@ -191,7 +192,7 @@ Tout décocher masque l'appareil. Rechargez le tableau de bord pour voir le chan
 
 ### Toujours à jour
 
-Quand vous ajoutez, renommez ou supprimez un appareil, une macro, une séquence ou une application sur la RS90, l'intégration le reçoit par MQTT et le tableau de bord suit à la prochaine ouverture (ou au rechargement) : nouvel appareil → nouvel onglet, appareil supprimé → onglet retiré, nouvelle macro → nouveau bouton. Un appareil dont vous avez choisi les boutons garde votre sélection ; les nouvelles commandes d'un appareil laissé sur **Show all commands** apparaissent toutes seules.
+Quand vous ajoutez, renommez ou supprimez un appareil, une macro, une séquence ou une application sur la RS90, l'intégration le reçoit par MQTT et le tableau de bord suit à la prochaine ouverture (ou au rechargement) : nouvel appareil → nouvel onglet, appareil supprimé → onglet retiré, nouvelle macro → nouveau bouton. Un appareil dont vous avez choisi les boutons garde votre sélection ; les nouvelles commandes d'un appareil laissé sur **All commands** apparaissent toutes seules.
 
 > ℹ️ La RS90 doit être **en ligne** pour publier ses changements ; à son réveil, l'intégration lui redemande ses listes. Si quelque chose n'apparaît toujours pas, appuyez sur le bouton **Synchroniser** (page de l'appareil RS90, ou section État du tableau de bord).
 

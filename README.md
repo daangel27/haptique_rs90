@@ -180,9 +180,10 @@ By default every command is shown. To keep only the ones you use:
 
 1. **Settings** → **Devices & services** → **Haptique RS90 Remote** → ⚙️ **Configure**
 2. **Dashboard: choose command buttons** → pick the device
-3. Untick **Show all commands**, tick the commands you want and **Submit**
+3. Choose **Only the commands I choose** → **Submit**
+4. Tick the commands you want → **Submit**. The list starts empty; to tick or untick everything at once, pick **Tick all** or **Untick all** in **Shortcut** and **Submit**
 
-Untick everything to hide a device. Reload the dashboard to see the change.
+Choose **All commands** to go back to every command, or **None: hide this device** to remove its view. Reload the dashboard to see the change.
 
 <p align="center">
 <img src="documentation/screenshots/options_menu.png" alt="Integration options" width="45%" />
@@ -191,7 +192,7 @@ Untick everything to hide a device. Reload the dashboard to see the change.
 
 ### Always up to date
 
-When you add, rename or remove a device, a macro, a sequence or an app on the RS90, the integration receives it over MQTT and the dashboard follows the next time you open (or reload) it: new device → new view, removed device → view gone, new macro → new button. A device with a custom button selection keeps it; new commands of a device left on **Show all commands** appear by themselves.
+When you add, rename or remove a device, a macro, a sequence or an app on the RS90, the integration receives it over MQTT and the dashboard follows the next time you open (or reload) it: new device → new view, removed device → view gone, new macro → new button. A device with a custom button selection keeps it; new commands of a device left on **All commands** appear by themselves.
 
 > ℹ️ The RS90 must be **online** to publish its changes; when it wakes up, the integration asks it for its lists again. If something still doesn't show up, press the **Sync** button (RS90 device page, or the Status section of the dashboard).
 

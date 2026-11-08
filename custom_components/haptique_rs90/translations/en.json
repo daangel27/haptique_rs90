@@ -43,9 +43,16 @@
       },
       "dashboard_commands": {
         "title": "Buttons for {device}",
-        "description": "Tick the commands to show as buttons in the {device} view of the Haptique RS90 dashboard. Untick everything to hide this device.",
+        "description": "Which command buttons should the {device} view of the Haptique RS90 dashboard show?",
         "data": {
-          "show_all": "Show all commands (and new ones automatically)",
+          "mode": "Buttons"
+        }
+      },
+      "dashboard_pick": {
+        "title": "Buttons for {device}",
+        "description": "Tick the commands to show as buttons, then **Submit**.\n\nTo tick or untick everything at once, pick it in **Shortcut** and **Submit**: the list comes back updated.",
+        "data": {
+          "shortcut": "Shortcut",
           "commands": "Commands"
         }
       },
@@ -66,7 +73,8 @@
       "no_devices": "No device received from the RS90 yet. Make sure it is online, then try again."
     },
     "error": {
-      "invalid_ip": "Enter an IPv4 address, e.g. 192.168.1.50"
+      "invalid_ip": "Enter an IPv4 address, e.g. 192.168.1.50",
+      "no_commands": "Tick at least one command, or choose to hide this device."
     }
   },
   "services": {
@@ -196,6 +204,22 @@
       },
       "wake": {
         "name": "Wake up"
+      }
+    }
+  },
+  "selector": {
+    "dashboard_mode": {
+      "options": {
+        "all": "All commands (new ones are added automatically)",
+        "choose": "Only the commands I choose",
+        "hide": "None: hide this device"
+      }
+    },
+    "dashboard_shortcut": {
+      "options": {
+        "none": "—",
+        "tick_all": "Tick all",
+        "untick_all": "Untick all"
       }
     }
   }
