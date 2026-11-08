@@ -388,7 +388,7 @@ The firmware only reports the app that was opened, not when you leave it.
 ## 📚 Documentation
 
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.8.0
+- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.9.0
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, sequences, apps and actions in detail
 - **[Device ID guide](documentation/GUIDE_DEVICE_ID.md)** - Finding the RS90 device ID
 - **[Templates](templates/)** - Dashboard card templates

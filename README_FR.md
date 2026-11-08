@@ -388,7 +388,7 @@ Le firmware signale seulement l'application ouverte, pas le moment où on la qui
 ## 📚 Documentation
 
 - **[CHANGELOG_FR.md](CHANGELOG_FR.md)** - Historique des versions
-- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.8.0
+- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.9.0
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, séquences, applications et actions en détail (en anglais)
 - **[Guide de l'identifiant d'appareil](documentation/GUIDE_DEVICE_ID_FR.md)** - Trouver l'identifiant de la RS90
 - **[Modèles](templates/)** - Modèles de cartes pour tableaux de bord
