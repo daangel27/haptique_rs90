@@ -273,14 +273,20 @@ class TargetManager:
             "timestamp": dt_util.utcnow().isoformat(),
         }
         self.coordinator.data["last_target_result"] = record
-        self.coordinator.hass.bus.async_fire(
-            RESULT_EVENT,
-            {
-                "device_id": getattr(self.coordinator, "device_id", None),
-                "remote_id": self.coordinator.remote_id,
-                **record,
-            },
-        )
+        event = {
+            "device_id": getattr(self.coordinator, "device_id", None),
+            "remote_id": self.coordinator.remote_id,
+            **record,
+        }
+        # The switch's entity_id lets the Activity panel find the entry when
+        # it is filtered on the RS90 device or on the switch.
+        from .logbook import target_entity_id  # noqa: PLC0415
+
+        if entity_id := target_entity_id(
+            self.coordinator.hass, self.coordinator.remote_id, kind, target_id
+        ):
+            event["entity_id"] = entity_id
+        self.coordinator.hass.bus.async_fire(RESULT_EVENT, event)
 
     def _publish_state(self) -> None:
         data = self.coordinator.data

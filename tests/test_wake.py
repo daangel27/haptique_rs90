@@ -180,3 +180,26 @@ async def test_wake_button_when_already_awake(hass, coordinator):
     burst.assert_not_called()
     assert [e.data["result"] for e in events] == ["awake"]
     assert wake_message(events[0].data) == "already awake"
+
+
+async def test_activity_events_name_their_entity(hass, coordinator, publish):
+    """Events carry entity_id so the Activity panel finds them per device."""
+    from homeassistant.core import callback
+    from homeassistant.helpers import entity_registry as er
+
+    from custom_components.haptique_rs90.const import COMMAND_EVENT, DOMAIN
+
+    registry = er.async_get(hass)
+    remote = coordinator.remote_id
+    sensor = registry.async_get_or_create(
+        "sensor", DOMAIN, f"{remote}_commands_d1", suggested_object_id="kodi_cmds"
+    )
+    coordinator.data["devices"] = [{"id": "d1", "name": "KODI"}]
+    events = []
+    hass.bus.async_listen(COMMAND_EVENT, callback(lambda e: events.append(e)))
+    await message(hass, "status", "online")
+    await coordinator.async_trigger_device_command("KODI", "UP")
+    await coordinator.async_trigger_device_command("OTHER", "UP")
+    await hass.async_block_till_done()
+    assert events[0].data["entity_id"] == sensor.entity_id
+    assert "entity_id" not in events[1].data

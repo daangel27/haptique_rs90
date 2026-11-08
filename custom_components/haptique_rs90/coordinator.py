@@ -12,6 +12,7 @@ from homeassistant.components import mqtt
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
@@ -448,9 +449,9 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         """Wake the RS90 (caller holds the wake lock) and log it."""
         if self._online.is_set():
             if manual:
-                self._fire_activity(WAKE_EVENT, {"result": "awake"})
+                self._fire_activity(WAKE_EVENT, {"result": "awake"}, self._wake_entity)
             return True
-        self._fire_activity(WAKE_EVENT, {"result": "sent"})
+        self._fire_activity(WAKE_EVENT, {"result": "sent"}, self._wake_entity)
         started = time.monotonic()
         woke = await async_wake(self.hass, self.wake_host, self._online)
         self._fire_activity(
@@ -459,17 +460,36 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 "result": "woke" if woke else "failed",
                 "seconds": round(time.monotonic() - started),
             },
+            self._wake_entity,
         )
         if woke:
             self._send_not_before = time.monotonic() + WAKE_SETTLE
         return woke
 
-    def _fire_activity(self, event_type: str, data: dict[str, Any]) -> None:
-        """Fire an event that the logbook shows in the device activity."""
-        self.hass.bus.async_fire(
-            event_type,
-            {"remote_id": self.remote_id, "device_id": self.device_id, **data},
-        )
+    @property
+    def _wake_entity(self) -> tuple[str, str]:
+        return ("button", f"{self.remote_id}_wake")
+
+    def _fire_activity(
+        self,
+        event_type: str,
+        data: dict[str, Any],
+        entity: tuple[str, str] | None = None,
+    ) -> None:
+        """Fire an event that the logbook shows in the device activity.
+
+        The entity_id (found from its unique_id) lets the Activity panel find
+        the entry when it is filtered on the RS90 device or on that entity.
+        `entity` is the (platform, unique_id) of the entity to attach it to.
+        """
+        event = {"remote_id": self.remote_id, "device_id": self.device_id, **data}
+        if entity and (
+            entity_id := er.async_get(self.hass).async_get_entity_id(
+                entity[0], DOMAIN, entity[1]
+            )
+        ):
+            event["entity_id"] = entity_id
+        self.hass.bus.async_fire(event_type, event)
 
     async def _async_ensure_awake(self) -> None:
         """Before a command: wake a sleeping RS90 up when auto-wake is on.
@@ -679,8 +699,20 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             command_name,
         )
         await mqtt.async_publish(self.hass, topic, command_name, qos=1, retain=False)
+        rs90_device_id = next(
+            (
+                d.get("id")
+                for d in self.data.get("devices", [])
+                if d.get("name") == device_name
+            ),
+            None,
+        )
         self._fire_activity(
-            COMMAND_EVENT, {"device": device_name, "command": command_name}
+            COMMAND_EVENT,
+            {"device": device_name, "command": command_name},
+            ("sensor", f"{self.remote_id}_commands_{rs90_device_id}")
+            if rs90_device_id
+            else None,
         )
 
     async def async_control_led_light(self, state: str, duration: int = 5) -> None:

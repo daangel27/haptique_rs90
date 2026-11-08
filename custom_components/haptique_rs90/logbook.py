@@ -102,7 +102,13 @@ def wake_message(data: dict[str, Any]) -> str:
     return f"did not wake up within {seconds} s"
 
 
-def _target_entity_id(
+def _entity(data: dict[str, Any]) -> dict[str, str]:
+    """Attach the entry to the entity named in the event, if any."""
+    entity_id = data.get("entity_id")
+    return {LOGBOOK_ENTRY_ENTITY_ID: entity_id} if entity_id else {}
+
+
+def target_entity_id(
     hass: HomeAssistant, remote_id: str, kind: str, target_id: str
 ) -> str | None:
     """Find the switch of a macro/sequence, including migrated identities."""
@@ -146,7 +152,7 @@ def async_describe_events(
         kind = data.get("target_kind")
         target_id = data.get("target_id")
         if remote_id and kind and target_id:
-            if entity_id := _target_entity_id(hass, remote_id, kind, target_id):
+            if entity_id := target_entity_id(hass, remote_id, kind, target_id):
                 description[LOGBOOK_ENTRY_ENTITY_ID] = entity_id
         return description
 
@@ -159,6 +165,7 @@ def async_describe_events(
             LOGBOOK_ENTRY_NAME: f"RS90 {data.get('device') or 'device'}",
             LOGBOOK_ENTRY_MESSAGE: f"{ARROW}{data.get('command')} sent",
             LOGBOOK_ENTRY_ICON: command_icon(data.get("command")),
+            **_entity(data),
         }
 
     async_describe_event(DOMAIN, COMMAND_EVENT, async_describe_command)
@@ -171,6 +178,7 @@ def async_describe_events(
             LOGBOOK_ENTRY_ICON: _WAKE_ICONS.get(
                 event.data.get("result"), "mdi:alarm-off"
             ),
+            **_entity(event.data),
         }
 
     async_describe_event(DOMAIN, WAKE_EVENT, async_describe_wake)
