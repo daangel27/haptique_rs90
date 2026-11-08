@@ -67,7 +67,11 @@ _COMMAND_ICONS = (
     ("SOURCE", "mdi:import"),
 )
 
-_WAKE_ICONS = {"sent": "mdi:alarm", "woke": "mdi:alarm-check"}
+_WAKE_ICONS = {
+    "sent": "mdi:alarm",
+    "woke": "mdi:alarm-check",
+    "awake": "mdi:alarm-check",
+}
 
 
 # Same arrow as Home Assistant's own "state → new state" entries.
@@ -90,6 +94,8 @@ def wake_message(data: dict[str, Any]) -> str:
     result = data.get("result")
     if result == "sent":
         return "wake-up sent"
+    if result == "awake":
+        return "already awake"
     seconds = data.get("seconds")
     if result == "woke":
         return f"woke up in {seconds} s"

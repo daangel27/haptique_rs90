@@ -159,3 +159,24 @@ def test_logbook_icons():
     assert command_icon("INPUT_CBL_SAT") == "mdi:import"
     assert command_icon("7") == "mdi:dialpad"
     assert command_icon("ECO_MODE_TOGGLE") == "mdi:remote"
+
+
+async def test_wake_button_when_already_awake(hass, coordinator):
+    """Pressing Wake up on an awake RS90 sends nothing and says so."""
+    from homeassistant.core import callback
+
+    from custom_components.haptique_rs90.const import WAKE_EVENT
+    from custom_components.haptique_rs90.logbook import wake_message
+
+    hass.config_entries.async_update_entry(
+        coordinator.entry, options={CONF_WAKE_HOST: "192.168.10.245"}
+    )
+    await message(hass, "status", "online")
+    events = []
+    hass.bus.async_listen(WAKE_EVENT, callback(lambda e: events.append(e)))
+    with patch.object(wake, "_send_burst") as burst:
+        assert await coordinator.async_wake()
+    await hass.async_block_till_done()
+    burst.assert_not_called()
+    assert [e.data["result"] for e in events] == ["awake"]
+    assert wake_message(events[0].data) == "already awake"

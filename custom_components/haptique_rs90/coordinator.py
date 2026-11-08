@@ -442,11 +442,13 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
                 "Set the RS90 IP address in the integration options to wake it up"
             )
         async with self._wake_lock:
-            return await self._async_wake_locked()
+            return await self._async_wake_locked(manual=True)
 
-    async def _async_wake_locked(self) -> bool:
+    async def _async_wake_locked(self, manual: bool = False) -> bool:
         """Wake the RS90 (caller holds the wake lock) and log it."""
         if self._online.is_set():
+            if manual:
+                self._fire_activity(WAKE_EVENT, {"result": "awake"})
             return True
         self._fire_activity(WAKE_EVENT, {"result": "sent"})
         started = time.monotonic()
