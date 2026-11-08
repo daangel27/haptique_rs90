@@ -186,8 +186,9 @@ Par défaut, toutes les commandes sont affichées. Pour ne garder que celles que
 Choisissez **All commands** (Toutes les commandes) pour revenir à toutes les commandes, ou **None: hide this device** (Aucune : masquer cet appareil) pour retirer son onglet. Rechargez le tableau de bord pour voir le changement.
 
 <p align="center">
-<img src="documentation/screenshots/options_menu.png" alt="Options de l'intégration" width="45%" />
-<img src="documentation/screenshots/options_commands.png" alt="Choisir les boutons de commandes" width="45%" />
+<img src="documentation/screenshots/options_menu.png" alt="Options de l'intégration" width="30%" />
+<img src="documentation/screenshots/options_mode.png" alt="Choisir quels boutons" width="30%" />
+<img src="documentation/screenshots/options_commands.png" alt="Choisir les boutons de commandes" width="30%" />
 </p>
 
 ### Toujours à jour

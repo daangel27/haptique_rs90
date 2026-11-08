@@ -186,8 +186,9 @@ By default every command is shown. To keep only the ones you use:
 Choose **All commands** to go back to every command, or **None: hide this device** to remove its view. Reload the dashboard to see the change.
 
 <p align="center">
-<img src="documentation/screenshots/options_menu.png" alt="Integration options" width="45%" />
-<img src="documentation/screenshots/options_commands.png" alt="Choose the command buttons" width="45%" />
+<img src="documentation/screenshots/options_menu.png" alt="Integration options" width="30%" />
+<img src="documentation/screenshots/options_mode.png" alt="Choose which buttons" width="30%" />
+<img src="documentation/screenshots/options_commands.png" alt="Choose the command buttons" width="30%" />
 </p>
 
 ### Always up to date
