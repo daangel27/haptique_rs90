@@ -1,133 +1,73 @@
-# Comment trouver le Device ID (Home Assistant) de votre RS90
+# Trouver l'identifiant de votre RS90 (`rs90_id`)
 
-## Qu'est-ce que le device_id ?
+Toutes les actions de l'intégration (`trigger_macro`, `trigger_sequence`, `trigger_device_command`, `launch_app`, `query_status`…) demandent **`rs90_id`** : l'**identifiant d'appareil Home Assistant** de votre télécommande, ex. `6f99751e78b5a07de72d549143e2975c`.
 
-Le `device_id` est l'**identifiant unique Home Assistant** de votre télécommande RS90.
+Ce n'est **pas** :
+- ❌ l'identifiant MQTT de la RS90 (ex. `3d5d95aa3a7f7b20`, utilisé dans les topics comme `Haptique/3d5d95aa3a7f7b20/status`)
+- ❌ le nom de la RS90 (ex. « RS90 Salon »)
 
-**Ce n'est PAS** :
-- ❌ L'ID MQTT du RS90 (ex: `3d5d95aa3a7f7b20`)
-- ❌ Le nom du RS90 (ex: "RS90 Salon")
-
-**C'est** :
-- ✅ L'identifiant interne Home Assistant (ex: `6f99751e78b5a07de72d549143e2975c`)
+> 💡 Vous voulez juste appuyer sur des boutons ? Le **tableau de bord Haptique RS90** n'a besoin d'aucun identifiant (voir le README). Ce guide sert pour les automatisations et les scripts.
 
 ---
 
-## Le plus rapide : le capteur Info Summary
+## 1. Le capteur Info Summary (le plus rapide)
 
-Ouvrez le capteur **Info Summary** de votre RS90 (page de l'appareil → Capteurs → Info Summary → Attributs) :
-- **Rs90 ID** est l'identifiant d'appareil Home Assistant (`rs90_id`)
-- **Rs90 remote ID** est l'identifiant MQTT
-- les identifiants des macros, séquences, appareils et applications y figurent aussi (attributs *by ID*)
+Page de l'appareil RS90 → **Capteurs** → **Info Summary** → **Attributs** :
+- **Rs90 ID** : le `rs90_id` à utiliser dans les actions
+- **Rs90 remote ID** : l'identifiant MQTT
+- **Macros / Sequences / Devices / Apps by ID** : les identifiants à utiliser pour `rs90_macro_id`, `rs90_sequence_id`, `rs90_device_id` et `app_package_id`
 
 Voir [Retrouver les identifiants](../README_FR.md#-retrouver-les-identifiants--le-capteur-info-summary) dans le README.
 
----
+## 2. Le laisser remplir par Home Assistant
 
-## Méthode 1 : Interface graphique (Recommandé)
+Dans une automatisation, un script ou **Outils de développement → Actions**, choisissez une action comme **Haptique RS90 : Trigger macro**, puis sélectionnez votre télécommande dans le champ **RS90 Remote**. En mode YAML, Home Assistant affiche le `rs90_id` qu'il a rempli.
 
-### Dans l'UI des Services
-
-1. Allez dans **Outils de développement** > **Services**
-2. Sélectionnez le service `haptique_rs90.trigger_macro`
-3. Cliquez sur le champ **"RS90 Remote"**
-4. **Sélectionnez votre RS90 dans la liste** → Home Assistant remplit automatiquement le `device_id` !
-
-✅ **Pas besoin de chercher l'ID manuellement !**
-
----
-
-## Méthode 2 : Via les Paramètres
-
-Si vous voulez voir l'ID explicitement :
-
-1. Allez dans **Paramètres** > **Appareils et services**
-2. Cliquez sur **Haptique RS90**
-3. Cliquez sur votre télécommande (ex: "RS90 Salon")
-4. L'URL dans votre navigateur contient le device_id :
-   ```
-   http://homeassistant.local:8123/config/devices/device/6f99751e78b5a07de72d549143e2975c
-                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                                          C'est le device_id !
-   ```
-
----
-
-## Méthode 3 : Via un template
-
-Dans **Outils de développement** > **Template**, testez :
+## 3. Avec un template (sans copier-coller)
 
 ```yaml
-{% for device in integration_entities('haptique_rs90') | map('device_id') | unique | list %}
-  {{ device }}
-{% endfor %}
+rs90_id: "{{ device_id('sensor.rs90_battery') }}"
+```
+
+Remplacez `sensor.rs90_battery` par n'importe quelle entité de votre RS90. L'identifiant suit alors la télécommande, même si l'intégration est supprimée puis ajoutée à nouveau.
+
+## 4. Dans l'adresse de la page de l'appareil
+
+**Paramètres → Appareils et services → Haptique RS90 → votre RS90**. La fin de l'adresse est l'identifiant :
+```
+http://homeassistant.local:8123/config/devices/device/6f99751e78b5a07de72d549143e2975c
 ```
 
 ---
 
-## Utilisation dans les services
+## Exemples
 
-### ✅ Méthode recommandée (Interface graphique)
-
+Allumer une macro :
 ```yaml
-service: haptique_rs90.trigger_macro
+action: haptique_rs90.trigger_macro
 data:
-  rs90_id: 6f99751e78b5a07de72d549143e2975c  # ← ID de l'appareil RS90
-  rs90_macro_id: "692eb1561bddd5814022960c"  # ← Depuis attributs de sensor.macro_{nom}_info
+  rs90_id: "{{ device_id('sensor.rs90_battery') }}"
+  rs90_macro_id: "692eb1561bddd5814022960c"   # Info Summary → Macros by ID
   action: "on"
 ```
 
-### ✅ Alternative (Sélecteur device)
-
+Envoyer une commande à un appareil :
 ```yaml
-service: haptique_rs90.trigger_macro
-target:
-  device_id: 6f99751e78b5a07de72d549143e2975c
+action: haptique_rs90.trigger_device_command
 data:
-  rs90_macro_id: "692eb1561bddd5814022960c"  # ← Depuis attributs de sensor.macro_{nom}_info
-  action: "on"
+  rs90_id: 6f99751e78b5a07de72d549143e2975c
+  rs90_device_id: "6adf6831cd975fa9bbfbb363"   # Info Summary → Devices by ID
+  command_name: "VOLUME_UP"                    # capteur Commands de l'appareil
 ```
 
----
-
-## Correspondance ID MQTT ↔ ID Home Assistant
-
-| Type | Exemple | Utilisation |
-|------|---------|-------------|
-| **ID MQTT** | `3d5d95aa3a7f7b20` | Topics MQTT (ex: `Haptique/3d5d95aa3a7f7b20/status`) |
-| **ID Home Assistant** | `6f99751e78b5a07de72d549143e2975c` | Services HA (ex: `device_id` dans les services) |
-
-**Important** : 
-- L'ID MQTT est visible dans les logs de l'intégration
-- L'ID Home Assistant est généré par Home Assistant lors de l'ajout de l'appareil
-- Les deux sont différents et ne sont **pas interchangeables**
+> ⚠️ `rs90_id` se met dans `data:`. Utiliser `target: device_id:` à la place ne fonctionne pas avec ces actions.
 
 ---
 
 ## FAQ
 
-### Q: Pourquoi ne pas utiliser l'ID MQTT directement ?
+**Le `rs90_id` peut-il changer ?**
+Non, tant que vous ne supprimez pas la RS90 de Home Assistant. Si vous le faites, le template de la méthode 3 garde vos automatisations fonctionnelles.
 
-R: Home Assistant génère son propre ID pour chaque appareil. Cela permet de gérer plusieurs RS90 avec le même firmware, des remplacements d'appareils, etc.
-
-### Q: Comment savoir quel RS90 est lequel si j'en ai plusieurs ?
-
-R: Donnez des noms clairs lors de l'installation :
-- ✅ "RS90 Salon"
-- ✅ "RS90 Chambre"
-- ❌ "Haptique RS90 3d5d95aa"
-
-### Q: Le device_id change-t-il ?
-
-R: Non, il reste fixe tant que vous ne supprimez pas et ne recréez pas l'intégration.
-
----
-
-## Résumé
-
-**Pour utiliser les services Haptique RS90** :
-1. Ouvrez l'interface des services
-2. Sélectionnez votre RS90 dans le menu déroulant
-3. Le device_id est automatiquement rempli ✅
-
-**Pas besoin de chercher l'ID manuellement !**
+**J'ai plusieurs RS90, comment les distinguer ?**
+Donnez à chacune un nom clair lors de l'ajout (« RS90 Salon », « RS90 Chambre ») : le sélecteur **RS90 Remote** affiche ces noms.
