@@ -20,9 +20,9 @@
 - [manifest.json](custom_components/haptique_rs90/manifest.json) - Integration manifest
 - [Haptique MQTT documentation](https://support.haptique.io/en/articles/mqtt)
 
-## 🎨 Templates
+## 📺 Dashboard
 
-- [templates/README.md](templates/README.md) / [README_FR.md](templates/README_FR.md) - Device buttons card for dashboards
+- [README.md#-dashboard](README.md#-dashboard) / [README_FR.md#-tableau-de-bord](README_FR.md#-tableau-de-bord) - Haptique RS90 dashboard (replaces the old card templates)
 
 ## 📸 Screenshots
 
