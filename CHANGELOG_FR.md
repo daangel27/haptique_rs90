@@ -7,6 +7,13 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [Non publiée]
+
+### 🗑️ Supprimé
+- Modèles de cartes pour tableaux de bord (dossier `templates/`) : utilisez le **tableau de bord Haptique RS90** à la place (Paramètres → Tableaux de bord → Ajouter un tableau de bord → Haptique RS90)
+
+---
+
 ## [1.9.0] - 2026-11-08
 
 ### ✨ Nouvelles fonctionnalités

@@ -58,7 +58,7 @@ body:
         - label: Switches
         - label: Configuration
         - label: Documentation
-        - label: Dashboard templates
+        - label: Dashboard
         - label: Other
 
   - type: textarea

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### 🗑️ Removed
+- Dashboard card templates (`templates/` folder): use the **Haptique RS90 dashboard** instead (Settings → Dashboards → Add dashboard → Haptique RS90)
+
+---
+
 ## [1.9.0] - 2026-11-08
 
 ### ✨ New Features
