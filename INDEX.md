@@ -1,6 +1,6 @@
 # Haptique RS90 Integration - Documentation Index
 
-**Current version:** 1.8.1 (November 7, 2026)
+**Current version:** 1.9.0 (November 8, 2026)
 
 ---
 
