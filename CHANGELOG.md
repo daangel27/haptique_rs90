@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Fixes
+- A key press is no longer replayed when Home Assistant starts or the integration reloads: the RS90 publishes `keys` retained, and the broker sent the last press again, firing its key event / device trigger a second time (e.g. a Power key automation running at every restart)
+
 ### 🗑️ Removed
 - Dashboard card templates (`templates/` folder): use the **Haptique RS90 dashboard** instead (Settings → Dashboards → Add dashboard → Haptique RS90)
 

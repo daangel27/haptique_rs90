@@ -218,3 +218,16 @@ async def test_sequence_name_cannot_spoof_canonical_macro_feedback(hass, coordin
     assert coordinator.targets.result("macro", "m1") is None
     await message(hass, "sequence/s1/status", "OFF")
     assert coordinator.targets.state("sequence", "s1") == "off"
+
+
+async def test_retained_key_press_is_not_replayed(hass, coordinator):
+    """The broker replays the retained last key on subscribe: no event for it."""
+    events = []
+    hass.bus.async_listen("haptique_rs90_key_pressed", events.append)
+    async_fire_mqtt_message(hass, f"{ROOT}/keys", "button:1", retain=True)
+    await hass.async_block_till_done()
+    assert events == []
+    assert coordinator.data["last_key"] == "1"
+    await message(hass, "keys", "button:1")
+    await hass.async_block_till_done()
+    assert [e.data["button"] for e in events] == [1]

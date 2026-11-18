@@ -167,8 +167,19 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         )
         _LOGGER.info("Subscribed to battery_level topic")
 
-        # Subscribe to key events
-        await self._subscribe(f"{self.base_topic}/{TOPIC_KEYS}", self._handle_keys)
+        # Subscribe to key events. The RS90 publishes `keys` retained, so the
+        # broker replays the last press on every (re)subscribe: that one only
+        # updates Last Key Pressed and must not fire a key event again.
+        @callback
+        def keys_received(msg):
+            if not self._closed:
+                self._handle_keys(msg.payload, replayed=bool(msg.retain))
+
+        self._subscriptions.append(
+            await mqtt.async_subscribe(
+                self.hass, f"{self.base_topic}/{TOPIC_KEYS}", keys_received, qos=0
+            )
+        )
 
         # Subscribe to test status (for running macro detection)
         await self._subscribe(
@@ -567,28 +578,35 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             _LOGGER.error("Failed to parse battery level: %s - %s", payload, err)
 
     @callback
-    def _handle_keys(self, payload: str) -> None:
-        """Handle key press events."""
+    def _handle_keys(self, payload: str, replayed: bool = False) -> None:
+        """Handle key press events (replayed = retained copy of an old press)."""
         try:
             # Payload format: "button:#"
             if "button:" in payload:
                 button_num = payload.split("button:")[1].strip()
                 _LOGGER.debug("Key pressed: button %s", button_num)
 
-                # Fire Home Assistant event for EVERY key press (including duplicates)
-                # This allows automations to trigger on repeated button presses
-                self.hass.bus.async_fire(
-                    f"{DOMAIN}_key_pressed",
-                    {
-                        "remote_id": self.remote_id,
-                        "device_id": self.device_id,  # HA device ID for device triggers
-                        "button": int(button_num),
-                        "timestamp": time.time(),  # Ensures uniqueness
-                    },
-                )
-                _LOGGER.debug(
-                    "Fired event: %s_key_pressed with button %s", DOMAIN, button_num
-                )
+                if replayed:
+                    # Retained copy replayed by the broker on (re)subscribe: an
+                    # old press, not a new one. Keep it for Last Key Pressed only.
+                    _LOGGER.debug("Ignoring replayed key press: button %s", button_num)
+                else:
+                    # Fire an event for EVERY new press (including repeats), so
+                    # automations trigger on repeated button presses
+                    self.hass.bus.async_fire(
+                        f"{DOMAIN}_key_pressed",
+                        {
+                            "remote_id": self.remote_id,
+                            "device_id": self.device_id,  # for device triggers
+                            "button": int(button_num),
+                            "timestamp": time.time(),  # Ensures uniqueness
+                        },
+                    )
+                    _LOGGER.debug(
+                        "Fired event: %s_key_pressed with button %s",
+                        DOMAIN,
+                        button_num,
+                    )
 
                 # Update sensor state (for backward compatibility)
                 self.data["last_key"] = button_num

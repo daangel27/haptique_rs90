@@ -9,6 +9,9 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Non publiée]
 
+### 🐛 Corrections
+- Un appui de touche n'est plus rejoué au démarrage de Home Assistant ou au rechargement de l'intégration : la RS90 publie `keys` en retained, et le broker renvoyait le dernier appui, ce qui redéclenchait son événement / déclencheur d'appareil (ex. une automatisation sur la touche Power exécutée à chaque redémarrage)
+
 ### 🗑️ Supprimé
 - Modèles de cartes pour tableaux de bord (dossier `templates/`) : utilisez le **tableau de bord Haptique RS90** à la place (Paramètres → Tableaux de bord → Ajouter un tableau de bord → Haptique RS90)
 
