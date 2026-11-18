@@ -1,3 +1,12 @@
+# What's New in v1.9.1
+
+**Release date:** November 18, 2026 · **Type:** Bug fix
+
+- **Key presses are no longer replayed at startup.** The RS90 keeps its last key press on the MQTT broker (retained), and the integration used to treat it as a new press every time Home Assistant restarted or the integration reloaded, so an automation on that key ran again (e.g. a Power key turning everything off). It now only updates **Last Key Pressed**. Thanks @Nick for spotting it!
+- Dashboard card templates removed: use the **Haptique RS90 dashboard** (Settings → Dashboards → Add dashboard → Haptique RS90).
+
+---
+
 # What's New in v1.9.0
 
 **Release date:** November 8, 2026

@@ -232,6 +232,9 @@ actions:
       entity_id: light.salon
 ```
 
+- `button` est un **nombre** (`13`, pas `"13"`). Dans un template, comparez-le comme un nombre : `{{ trigger.event.data.button == 13 }}`.
+- Seuls les nouveaux appuis déclenchent l'événement : le dernier appui, conservé par le broker MQTT, n'est pas rejoué au redémarrage de Home Assistant (depuis la 1.9.1).
+
 Sans YAML avec les **déclencheurs d'appareil** : **Ajouter un déclencheur** → **Appareil** → votre RS90 → **Button pressed** → bouton 1 à 24.
 
 <img src="documentation/screenshots/device_trigger.png" alt="Déclencheur d'appareil" width="60%" />
@@ -388,7 +391,7 @@ Le firmware signale seulement l'application ouverte, pas le moment où on la qui
 ## 📚 Documentation
 
 - **[CHANGELOG_FR.md](CHANGELOG_FR.md)** - Historique des versions
-- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.9.0
+- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.9.1
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, séquences, applications et actions en détail (en anglais)
 - **[Guide de l'identifiant d'appareil](documentation/GUIDE_DEVICE_ID_FR.md)** - Trouver l'identifiant de la RS90
 
@@ -423,7 +426,7 @@ Licence MIT. Voir [LICENSE](LICENSE).
 
 ---
 
-**Version :** 1.9.0
+**Version :** 1.9.1
 **Auteurs :** daangel27, avec Claude (Anthropic)
 **Dernière mise à jour :** novembre 2026
 **Langues :** English, Français
