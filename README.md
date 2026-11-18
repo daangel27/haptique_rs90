@@ -232,6 +232,9 @@ actions:
       entity_id: light.living_room
 ```
 
+- `button` is a **number** (`13`, not `"13"`). In a template, compare it as a number: `{{ trigger.event.data.button == 13 }}`.
+- Only new presses fire the event: the last press, kept by the MQTT broker, is not replayed when Home Assistant restarts (since 1.9.1).
+
 No YAML needed with **device triggers**: **Add Trigger** → **Device** → your RS90 → **Button pressed** → button 1-24.
 
 <img src="documentation/screenshots/device_trigger.png" alt="Device trigger" width="60%" />
@@ -388,7 +391,7 @@ The firmware only reports the app that was opened, not when you leave it.
 ## 📚 Documentation
 
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.9.0
+- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.9.1
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, sequences, apps and actions in detail
 - **[Device ID guide](documentation/GUIDE_DEVICE_ID.md)** - Finding the RS90 device ID
 
@@ -423,7 +426,7 @@ MIT License. See [LICENSE](LICENSE).
 
 ---
 
-**Version:** 1.9.0
+**Version:** 1.9.1
 **Authors:** daangel27, with Claude (Anthropic)
 **Last updated:** November 2026
 **Languages:** English, Français

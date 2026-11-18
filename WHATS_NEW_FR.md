@@ -1,3 +1,12 @@
+# Nouveautés v1.9.1
+
+**Date de sortie :** 18 novembre 2026 · **Type :** correctif
+
+- **Les appuis de touche ne sont plus rejoués au démarrage.** La RS90 garde son dernier appui sur le broker MQTT (retained), et l'intégration le prenait pour un nouvel appui à chaque redémarrage de Home Assistant ou rechargement de l'intégration : une automatisation sur cette touche se relançait (ex. une touche Power qui éteignait tout). Il ne met plus à jour que **Last Key Pressed**. Merci à @Nick de l'avoir repéré !
+- Modèles de cartes supprimés : utilisez le **tableau de bord Haptique RS90** (Paramètres → Tableaux de bord → Ajouter un tableau de bord → Haptique RS90).
+
+---
+
 # Nouveautés v1.9.0
 
 **Date de sortie :** 8 novembre 2026
