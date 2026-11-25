@@ -58,7 +58,14 @@ async def test_layout_from_registry_and_inventory(hass, coordinator, remote):
     assert len(layout["status"]) == 2
     assert [d["name"] for d in layout["devices"]] == ["AMPLI", "KODI"]
     kodi = layout["devices"][1]
-    assert kodi == {"name": "KODI", "rs90_device_id": "d1", "commands": ["UP", "OK"]}
+    assert kodi == {
+        "name": "KODI",
+        "rs90_device_id": "d1",
+        "commands": [
+            {"id": "UP", "key": "UP", "label": "UP"},
+            {"id": "OK", "key": "OK", "label": "OK"},
+        ],
+    }
     assert layout["devices"][0]["commands"] == []
 
 
@@ -73,7 +80,7 @@ async def test_websocket_command(hass, coordinator, remote, hass_ws_client):
     assert reply["success"]
     remotes = reply["result"]["remotes"]
     assert len(remotes) == 1
-    assert remotes[0]["devices"][1]["commands"] == ["UP", "OK"]
+    assert [c["id"] for c in remotes[0]["devices"][1]["commands"]] == ["UP", "OK"]
 
 
 async def test_removed_targets_and_apps_left_out(hass, coordinator, remote):

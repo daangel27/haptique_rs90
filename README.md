@@ -205,11 +205,11 @@ strategy:
   type: custom:haptique-rs90
   hide_devices: [XBOX]          # views not to show
   devices:                      # only these device views, with these commands
-    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY, PAUSE]
     TV: all
 ```
 
-The selection made in the integration options applies first.
+The selection made in the integration options applies first. Command IDs are the `id` values of the device's **Commands** sensor (with firmware 4.4, the command name also works for commands that have a technical ID, e.g. `POWER` for *Power*).
 </details>
 
 ---
@@ -381,7 +381,9 @@ Known firmware limitations (reported to Haptique):
 Use **Last Macro Result** and the logbook to see what the RS90 actually did, and `haptique_rs90.query_status` to re-read a state.
 
 ### A device command does nothing
-The Activity shows `RS90 <device> <command> sent`, but the device doesn't react: check that the device doesn't have **two commands with the same name** (shown twice in its **Commands** sensor, e.g. two `POWER`). Commands are sent by name, so the RS90 always uses the same one, which may be a discrete *Power on* that does nothing when the device is already on. Rename one of them in the Haptique app (e.g. `POWER_ON` / `POWER_OFF`).
+The Activity shows `RS90 <device> <command> sent`, but the device doesn't react:
+- **Firmware 4.3 and older**: check that the device doesn't have **two commands with the same name** (shown twice in its **Commands** sensor, e.g. two `POWER`). Commands are sent by name, so the RS90 always uses the same one, which may be a discrete *Power on* that does nothing when the device is already on. Rename one of them in the Haptique app, or update the RS90 to 4.4.
+- **Firmware 4.4**: every command has its own ID, so the right code is sent. If the device still doesn't react, the IR code itself is wrong: learn it again in the Haptique app.
 
 ### Last Reported App doesn't change when leaving an app
 The firmware only reports the app that was opened, not when you leave it.
@@ -391,7 +393,7 @@ The firmware only reports the app that was opened, not when you leave it.
 ## 📚 Documentation
 
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.9.1
+- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.9.2
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, sequences, apps and actions in detail
 - **[Device ID guide](documentation/GUIDE_DEVICE_ID.md)** - Finding the RS90 device ID
 
@@ -426,7 +428,7 @@ MIT License. See [LICENSE](LICENSE).
 
 ---
 
-**Version:** 1.9.1
+**Version:** 1.9.2
 **Authors:** daangel27, with Claude (Anthropic)
 **Last updated:** November 2026
 **Languages:** English, Français

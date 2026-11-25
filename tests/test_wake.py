@@ -203,3 +203,23 @@ async def test_activity_events_name_their_entity(hass, coordinator, publish):
     await hass.async_block_till_done()
     assert events[0].data["entity_id"] == sensor.entity_id
     assert "entity_id" not in events[1].data
+
+
+async def test_command_event_names_technical_ids(hass, coordinator, publish):
+    """Firmware 4.4 toggle codes have a technical ID: the Activity shows the name."""
+    from homeassistant.core import callback
+
+    from custom_components.haptique_rs90.const import COMMAND_EVENT
+
+    coordinator.data["devices"] = [{"id": "d2", "name": "AMPLI"}]
+    coordinator.data["device_commands"]["AMPLI"] = [
+        {"id": "6adf6831cd975fa9bbfbb366", "name": "Power"}
+    ]
+    events = []
+    hass.bus.async_listen(COMMAND_EVENT, callback(lambda e: events.append(e)))
+    await message(hass, "status", "online")
+    await coordinator.async_trigger_device_command("AMPLI", "6adf6831cd975fa9bbfbb366")
+    await hass.async_block_till_done()
+    data = events[0].data
+    assert data["command"] == "6adf6831cd975fa9bbfbb366"
+    assert (data["label"], data["key"]) == ("Power", "POWER")

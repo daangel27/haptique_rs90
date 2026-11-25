@@ -205,11 +205,11 @@ strategy:
   type: custom:haptique-rs90
   hide_devices: [XBOX]          # onglets à ne pas afficher
   devices:                      # uniquement ces onglets, avec ces commandes
-    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY, PAUSE]
     TV: all
 ```
 
-La sélection faite dans les options de l'intégration s'applique en premier.
+La sélection faite dans les options de l'intégration s'applique en premier. Les ID de commande sont les valeurs `id` du capteur **Commands** de l'appareil (avec le firmware 4.4, le nom fonctionne aussi pour les commandes qui ont un ID technique, ex. `POWER` pour *Power*).
 </details>
 
 ---
@@ -381,7 +381,9 @@ Limitations connues du firmware (signalées à Haptique) :
 Utilisez **Last Macro Result** et le journal pour voir ce que la RS90 a réellement fait, et `haptique_rs90.query_status` pour relire un état.
 
 ### Une commande d'appareil ne fait rien
-L'Activité affiche `RS90 <appareil> <commande> sent`, mais l'appareil ne réagit pas : vérifiez qu'il n'a pas **deux commandes du même nom** (affichées deux fois dans son capteur **Commands**, ex. deux `POWER`). Les commandes sont envoyées par leur nom : la RS90 utilise donc toujours la même, qui peut être un *Power on* discret sans effet quand l'appareil est déjà allumé. Renommez l'une d'elles dans l'application Haptique (ex. `POWER_ON` / `POWER_OFF`).
+L'Activité affiche `RS90 <appareil> <commande> sent`, mais l'appareil ne réagit pas :
+- **Firmware 4.3 et antérieur** : vérifiez qu'il n'a pas **deux commandes du même nom** (affichées deux fois dans son capteur **Commands**, ex. deux `POWER`). Les commandes sont envoyées par leur nom : la RS90 utilise donc toujours la même, qui peut être un *Power on* discret sans effet quand l'appareil est déjà allumé. Renommez l'une d'elles dans l'application Haptique, ou passez la RS90 en 4.4.
+- **Firmware 4.4** : chaque commande a son propre ID, le bon code est donc envoyé. Si l'appareil ne réagit toujours pas, c'est le code IR lui-même : réapprenez-le dans l'application Haptique.
 
 ### Last Reported App ne change pas quand on quitte une application
 Le firmware signale seulement l'application ouverte, pas le moment où on la quitte.
@@ -391,7 +393,7 @@ Le firmware signale seulement l'application ouverte, pas le moment où on la qui
 ## 📚 Documentation
 
 - **[CHANGELOG_FR.md](CHANGELOG_FR.md)** - Historique des versions
-- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.9.1
+- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.9.2
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, séquences, applications et actions en détail (en anglais)
 - **[Guide de l'identifiant d'appareil](documentation/GUIDE_DEVICE_ID_FR.md)** - Trouver l'identifiant de la RS90
 
@@ -426,7 +428,7 @@ Licence MIT. Voir [LICENSE](LICENSE).
 
 ---
 
-**Version :** 1.9.1
+**Version :** 1.9.2
 **Auteurs :** daangel27, avec Claude (Anthropic)
 **Dernière mise à jour :** novembre 2026
 **Langues :** English, Français

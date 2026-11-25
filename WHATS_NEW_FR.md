@@ -1,3 +1,18 @@
+# Nouveautés v1.9.2
+
+**Date de sortie :** 25 novembre 2026 · **Type :** correctif · **Pour :** firmware RS90 4.4
+
+Le firmware RS90 4.4 corrige les commandes en double : chaque code a maintenant son propre ID, et la bascule **Power** de l'AMPLI fonctionne enfin depuis Home Assistant. Mais certains de ces ID sont techniques (`6adf6831cd975fa9bbfbb366`), et le tableau de bord les affichait sur les boutons. La 1.9.2 adapte l'intégration :
+
+- **Les boutons affichent le nom de la commande** (`Power`, `Mute/Unmute`, `Volume + 2`…) et la section **Alimentation** revient avec `On`, `Off` et `Power`.
+- Votre **sélection de commandes** faite avec le firmware 4.3 reste valable.
+- L'**Activité** affiche `RS90 AMPLI → Power sent` au lieu de l'ID.
+- ⚠️ Après le passage de la RS90 en 4.4, les automatisations qui envoient `POWER`, `MUTE_UNMUTE` ou `PLAY_PAUSE` peuvent devoir utiliser les nouveaux ID (`ON`/`OFF`, `MUTE`/`UNMUTE`, `PLAY`/`PAUSE`) : voir le capteur **Commands** de l'appareil.
+
+Toujours en firmware 4.3 ? Rien ne change pour vous.
+
+---
+
 # Nouveautés v1.9.1
 
 **Date de sortie :** 18 novembre 2026 · **Type :** correctif

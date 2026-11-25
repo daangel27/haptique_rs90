@@ -1,3 +1,18 @@
+# What's New in v1.9.2
+
+**Release date:** November 25, 2026 · **Type:** Bug fix · **For:** RS90 firmware 4.4
+
+RS90 firmware 4.4 fixes duplicate commands: every code now has its own ID, so the AMPLI **Power** toggle finally works from Home Assistant. But some of these IDs are technical (`6adf6831cd975fa9bbfbb366`), and the dashboard showed them on the buttons. 1.9.2 adapts the integration:
+
+- **Buttons show the command name** (`Power`, `Mute/Unmute`, `Volume + 2`…) and the **Power** section is back with `On`, `Off` and `Power`.
+- Your **dashboard command selection** made with firmware 4.3 still works.
+- The **Activity** shows `RS90 AMPLI → Power sent` instead of the ID.
+- ⚠️ After updating the RS90 to 4.4, automations that send `POWER`, `MUTE_UNMUTE` or `PLAY_PAUSE` may need the new IDs (`ON`/`OFF`, `MUTE`/`UNMUTE`, `PLAY`/`PAUSE`): check the device's **Commands** sensor.
+
+Still on firmware 4.3? Nothing changes for you.
+
+---
+
 # What's New in v1.9.1
 
 **Release date:** November 18, 2026 · **Type:** Bug fix

@@ -93,7 +93,7 @@ async def test_choose_hide_and_reset_commands(hass, coordinator, remote):
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.options[CONF_DASHBOARD_COMMANDS] == {"d1": ["UP", "OK"]}
     kodi = _remote_layout(hass, coordinator)["devices"][0]
-    assert kodi["commands"] == ["UP", "OK"]
+    assert [c["id"] for c in kodi["commands"]] == ["UP", "OK"]
 
     # Reopening shows the current choice.
     result = await _commands_form(hass, entry)
@@ -118,11 +118,9 @@ async def test_choose_hide_and_reset_commands(hass, coordinator, remote):
         result["flow_id"], {"mode": "all"}
     )
     assert entry.options[CONF_DASHBOARD_COMMANDS] == {}
-    assert _remote_layout(hass, coordinator)["devices"][0]["commands"] == [
-        "UP",
-        "DOWN",
-        "OK",
-    ]
+    assert [
+        c["id"] for c in _remote_layout(hass, coordinator)["devices"][0]["commands"]
+    ] == ["UP", "DOWN", "OK"]
 
 
 async def test_no_device_yet(hass, coordinator):

@@ -14,7 +14,7 @@
  *   strategy:
  *     type: custom:haptique-rs90
  *     devices:            # limit the device views and their commands
- *       KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+ *       KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY, PAUSE]
  *       TV: all
  *     hide_devices: [XBOX]
  *     columns: 4          # buttons per row in device views
@@ -57,8 +57,11 @@ function slug(value) {
     .replace(/^-|-$/g, "") || "device";
 }
 
+// A command is {id, key, label}: id is sent to the RS90, key ("POWER",
+// "VOLUME_UP"…) picks the icon and the place on the remote, label is shown.
+// Firmware 4.4 gives some commands a technical id (6adf6831…), so never show it.
 function label(command) {
-  return String(command).replace(/_/g, " ");
+  return String(command.label || command.id).replace(/^MEDIA /i, "");
 }
 
 /** Layout of every RS90, from the integration (stable while the remote sleeps). */
@@ -228,6 +231,7 @@ const SPACER_STYLE =
 // Icon and whether to show the name, per command.
 const ICONS = {
   POWER: ["mdi:power", true], POWER_ON: ["mdi:power-on", true], POWER_OFF: ["mdi:power-off", true],
+  ON: ["mdi:power-on", true], OFF: ["mdi:power-off", true],
   POWER_OFF_ALL_ZONES: ["mdi:power-off", true],
   UP: ["mdi:chevron-up", false], DOWN: ["mdi:chevron-down", false],
   LEFT: ["mdi:chevron-left", false], RIGHT: ["mdi:chevron-right", false],
@@ -248,7 +252,7 @@ const ICONS = {
 };
 
 const GROUPS = [
-  { key: "power", icon: "mdi:power", test: (c) => /^POWER/.test(c) },
+  { key: "power", icon: "mdi:power", test: (c) => /^POWER/.test(c) || c === "ON" || c === "OFF" },
   { key: "nav", icon: "mdi:gamepad", test: (c) => ["UP", "DOWN", "LEFT", "RIGHT", "OK", "SELECT", "ENTER", "BACK", "RETURN", "EXIT", "HOME", "MENU", "MENU_HOME", "INFO", "INFOS", "GUIDE", "DISPLAY"].includes(c) },
   { key: "volume", icon: "mdi:volume-high", test: (c) => /^(VOLUME_|MUTE|UNMUTE)/.test(c) || /^CHANNEL_(UP|DOWN)$/.test(c) },
   { key: "media", icon: "mdi:play-pause", test: (c) => ["PLAY_PAUSE", "PLAY", "PAUSE", "STOP", "MEDIA_REWIND", "MEDIA_FAST_FORWARD", "REWIND", "FAST_FORWARD", "PREVIOUS", "NEXT", "RECORD", "PLAYBACK"].includes(c) },
@@ -263,10 +267,10 @@ const GROUP_TEXT = {
 };
 
 function commandButton(remote, device, cmd, colors) {
-  const [icon, showName] = ICONS[cmd] || [null, true];
+  const [icon, showName] = ICONS[cmd.key] || [null, true];
   return {
     type: "button",
-    name: label(cmd).replace(/^MEDIA /, ""),
+    name: label(cmd),
     icon: icon || undefined,
     show_icon: Boolean(icon),
     show_name: showName || !icon,
@@ -274,7 +278,7 @@ function commandButton(remote, device, cmd, colors) {
     tap_action: {
       action: "perform-action",
       perform_action: `${DOMAIN}.trigger_device_command`,
-      data: { rs90_id: remote.device_id, rs90_device_id: device.rs90_device_id, command_name: cmd },
+      data: { rs90_id: remote.device_id, rs90_device_id: device.rs90_device_id, command_name: cmd.id },
     },
     hold_action: { action: "none" },
     card_mod: { style: buttonStyle(colors, 58) },
@@ -287,6 +291,20 @@ function spacer() {
 
 /** Lay out commands like a remote: D-pad, keypad, transport row… */
 function arrange(group, cmds) {
+  // Work on keys, then map back to commands; a key listed twice (two
+  // "Volume +" codes) keeps its first command in place, the other goes after.
+  const byKey = new Map();
+  cmds.forEach((c) => byKey.has(c.key) || byKey.set(c.key, c));
+  const result = (columns, keys) => {
+    const placed = keys.map((k) => (k ? byKey.get(k) : null));
+    const used = new Set(placed.filter(Boolean));
+    return { columns, cells: [...placed, ...cmds.filter((c) => !used.has(c))] };
+  };
+  const laid = arrangeKeys(group, [...byKey.keys()]);
+  return result(laid.columns, laid.cells);
+}
+
+function arrangeKeys(group, cmds) {
   const has = (c) => cmds.includes(c);
   const pick = (...names) => names.find((n) => has(n));
   if (group === "nav") {
@@ -309,7 +327,7 @@ function arrange(group, cmds) {
   }
   if (group === "volume") {
     // Volume on the left, mute in the middle, channels on the right.
-    const mute = pick("MUTE_UNMUTE", "MUTE");
+    const mute = pick("MUTE", "MUTE_UNMUTE");
     const unmute = mute === "MUTE" ? pick("UNMUTE") : null;
     const channels = has("CHANNEL_UP") || has("CHANNEL_DOWN");
     const rows = channels
@@ -326,20 +344,25 @@ function arrange(group, cmds) {
     const known = order.filter(has);
     return { columns: 4, cells: [...known, ...cmds.filter((c) => !known.includes(c))] };
   }
-  return { columns: group === "power" ? 3 : 4, cells: cmds };
+  if (group === "power") {
+    const order = ["POWER", "ON", "OFF", "POWER_ON", "POWER_OFF"];
+    const known = order.filter(has);
+    return { columns: 3, cells: [...known, ...cmds.filter((c) => !known.includes(c))] };
+  }
+  return { columns: 4, cells: cmds };
 }
 
 function deviceView(hass, remote, device, config) {
   const wanted = config.devices && config.devices[device.name];
   let commands = device.commands;
-  if (Array.isArray(wanted)) commands = commands.filter((cmd) => wanted.includes(cmd));
+  if (Array.isArray(wanted)) commands = commands.filter((cmd) => wanted.includes(cmd.id) || wanted.includes(cmd.key));
   const lang = ((hass.locale && hass.locale.language) || "en").split("-")[0];
   const names = GROUP_TEXT[lang] || GROUP_TEXT.en;
 
   const remaining = [...commands];
   const sections = [];
   for (const group of GROUPS) {
-    const cmds = remaining.filter((c) => group.test(c));
+    const cmds = remaining.filter((c) => group.test(c.key));
     if (!cmds.length) continue;
     cmds.forEach((c) => remaining.splice(remaining.indexOf(c), 1));
     const { columns, cells } = arrange(group.key, cmds);

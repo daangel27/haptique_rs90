@@ -15,6 +15,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .commands import find_command, unique_commands
 from .const import (
     COMMAND_EVENT,
     CONF_REMOTE_ID,
@@ -725,9 +726,14 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             ),
             None,
         )
+        event = {"device": device_name, "command": command_name}
+        listed = self.data.get("device_commands", {}).get(device_name, [])
+        if command := find_command(unique_commands(listed), command_name):
+            event["label"] = command["label"]
+            event["key"] = command["key"]
         self._fire_activity(
             COMMAND_EVENT,
-            {"device": device_name, "command": command_name},
+            event,
             ("sensor", f"{self.remote_id}_commands_{rs90_device_id}")
             if rs90_device_id
             else None,
