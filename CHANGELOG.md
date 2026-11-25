@@ -17,6 +17,9 @@ Firmware 4.4 changed how device commands are published: readable names (`On`, `V
 - Activity: device commands show their name and icon (`RS90 AMPLI → Power sent`)
 - Firmware 4.3 and older work as before
 
+### ✨ New for RS90 firmware 4.4
+- **Autodisplay** and **Keypad backlight** switches, **Stay ready** select (`5 minutes`, `30 minutes`, `Always`) in the Configuration section of the RS90: they follow the `settings/*` topics published by firmware 4.4 (also when changed on the RS90 screen) and only appear when the RS90 publishes them
+
 ### ⚠️ Check your automations after updating the RS90 to 4.4
 Automations and scripts that send `POWER`, `MUTE_UNMUTE` or `PLAY_PAUSE` to a device that now lists `ON`/`OFF`, `MUTE`/`UNMUTE` or `PLAY`/`PAUSE` must use the new IDs (see the device's **Commands** sensor).
 

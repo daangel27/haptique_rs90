@@ -17,6 +17,9 @@ Le firmware 4.4 publie les commandes des appareils autrement : noms lisibles (`O
 - Activité : les commandes envoyées affichent leur nom et leur icône (`RS90 AMPLI → Power sent`)
 - Les firmwares 4.3 et antérieurs fonctionnent comme avant
 
+### ✨ Nouveau pour le firmware RS90 4.4
+- Interrupteurs **Affichage automatique** et **Rétroéclairage du clavier**, sélecteur **Rester prêt** (`5 minutes`, `30 minutes`, `Toujours`) dans la section Configuration de la RS90 : ils suivent les topics `settings/*` publiés par le firmware 4.4 (y compris quand on les change sur l'écran de la RS90) et n'apparaissent que si la RS90 les publie
+
 ### ⚠️ Vérifiez vos automatisations après le passage de la RS90 en 4.4
 Les automatisations et scripts qui envoient `POWER`, `MUTE_UNMUTE` ou `PLAY_PAUSE` à un appareil qui liste désormais `ON`/`OFF`, `MUTE`/`UNMUTE` ou `PLAY`/`PAUSE` doivent utiliser les nouveaux ID (voir le capteur **Commands** de l'appareil).
 

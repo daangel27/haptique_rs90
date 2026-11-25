@@ -135,6 +135,7 @@ All entities are created automatically.
 | **Last Key Pressed** sensor | Last pressed button |
 | **Commands - {device}** sensors | Number of commands, full list in attributes |
 | **Info Summary** sensor | All IDs (devices, macros, sequences, apps) in one place, see [Finding the IDs](#-finding-the-ids-the-info-summary-sensor) |
+| **Autodisplay**, **Keypad backlight** switches and **Stay ready** select | RS90 settings (firmware 4.4+, Configuration section of the device): screen and keys light up when the remote is picked up, key lighting, and how long the RS90 stays ready before deep sleep (`5 minutes`, `30 minutes`, `Always`). Changes made on the RS90 screen show up in Home Assistant |
 
 > ℹ️ Macro states are what the RS90 reports, **not** a measurement of the TV or amplifier power.
 
@@ -338,6 +339,8 @@ Home Assistant sends a few packets to the RS90's IP address until it reports onl
 Each wake-up shows in the RS90's **Activity** (`wake-up sent`, then `woke up in 8 s` or `did not wake up`), along with every device command sent. After a wake-up, Home Assistant waits 4 seconds and then sends the commands pressed meanwhile, one by one.
 
 > ⚠️ Right after waking up, the RS90 can still miss a command sent to a network-controlled device (e.g. Kodi) when several are pressed in a row. Infrared devices are not affected. Leave the RS90 on its dock when every command must go through.
+
+> 💡 Firmware 4.4+: the **Stay ready** select sets how long the RS90 stays reachable before deep sleep. Set it to **Always** (e.g. from an automation during a movie) to avoid wake-ups, at the cost of battery life.
 
 ---
 

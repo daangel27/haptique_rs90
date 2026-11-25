@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import CONF_REMOTE_ID, DOMAIN
 from .coordinator import HaptiqueRS90Coordinator
+from .settings import SWITCH_SETTINGS, HaptiqueRS90Setting, add_when_published
 
 
 async def async_setup_entry(
@@ -100,6 +101,33 @@ async def async_setup_entry(
 
     reconcile()
     entry.async_on_unload(coordinator.async_add_listener(reconcile))
+
+    add_when_published(
+        coordinator,
+        entry,
+        SWITCH_SETTINGS,
+        lambda name: HaptiqueRS90SettingSwitch(coordinator, entry, name),
+        async_add_entities,
+    )
+
+
+class HaptiqueRS90SettingSwitch(HaptiqueRS90Setting, SwitchEntity):
+    """On/off RS90 setting: Autodisplay, Keypad backlight (firmware 4.4+)."""
+
+    def __init__(self, coordinator, entry, name) -> None:
+        super().__init__(coordinator, entry, name)
+        self._attr_icon = SWITCH_SETTINGS[name]
+
+    @property
+    def is_on(self) -> bool | None:
+        value = self.value
+        return None if value is None else value.lower() == "on"
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.coordinator.async_set_setting(self._setting, "on")
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.coordinator.async_set_setting(self._setting, "off")
 
 
 class HaptiqueRS90MacroSwitch(CoordinatorEntity, SwitchEntity):

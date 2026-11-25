@@ -105,6 +105,8 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             "last_target_result": None,  # Last non-retained macro/sequence result
             "led_light_state": "off",  # RGB ring light state
             "led_light_duration": 5,  # Default duration in seconds
+            # Firmware 4.4+: retained settings/<name> (autodisplay, stay_ready, backlight)
+            "settings": {},
         }
 
         self._app_feedback_ready = False
@@ -185,6 +187,22 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         # Subscribe to test status (for running macro detection)
         await self._subscribe(
             f"{self.base_topic}/{TOPIC_TEST_STATUS}", self._handle_test_status
+        )
+
+        @callback
+        def setting_received(msg):
+            if self._closed:
+                return
+            name = msg.topic.removeprefix(f"{self.base_topic}/settings/")
+            if "/" in name or not msg.payload:
+                return  # ignore settings/<name>/set echoes and cleared topics
+            self.data["settings"][name] = msg.payload
+            self.async_set_updated_data(self.data)
+
+        self._subscriptions.append(
+            await mqtt.async_subscribe(
+                self.hass, f"{self.base_topic}/settings/+", setting_received, qos=0
+            )
         )
 
         await self._subscribe(f"{self.base_topic}/app/list", self._handle_app_list)
@@ -737,6 +755,21 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             ("sensor", f"{self.remote_id}_commands_{rs90_device_id}")
             if rs90_device_id
             else None,
+        )
+
+    async def async_set_setting(self, name: str, value: str) -> None:
+        """Change an RS90 setting (firmware 4.4+): settings/<name>/set.
+
+        The RS90 answers on the retained settings/<name> topic, which updates
+        the entity; nothing is assumed locally.
+        """
+        await self._async_ensure_awake()
+        await mqtt.async_publish(
+            self.hass,
+            f"{self.base_topic}/settings/{name}/set",
+            value,
+            qos=1,
+            retain=False,
         )
 
     async def async_control_led_light(self, state: str, duration: int = 5) -> None:

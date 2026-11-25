@@ -205,6 +205,24 @@
       "wake": {
         "name": "Wake up"
       }
+    },
+    "switch": {
+      "autodisplay": {
+        "name": "Autodisplay"
+      },
+      "backlight": {
+        "name": "Keypad backlight"
+      }
+    },
+    "select": {
+      "stay_ready": {
+        "name": "Stay ready",
+        "state": {
+          "5": "5 minutes",
+          "30": "30 minutes",
+          "always": "Always"
+        }
+      }
     }
   },
   "selector": {

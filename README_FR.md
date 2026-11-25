@@ -135,6 +135,7 @@ Toutes les entités sont créées automatiquement.
 | Capteur **Last Key Pressed** | Dernière touche appuyée |
 | Capteurs **Commands - {appareil}** | Nombre de commandes, liste complète en attributs |
 | Capteur **Info Summary** | Tous les identifiants (appareils, macros, séquences, applications) au même endroit, voir [Retrouver les identifiants](#-retrouver-les-identifiants--le-capteur-info-summary) |
+| Interrupteurs **Affichage automatique**, **Rétroéclairage du clavier** et sélecteur **Rester prêt** | Réglages de la RS90 (firmware 4.4+, section Configuration de l'appareil) : écran et touches qui s'allument quand on prend la télécommande, éclairage des touches, et durée pendant laquelle la RS90 reste prête avant la veille profonde (`5 minutes`, `30 minutes`, `Toujours`). Les changements faits sur l'écran de la RS90 apparaissent dans Home Assistant |
 
 > ℹ️ L'état d'une macro est ce que la RS90 signale, **pas** une mesure de l'alimentation de la TV ou de l'ampli.
 
@@ -338,6 +339,8 @@ Home Assistant envoie quelques paquets à l'adresse IP de la RS90 jusqu'à ce qu
 Chaque réveil apparaît dans l'**Activité** de la RS90 (`wake-up sent`, puis `woke up in 8 s` ou `did not wake up`), comme chaque commande envoyée à un appareil. Après un réveil, Home Assistant attend 4 secondes puis envoie une par une les commandes appuyées entre-temps.
 
 > ⚠️ Juste après son réveil, la RS90 peut encore rater une commande destinée à un appareil piloté par le réseau (ex. Kodi) quand plusieurs sont appuyées d'affilée. Les appareils infrarouges ne sont pas concernés. Laissez la RS90 sur son socle si chaque commande doit passer.
+
+> 💡 Firmware 4.4+ : le sélecteur **Rester prêt** règle la durée pendant laquelle la RS90 reste joignable avant la veille profonde. Réglez-le sur **Toujours** (ex. par une automatisation pendant un film) pour éviter les réveils, au prix de l'autonomie.
 
 ---
 

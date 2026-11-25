@@ -24,6 +24,7 @@ PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.SWITCH,  # Macros as switches (on/off state visible)
+    Platform.SELECT,  # RS90 settings with a list of values (firmware 4.4+)
 ]
 
 
