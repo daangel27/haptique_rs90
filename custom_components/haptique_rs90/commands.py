@@ -59,7 +59,8 @@ def command_label(command: dict[str, Any]) -> str:
     """Text shown to the user: the readable name, else the ID."""
     name = _readable_name(command.get("name"))
     if name:
-        return name
+        # Some codes come all lowercase ("hdmi out 1"): capitalise the first letter.
+        return name[0].upper() + name[1:] if name == name.lower() else name
     return str(command.get("id") or "").replace("_", " ")
 
 

@@ -51,7 +51,7 @@ def test_keys_and_labels_44():
     assert (toggle["key"], toggle["label"]) == ("MUTE_UNMUTE", "Mute/Unmute")
     assert commands["ON"]["label"] == "On"
     assert commands["VOLUME_UP"]["key"] == "VOLUME_UP"
-    assert commands["INPUT_CBL_SAT"]["label"] == "input cbl/sat"
+    assert commands["INPUT_CBL_SAT"]["label"] == "Input cbl/sat"
 
 
 def test_same_name_gets_a_number():

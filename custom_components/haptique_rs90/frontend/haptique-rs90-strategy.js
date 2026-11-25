@@ -29,6 +29,7 @@ const TEXT = {
     sequences: "Sequences",
     apps: "Apps",
     status: "Status",
+    settings: "Settings",
     noApps: "No app enabled. Enable app buttons in Settings → Entities.",
     noDevice: "No Haptique RS90 found. Add the integration first.",
   },
@@ -38,6 +39,7 @@ const TEXT = {
     sequences: "Séquences",
     apps: "Applications",
     status: "État",
+    settings: "Réglages",
     noApps: "Aucune application activée. Activez les boutons d'applications dans Paramètres → Entités.",
     noDevice: "Aucune Haptique RS90 trouvée. Ajoutez d'abord l'intégration.",
   },
@@ -69,7 +71,8 @@ async function collect(hass) {
   const result = await hass.callWS({ type: `${DOMAIN}/dashboard` });
   const remotes = result.remotes || [];
   for (const remote of remotes) {
-    for (const key of ["macros", "sequences", "apps", "status"]) {
+    remote.settings = remote.settings || [];
+    for (const key of ["macros", "sequences", "apps", "status", "settings"]) {
       remote[key] = remote[key].filter((id) => hass.states[id]);
       remote[key].sort((a, b) => name(hass, a).localeCompare(name(hass, b)));
     }
@@ -176,6 +179,20 @@ function remoteView(hass, remote, t, multi) {
       ],
     });
   }
+  if (remote.settings.length) {
+    // RS90 settings (firmware 4.4+): toggles and the Stay ready list.
+    sections.push({
+      type: "grid",
+      cards: [
+        { type: "heading", heading: t.settings, heading_style: "title", icon: "mdi:cog-outline" },
+        ...remote.settings.map((entity) =>
+          entity.startsWith("select.")
+            ? { type: "tile", entity, name: shortName(hass, entity), features: [{ type: "select-options" }] }
+            : { type: "tile", entity, name: shortName(hass, entity), tap_action: { action: "toggle" } },
+        ),
+      ],
+    });
+  }
   return {
     title: multi ? remote.name : t.remote,
     path: multi ? `rs90-${slug(remote.name)}` : "rs90",
@@ -273,7 +290,9 @@ function commandButton(remote, device, cmd, colors) {
     name: label(cmd),
     icon: icon || undefined,
     show_icon: Boolean(icon),
-    show_name: showName || !icon,
+    // Two codes with the same name ("Volume +", "Volume + 2"): show the name
+    // on the numbered one so the buttons can be told apart.
+    show_name: showName || !icon || / \d+$/.test(label(cmd)),
     icon_height: "22px",
     tap_action: {
       action: "perform-action",

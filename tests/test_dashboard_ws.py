@@ -35,6 +35,8 @@ async def _seed(hass, coordinator):
         ("sensor", "remote-1_commands_d1", None),
         ("sensor", "remote-1_info_summary", None),
         ("sensor", "remote-1_battery", None),
+        ("switch", "remote-1_setting_backlight", None),
+        ("select", "remote-1_setting_stay_ready", None),
     ):
         registry.async_get_or_create(
             domain, "haptique_rs90", unique_id, config_entry=entry, capabilities=caps
@@ -52,6 +54,8 @@ async def test_layout_from_registry_and_inventory(hass, coordinator, remote):
     layout = _remote_layout(hass, coordinator)
     assert layout["device_id"] == remote
     assert len(layout["macros"]) == 1 and layout["macros"][0].startswith("switch.")
+    # Settings (firmware 4.4) have their own section, not among the macros.
+    assert len(layout["settings"]) == 2
     assert len(layout["sequences"]) == 1
     assert len(layout["apps"]) == 1  # the disabled app is left out
     # RGB button and battery are status; commands and info summary are not.

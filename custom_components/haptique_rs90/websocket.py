@@ -61,6 +61,7 @@ def _remote_layout(hass: HomeAssistant, coordinator: Any) -> dict[str, Any]:
         "sequences": [],
         "apps": [],
         "status": [],
+        "settings": [],
         "devices": [],
     }
     if device := dr.async_get(hass).async_get(coordinator.device_id or ""):
@@ -70,7 +71,10 @@ def _remote_layout(hass: HomeAssistant, coordinator: Any) -> dict[str, Any]:
         if item.disabled_by:
             continue
         unique_id = item.unique_id or ""
-        if item.domain == "switch":
+        if unique_id.startswith(f"{remote_id}_setting_"):
+            # Firmware 4.4+ settings: own section, not among the macros.
+            layout["settings"].append(item.entity_id)
+        elif item.domain == "switch":
             kind = (item.capabilities or {}).get("haptique_target_kind", "macro")
             if not _target_present(coordinator, remote_id, kind, unique_id):
                 continue
