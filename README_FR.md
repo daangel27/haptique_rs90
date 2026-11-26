@@ -50,6 +50,7 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 - 📱 **Boutons d'applications** : lancent n'importe quelle application installée sur la RS90 (désactivés par défaut, activez ceux qui vous intéressent)
 - 📡 **Commandes des appareils** : envoient n'importe quelle commande IR/IP d'un appareil configuré
 - 🌈 **Anneau lumineux RGB** : bouton et action pour déclencher une animation
+- ⚙️ **Réglages de la RS90** (firmware 4.4+, *nouveau en 1.9.2*) : **Affichage automatique**, **Rétroéclairage du clavier** et **Rester prêt** (5 min / 30 min / Toujours) depuis Home Assistant, synchronisés avec l'écran de la RS90 — ex. touches éclairées et télécommande toujours prête pendant un film
 
 ### Suivi
 - 📊 **Last Macro Result** : dernier résultat d'exécution avec le nom de la macro, l'action et le statut (ex. `CANAL · OFF · skipped (already_in_requested_state)`), avec une ligne dans le journal par résultat
@@ -135,8 +136,11 @@ Toutes les entités sont créées automatiquement.
 | Capteur **Last Key Pressed** | Dernière touche appuyée |
 | Capteurs **Commands - {appareil}** | Nombre de commandes, liste complète en attributs |
 | Capteur **Info Summary** | Tous les identifiants (appareils, macros, séquences, applications) au même endroit, voir [Retrouver les identifiants](#-retrouver-les-identifiants--le-capteur-info-summary) |
+| Interrupteurs **Affichage automatique**, **Rétroéclairage du clavier** et sélecteur **Rester prêt** | Réglages de la RS90 (firmware 4.4+, section Configuration de l'appareil) : écran et touches qui s'allument quand on prend la télécommande, éclairage des touches, et durée pendant laquelle la RS90 reste prête avant la veille profonde (`5 minutes`, `30 minutes`, `Toujours`). Les changements faits sur l'écran de la RS90 apparaissent dans Home Assistant |
 
 > ℹ️ L'état d'une macro est ce que la RS90 signale, **pas** une mesure de l'alimentation de la TV ou de l'ampli.
+
+> ⚠️ **Groupes de macros (firmware 4.4).** Dans l'application web Haptique ([config.haptique.tech](https://config.haptique.tech) → Macros → Groups), les macros d'un même groupe s'enchaînent sans éteindre puis rallumer les appareils partagés. Avec le firmware 4.4 (build 94), cela ne fonctionne que si la macro est lancée **depuis l'écran de la RS90** : lancée depuis Home Assistant (MQTT), toute la macro est rejouée, et les codes bascule peuvent éteindre la TV. La RS90 ne sait alors plus quels appareils sont allumés. Signalé à Haptique.
 
 ---
 
@@ -205,11 +209,11 @@ strategy:
   type: custom:haptique-rs90
   hide_devices: [XBOX]          # onglets à ne pas afficher
   devices:                      # uniquement ces onglets, avec ces commandes
-    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY, PAUSE]
     TV: all
 ```
 
-La sélection faite dans les options de l'intégration s'applique en premier.
+La sélection faite dans les options de l'intégration s'applique en premier. Les ID de commande sont les valeurs `id` du capteur **Commands** de l'appareil (avec le firmware 4.4, le nom fonctionne aussi pour les commandes qui ont un ID technique, ex. `POWER` pour *Power*).
 </details>
 
 ---
@@ -337,7 +341,9 @@ Home Assistant envoie quelques paquets à l'adresse IP de la RS90 jusqu'à ce qu
 
 Chaque réveil apparaît dans l'**Activité** de la RS90 (`wake-up sent`, puis `woke up in 8 s` ou `did not wake up`), comme chaque commande envoyée à un appareil. Après un réveil, Home Assistant attend 4 secondes puis envoie une par une les commandes appuyées entre-temps.
 
-> ⚠️ Juste après son réveil, la RS90 peut encore rater une commande destinée à un appareil piloté par le réseau (ex. Kodi) quand plusieurs sont appuyées d'affilée. Les appareils infrarouges ne sont pas concernés. Laissez la RS90 sur son socle si chaque commande doit passer.
+> ⚠️ Juste après son réveil, la RS90 peut encore rater des commandes envoyées d'affilée (firmware 4.4 : 3 sur 5 passées, alors que les 5 passent quand elle est éveillée). Signalé à Haptique. Laissez la RS90 sur son socle, ou réglez **Rester prêt** sur **Toujours**, si chaque commande doit passer.
+
+> 💡 Firmware 4.4+ : le sélecteur **Rester prêt** règle la durée pendant laquelle la RS90 reste joignable avant la veille profonde. Réglez-le sur **Toujours** (ex. par une automatisation pendant un film) pour éviter les réveils, au prix de l'autonomie.
 
 ---
 
@@ -381,7 +387,9 @@ Limitations connues du firmware (signalées à Haptique) :
 Utilisez **Last Macro Result** et le journal pour voir ce que la RS90 a réellement fait, et `haptique_rs90.query_status` pour relire un état.
 
 ### Une commande d'appareil ne fait rien
-L'Activité affiche `RS90 <appareil> <commande> sent`, mais l'appareil ne réagit pas : vérifiez qu'il n'a pas **deux commandes du même nom** (affichées deux fois dans son capteur **Commands**, ex. deux `POWER`). Les commandes sont envoyées par leur nom : la RS90 utilise donc toujours la même, qui peut être un *Power on* discret sans effet quand l'appareil est déjà allumé. Renommez l'une d'elles dans l'application Haptique (ex. `POWER_ON` / `POWER_OFF`).
+L'Activité affiche `RS90 <appareil> <commande> sent`, mais l'appareil ne réagit pas :
+- **Firmware 4.3 et antérieur** : vérifiez qu'il n'a pas **deux commandes du même nom** (affichées deux fois dans son capteur **Commands**, ex. deux `POWER`). Les commandes sont envoyées par leur nom : la RS90 utilise donc toujours la même, qui peut être un *Power on* discret sans effet quand l'appareil est déjà allumé. Renommez l'une d'elles dans l'application Haptique, ou passez la RS90 en 4.4.
+- **Firmware 4.4** : chaque commande a son propre ID, le bon code est donc envoyé. Si l'appareil ne réagit toujours pas, c'est le code IR lui-même : réapprenez-le dans l'application Haptique.
 
 ### Last Reported App ne change pas quand on quitte une application
 Le firmware signale seulement l'application ouverte, pas le moment où on la quitte.
@@ -391,7 +399,7 @@ Le firmware signale seulement l'application ouverte, pas le moment où on la qui
 ## 📚 Documentation
 
 - **[CHANGELOG_FR.md](CHANGELOG_FR.md)** - Historique des versions
-- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.9.1
+- **[WHATS_NEW_FR.md](WHATS_NEW_FR.md)** - Nouveautés de la 1.9.2
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, séquences, applications et actions en détail (en anglais)
 - **[Guide de l'identifiant d'appareil](documentation/GUIDE_DEVICE_ID_FR.md)** - Trouver l'identifiant de la RS90
 
@@ -426,7 +434,7 @@ Licence MIT. Voir [LICENSE](LICENSE).
 
 ---
 
-**Version :** 1.9.1
+**Version :** 1.9.2
 **Auteurs :** daangel27, avec Claude (Anthropic)
 **Dernière mise à jour :** novembre 2026
 **Langues :** English, Français

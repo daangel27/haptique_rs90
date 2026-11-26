@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
+from .commands import is_selected, unique_commands
 from .const import CONF_DASHBOARD_COMMANDS, DOMAIN
 
 WS_DASHBOARD = f"{DOMAIN}/dashboard"
@@ -60,6 +61,7 @@ def _remote_layout(hass: HomeAssistant, coordinator: Any) -> dict[str, Any]:
         "sequences": [],
         "apps": [],
         "status": [],
+        "settings": [],
         "devices": [],
     }
     if device := dr.async_get(hass).async_get(coordinator.device_id or ""):
@@ -69,7 +71,10 @@ def _remote_layout(hass: HomeAssistant, coordinator: Any) -> dict[str, Any]:
         if item.disabled_by:
             continue
         unique_id = item.unique_id or ""
-        if item.domain == "switch":
+        if unique_id.startswith(f"{remote_id}_setting_"):
+            # Firmware 4.4+ settings: own section, not among the macros.
+            layout["settings"].append(item.entity_id)
+        elif item.domain == "switch":
             kind = (item.capabilities or {}).get("haptique_target_kind", "macro")
             if not _target_present(coordinator, remote_id, kind, unique_id):
                 continue
@@ -94,13 +99,18 @@ def _remote_layout(hass: HomeAssistant, coordinator: Any) -> dict[str, Any]:
     selection = entry.options.get(CONF_DASHBOARD_COMMANDS, {})
     for device in data.get("devices", []):
         name = device.get("name")
-        ids = [cmd.get("id") for cmd in commands.get(name, []) if cmd.get("id")]
-        # The firmware can list the same command twice.
-        ids = list(dict.fromkeys(ids))
+        listed = unique_commands(commands.get(name, []))
         if (chosen := selection.get(device.get("id"))) is not None:
-            ids = [cmd for cmd in ids if cmd in chosen]
+            listed = [cmd for cmd in listed if is_selected(cmd, chosen)]
         layout["devices"].append(
-            {"name": name, "rs90_device_id": device.get("id"), "commands": ids}
+            {
+                "name": name,
+                "rs90_device_id": device.get("id"),
+                "commands": [
+                    {"id": cmd["id"], "key": cmd["key"], "label": cmd["label"]}
+                    for cmd in listed
+                ],
+            }
         )
     layout["devices"].sort(key=lambda device: str(device["name"]).lower())
     return layout

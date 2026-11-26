@@ -15,6 +15,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .commands import find_command, unique_commands
 from .const import (
     COMMAND_EVENT,
     CONF_REMOTE_ID,
@@ -104,6 +105,8 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             "last_target_result": None,  # Last non-retained macro/sequence result
             "led_light_state": "off",  # RGB ring light state
             "led_light_duration": 5,  # Default duration in seconds
+            # Firmware 4.4+: retained settings/<name> (autodisplay, stay_ready, backlight)
+            "settings": {},
         }
 
         self._app_feedback_ready = False
@@ -184,6 +187,22 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
         # Subscribe to test status (for running macro detection)
         await self._subscribe(
             f"{self.base_topic}/{TOPIC_TEST_STATUS}", self._handle_test_status
+        )
+
+        @callback
+        def setting_received(msg):
+            if self._closed:
+                return
+            name = msg.topic.removeprefix(f"{self.base_topic}/settings/")
+            if "/" in name or not msg.payload:
+                return  # ignore settings/<name>/set echoes and cleared topics
+            self.data["settings"][name] = msg.payload
+            self.async_set_updated_data(self.data)
+
+        self._subscriptions.append(
+            await mqtt.async_subscribe(
+                self.hass, f"{self.base_topic}/settings/+", setting_received, qos=0
+            )
         )
 
         await self._subscribe(f"{self.base_topic}/app/list", self._handle_app_list)
@@ -580,6 +599,12 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
     @callback
     def _handle_keys(self, payload: str, replayed: bool = False) -> None:
         """Handle key press events (replayed = retained copy of an old press)."""
+        if not payload or not payload.strip():
+            # Firmware 4.4 no longer keeps `keys` retained and clears the old
+            # retained press with an empty message (seen every few minutes,
+            # when the RS90 reconnects). Not a key press.
+            _LOGGER.debug("Ignoring empty key payload")
+            return
         try:
             # Payload format: "button:#"
             if "button:" in payload:
@@ -725,12 +750,32 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
             ),
             None,
         )
+        event = {"device": device_name, "command": command_name}
+        listed = self.data.get("device_commands", {}).get(device_name, [])
+        if command := find_command(unique_commands(listed), command_name):
+            event["label"] = command["label"]
+            event["key"] = command["key"]
         self._fire_activity(
             COMMAND_EVENT,
-            {"device": device_name, "command": command_name},
+            event,
             ("sensor", f"{self.remote_id}_commands_{rs90_device_id}")
             if rs90_device_id
             else None,
+        )
+
+    async def async_set_setting(self, name: str, value: str) -> None:
+        """Change an RS90 setting (firmware 4.4+): settings/<name>/set.
+
+        The RS90 answers on the retained settings/<name> topic, which updates
+        the entity; nothing is assumed locally.
+        """
+        await self._async_ensure_awake()
+        await mqtt.async_publish(
+            self.hass,
+            f"{self.base_topic}/settings/{name}/set",
+            value,
+            qos=1,
+            retain=False,
         )
 
     async def async_control_led_light(self, state: str, duration: int = 5) -> None:

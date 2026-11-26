@@ -43,6 +43,7 @@ _COMMAND_ICONS = (
     ("VOLUME_DOWN", "mdi:volume-minus"),
     ("VOL_DOWN", "mdi:volume-minus"),
     ("MUTE", "mdi:volume-mute"),
+    ("UNMUTE", "mdi:volume-high"),
     ("CHANNEL", "mdi:television-guide"),
     ("CH_", "mdi:television-guide"),
     ("UP", "mdi:arrow-up-bold"),
@@ -57,7 +58,8 @@ _COMMAND_ICONS = (
     ("HOME", "mdi:home"),
     ("MENU", "mdi:menu"),
     ("INFO", "mdi:information-outline"),
-    ("PLAY", "mdi:play-pause"),
+    ("PLAY_PAUSE", "mdi:play-pause"),
+    ("PLAY", "mdi:play"),
     ("PAUSE", "mdi:pause"),
     ("STOP", "mdi:stop"),
     ("REWIND", "mdi:rewind"),
@@ -83,6 +85,8 @@ def command_icon(command: str | None) -> str:
     name = (command or "").upper()
     if name.isdigit():
         return "mdi:dialpad"
+    if name in ("ON", "OFF"):
+        return "mdi:power"
     for prefix, icon in _COMMAND_ICONS:
         if name.startswith(prefix):
             return icon
@@ -163,8 +167,8 @@ def async_describe_events(
         data = event.data
         return {
             LOGBOOK_ENTRY_NAME: f"RS90 {data.get('device') or 'device'}",
-            LOGBOOK_ENTRY_MESSAGE: f"{ARROW}{data.get('command')} sent",
-            LOGBOOK_ENTRY_ICON: command_icon(data.get("command")),
+            LOGBOOK_ENTRY_MESSAGE: f"{ARROW}{data.get('label') or data.get('command')} sent",
+            LOGBOOK_ENTRY_ICON: command_icon(data.get("key") or data.get("command")),
             **_entity(data),
         }
 

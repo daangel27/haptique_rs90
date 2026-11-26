@@ -1,3 +1,39 @@
+# Nouveautés v1.9.2
+
+**Date de sortie :** 26 novembre 2026 · **Pour :** firmware RS90 4.4
+
+## ⚙️ Nouveau : les réglages de votre RS90 dans Home Assistant
+
+Avec le firmware RS90 4.4, trois réglages de la télécommande apparaissent sur l'appareil RS90 (section Configuration) et sur le tableau de bord (section **Réglages**) :
+
+| Réglage | À quoi il sert | Valeurs |
+|---|---|---|
+| **Affichage automatique** | L'écran et les touches s'allument quand on prend la télécommande | Activé / Désactivé |
+| **Rétroéclairage du clavier** | Éclaire les touches physiques quand l'écran est allumé (de retour avec le firmware 4.4) | Activé / Désactivé |
+| **Rester prêt** | Durée pendant laquelle la RS90 reste joignable avant la veille profonde | 5 minutes / 30 minutes / Toujours |
+
+Changez-les depuis Home Assistant ou sur la RS90 : les deux restent synchronisés. Idées d'automatisations :
+- **Soirée film** : Rester prêt sur **Toujours** pendant qu'une macro tourne, pour que les commandes de Home Assistant n'attendent jamais un réveil, puis retour à 5 minutes pour la batterie.
+- **Pièce sombre** : rétroéclairage du clavier le soir, coupé la journée.
+
+## 🐛 Corrections pour le firmware 4.4
+
+Le firmware 4.4 corrige les commandes en double : chaque code a maintenant son propre ID, et les codes bascule comme le **Power** de l'AMPLI fonctionnent enfin depuis Home Assistant. Certains de ces ID sont techniques (`6adf6831cd975fa9bbfbb366`), et le tableau de bord les affichait sur les boutons :
+
+- **Les boutons affichent le nom de la commande** (`Power`, `Mute/Unmute`, `Volume + 2`…) et la section **Alimentation** revient avec `On`, `Off` et `Power`.
+- Votre **sélection de commandes** faite avec le firmware 4.3 reste valable.
+- L'**Activité** affiche `RS90 AMPLI → Power sent` au lieu de l'ID.
+- Fini les avertissements « Unexpected key payload format » dans le journal : le firmware 4.4 efface l'ancien appui de touche par un message vide.
+
+## ⚠️ Bon à savoir
+
+- Les automatisations qui envoient `POWER`, `MUTE_UNMUTE` ou `PLAY_PAUSE` peuvent devoir utiliser les nouveaux ID (`ON`/`OFF`, `MUTE`/`UNMUTE`, `PLAY`/`PAUSE`) : voir le capteur **Commands** de l'appareil.
+- Les **groupes de macros** (nouveauté du firmware 4.4, à créer sur config.haptique.tech) ne s'appliquent que si la macro est lancée depuis l'écran de la RS90, pas depuis Home Assistant. Signalé à Haptique.
+
+Toujours en firmware 4.3 ? Rien ne change pour vous.
+
+---
+
 # Nouveautés v1.9.1
 
 **Date de sortie :** 18 novembre 2026 · **Type :** correctif

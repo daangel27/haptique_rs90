@@ -205,6 +205,24 @@
       "wake": {
         "name": "Réveiller"
       }
+    },
+    "switch": {
+      "autodisplay": {
+        "name": "Affichage automatique"
+      },
+      "backlight": {
+        "name": "Rétroéclairage du clavier"
+      }
+    },
+    "select": {
+      "stay_ready": {
+        "name": "Rester prêt",
+        "state": {
+          "5": "5 minutes",
+          "30": "30 minutes",
+          "always": "Toujours"
+        }
+      }
     }
   },
   "selector": {

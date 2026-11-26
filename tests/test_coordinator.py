@@ -231,3 +231,15 @@ async def test_retained_key_press_is_not_replayed(hass, coordinator):
     await message(hass, "keys", "button:1")
     await hass.async_block_till_done()
     assert [e.data["button"] for e in events] == [1]
+
+
+async def test_empty_key_payload_is_ignored(hass, coordinator, caplog):
+    """Firmware 4.4 clears the retained `keys` topic with an empty message."""
+    events = []
+    hass.bus.async_listen("haptique_rs90_key_pressed", events.append)
+    await message(hass, "keys", "button:5")
+    await message(hass, "keys", "")
+    await hass.async_block_till_done()
+    assert [e.data["button"] for e in events] == [5]
+    assert coordinator.data["last_key"] == "5"
+    assert "Unexpected key payload" not in caplog.text

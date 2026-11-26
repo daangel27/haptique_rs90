@@ -50,6 +50,7 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 - 📱 **App buttons**: launch any app installed on the RS90 (disabled by default, enable the ones you want)
 - 📡 **Device commands**: send any IR/IP command of any configured device
 - 🌈 **RGB Ring Light**: button and action to trigger an animation
+- ⚙️ **RS90 settings** (firmware 4.4+, *new in 1.9.2*): **Autodisplay**, **Keypad backlight** and **Stay ready** (5 min / 30 min / Always) from Home Assistant, in sync with the RS90 screen — e.g. keys lit and the remote always ready during a movie
 
 ### Monitoring
 - 📊 **Last Macro Result**: last execution result with macro name, action and status (e.g. `CANAL · OFF · skipped (already_in_requested_state)`), with one logbook entry per result
@@ -135,8 +136,11 @@ All entities are created automatically.
 | **Last Key Pressed** sensor | Last pressed button |
 | **Commands - {device}** sensors | Number of commands, full list in attributes |
 | **Info Summary** sensor | All IDs (devices, macros, sequences, apps) in one place, see [Finding the IDs](#-finding-the-ids-the-info-summary-sensor) |
+| **Autodisplay**, **Keypad backlight** switches and **Stay ready** select | RS90 settings (firmware 4.4+, Configuration section of the device): screen and keys light up when the remote is picked up, key lighting, and how long the RS90 stays ready before deep sleep (`5 minutes`, `30 minutes`, `Always`). Changes made on the RS90 screen show up in Home Assistant |
 
 > ℹ️ Macro states are what the RS90 reports, **not** a measurement of the TV or amplifier power.
+
+> ⚠️ **Macro groups (firmware 4.4).** In the Haptique web app ([config.haptique.tech](https://config.haptique.tech) → Macros → Groups), macros in the same group switch without turning shared devices off and on again. With firmware 4.4 (build 94) this only works when the macro is started **from the RS90 screen**: started from Home Assistant (MQTT), the whole macro is replayed, so toggle codes can turn the TV off. The RS90 then no longer knows which devices are on. Reported to Haptique.
 
 ---
 
@@ -205,11 +209,11 @@ strategy:
   type: custom:haptique-rs90
   hide_devices: [XBOX]          # views not to show
   devices:                      # only these device views, with these commands
-    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY_PAUSE]
+    KODI: [UP, DOWN, LEFT, RIGHT, OK, PLAY, PAUSE]
     TV: all
 ```
 
-The selection made in the integration options applies first.
+The selection made in the integration options applies first. Command IDs are the `id` values of the device's **Commands** sensor (with firmware 4.4, the command name also works for commands that have a technical ID, e.g. `POWER` for *Power*).
 </details>
 
 ---
@@ -337,7 +341,9 @@ Home Assistant sends a few packets to the RS90's IP address until it reports onl
 
 Each wake-up shows in the RS90's **Activity** (`wake-up sent`, then `woke up in 8 s` or `did not wake up`), along with every device command sent. After a wake-up, Home Assistant waits 4 seconds and then sends the commands pressed meanwhile, one by one.
 
-> ⚠️ Right after waking up, the RS90 can still miss a command sent to a network-controlled device (e.g. Kodi) when several are pressed in a row. Infrared devices are not affected. Leave the RS90 on its dock when every command must go through.
+> ⚠️ Right after waking up, the RS90 can still miss commands when several are sent in a row (firmware 4.4: 3 of 5 went through, while all 5 do when it is awake). Reported to Haptique. Leave the RS90 on its dock, or set **Stay ready** to **Always**, when every command must go through.
+
+> 💡 Firmware 4.4+: the **Stay ready** select sets how long the RS90 stays reachable before deep sleep. Set it to **Always** (e.g. from an automation during a movie) to avoid wake-ups, at the cost of battery life.
 
 ---
 
@@ -381,7 +387,9 @@ Known firmware limitations (reported to Haptique):
 Use **Last Macro Result** and the logbook to see what the RS90 actually did, and `haptique_rs90.query_status` to re-read a state.
 
 ### A device command does nothing
-The Activity shows `RS90 <device> <command> sent`, but the device doesn't react: check that the device doesn't have **two commands with the same name** (shown twice in its **Commands** sensor, e.g. two `POWER`). Commands are sent by name, so the RS90 always uses the same one, which may be a discrete *Power on* that does nothing when the device is already on. Rename one of them in the Haptique app (e.g. `POWER_ON` / `POWER_OFF`).
+The Activity shows `RS90 <device> <command> sent`, but the device doesn't react:
+- **Firmware 4.3 and older**: check that the device doesn't have **two commands with the same name** (shown twice in its **Commands** sensor, e.g. two `POWER`). Commands are sent by name, so the RS90 always uses the same one, which may be a discrete *Power on* that does nothing when the device is already on. Rename one of them in the Haptique app, or update the RS90 to 4.4.
+- **Firmware 4.4**: every command has its own ID, so the right code is sent. If the device still doesn't react, the IR code itself is wrong: learn it again in the Haptique app.
 
 ### Last Reported App doesn't change when leaving an app
 The firmware only reports the app that was opened, not when you leave it.
@@ -391,7 +399,7 @@ The firmware only reports the app that was opened, not when you leave it.
 ## 📚 Documentation
 
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.9.1
+- **[WHATS_NEW.md](WHATS_NEW.md)** - What's new in 1.9.2
 - **[Standard MQTT](documentation/STANDARD_MQTT.md)** - Macros, sequences, apps and actions in detail
 - **[Device ID guide](documentation/GUIDE_DEVICE_ID.md)** - Finding the RS90 device ID
 
@@ -426,7 +434,7 @@ MIT License. See [LICENSE](LICENSE).
 
 ---
 
-**Version:** 1.9.1
+**Version:** 1.9.2
 **Authors:** daangel27, with Claude (Anthropic)
 **Last updated:** November 2026
 **Languages:** English, Français

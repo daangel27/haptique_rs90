@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.2] - 2026-11-26
+
+### 🐛 Fixes for RS90 firmware 4.4
+Firmware 4.4 changed how device commands are published: readable names (`On`, `Volume +`), grouped commands split (`POWER` → `ON` + `OFF`, `MUTE_UNMUTE` → `MUTE` + `UNMUTE`, `PLAY_PAUSE` → `PLAY` + `PAUSE`), and a technical ID (e.g. `6adf6831cd975fa9bbfbb366`) for toggle codes and for two codes with the same name.
+- Dashboard: buttons show the command **name** instead of its ID (no more `6adf6831cd…` buttons); two codes with the same name are numbered (`Volume +`, `Volume + 2`)
+- Dashboard: the **Power** section gets `On`, `Off` and the `Power` toggle again, and toggle codes such as `Mute/Unmute` get their icon and place on the remote
+- Options → dashboard commands: the list shows command names, and a selection saved with firmware 4.3 keeps working (`POWER` still selects `On`, `Off` and `Power`)
+- Activity: device commands show their name and icon (`RS90 AMPLI → Power sent`)
+- No more "Unexpected key payload format" warnings: the empty message firmware 4.4 publishes on `keys` to clear the old retained press is ignored
+- Firmware 4.3 and older work as before
+
+### ✨ New for RS90 firmware 4.4
+- **Autodisplay** and **Keypad backlight** switches, **Stay ready** select (`5 minutes`, `30 minutes`, `Always`) in the Configuration section of the RS90: they follow the `settings/*` topics published by firmware 4.4 (also when changed on the RS90 screen) and only appear when the RS90 publishes them
+
+### 📝 Documentation
+- README: macro groups only apply when a macro is started from the RS90 screen (firmware 4.4); commands lost right after a wake-up affect every device, not only network ones
+
+### ⚠️ Check your automations after updating the RS90 to 4.4
+Automations and scripts that send `POWER`, `MUTE_UNMUTE` or `PLAY_PAUSE` to a device that now lists `ON`/`OFF`, `MUTE`/`UNMUTE` or `PLAY`/`PAUSE` must use the new IDs (see the device's **Commands** sensor).
+
+---
+
 ## [1.9.1] - 2026-11-18
 
 ### 🐛 Fixes

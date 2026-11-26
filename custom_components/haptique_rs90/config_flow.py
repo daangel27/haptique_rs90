@@ -15,6 +15,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
+from .commands import is_selected, unique_commands
 from .const import (
     CONF_DASHBOARD_COMMANDS,
     CONF_NAME,
@@ -220,18 +221,15 @@ class HaptiqueRS90OptionsFlow(config_entries.OptionsFlow):
             ),
         )
 
-    def _device_commands(self) -> tuple[dict[str, Any] | None, list[str]]:
-        """The selected device and its command names, without duplicates."""
+    def _device_commands(
+        self,
+    ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
+        """The selected device and its commands, without duplicates."""
         devices, commands = self._inventory()
         device = next((d for d in devices if d["id"] == self._device_id), None)
         if device is None:
             return None, []
-        available = list(
-            dict.fromkeys(
-                cmd["id"] for cmd in commands.get(device["name"], []) if cmd.get("id")
-            )
-        )
-        return device, available
+        return device, unique_commands(commands.get(device["name"], []))
 
     async def async_step_dashboard_commands(
         self, user_input: dict[str, Any] | None = None
@@ -279,12 +277,14 @@ class HaptiqueRS90OptionsFlow(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Tick the command buttons to show for one device."""
-        device, available = self._device_commands()
+        device, listed = self._device_commands()
         if device is None:
             return self.async_abort(reason="no_devices")
+        available = [cmd["id"] for cmd in listed]
         selection = dict(self._config_entry.options.get(CONF_DASHBOARD_COMMANDS, {}))
         errors: dict[str, str] = {}
-        ticked = [c for c in selection.get(self._device_id) or [] if c in available]
+        saved = selection.get(self._device_id) or []
+        ticked = [cmd["id"] for cmd in listed if is_selected(cmd, saved)]
 
         if user_input is not None:
             shortcut = user_input.get("shortcut", SHORTCUT_NONE)
@@ -316,7 +316,12 @@ class HaptiqueRS90OptionsFlow(config_entries.OptionsFlow):
                     ),
                     vol.Optional("commands", default=ticked): selector.SelectSelector(
                         selector.SelectSelectorConfig(
-                            options=available,
+                            options=[
+                                selector.SelectOptionDict(
+                                    value=cmd["id"], label=cmd["label"]
+                                )
+                                for cmd in listed
+                            ],
                             multiple=True,
                             mode=selector.SelectSelectorMode.LIST,
                         )
