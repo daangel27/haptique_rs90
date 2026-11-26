@@ -139,6 +139,8 @@ All entities are created automatically.
 
 > ℹ️ Macro states are what the RS90 reports, **not** a measurement of the TV or amplifier power.
 
+> ⚠️ **Macro groups (firmware 4.4).** In the Haptique web app ([config.haptique.tech](https://config.haptique.tech) → Macros → Groups), macros in the same group switch without turning shared devices off and on again. With firmware 4.4 (build 94) this only works when the macro is started **from the RS90 screen**: started from Home Assistant (MQTT), the whole macro is replayed, so toggle codes can turn the TV off. The RS90 then no longer knows which devices are on. Reported to Haptique.
+
 ---
 
 ## 📺 Dashboard
@@ -338,7 +340,7 @@ Home Assistant sends a few packets to the RS90's IP address until it reports onl
 
 Each wake-up shows in the RS90's **Activity** (`wake-up sent`, then `woke up in 8 s` or `did not wake up`), along with every device command sent. After a wake-up, Home Assistant waits 4 seconds and then sends the commands pressed meanwhile, one by one.
 
-> ⚠️ Right after waking up, the RS90 can still miss a command sent to a network-controlled device (e.g. Kodi) when several are pressed in a row. Infrared devices are not affected. Leave the RS90 on its dock when every command must go through.
+> ⚠️ Right after waking up, the RS90 can still miss commands when several are sent in a row (firmware 4.4: 3 of 5 went through, while all 5 do when it is awake). Reported to Haptique. Leave the RS90 on its dock, or set **Stay ready** to **Always**, when every command must go through.
 
 > 💡 Firmware 4.4+: the **Stay ready** select sets how long the RS90 stays reachable before deep sleep. Set it to **Always** (e.g. from an automation during a movie) to avoid wake-ups, at the cost of battery life.
 

@@ -139,6 +139,8 @@ Toutes les entités sont créées automatiquement.
 
 > ℹ️ L'état d'une macro est ce que la RS90 signale, **pas** une mesure de l'alimentation de la TV ou de l'ampli.
 
+> ⚠️ **Groupes de macros (firmware 4.4).** Dans l'application web Haptique ([config.haptique.tech](https://config.haptique.tech) → Macros → Groups), les macros d'un même groupe s'enchaînent sans éteindre puis rallumer les appareils partagés. Avec le firmware 4.4 (build 94), cela ne fonctionne que si la macro est lancée **depuis l'écran de la RS90** : lancée depuis Home Assistant (MQTT), toute la macro est rejouée, et les codes bascule peuvent éteindre la TV. La RS90 ne sait alors plus quels appareils sont allumés. Signalé à Haptique.
+
 ---
 
 ## 📺 Tableau de bord
@@ -338,7 +340,7 @@ Home Assistant envoie quelques paquets à l'adresse IP de la RS90 jusqu'à ce qu
 
 Chaque réveil apparaît dans l'**Activité** de la RS90 (`wake-up sent`, puis `woke up in 8 s` ou `did not wake up`), comme chaque commande envoyée à un appareil. Après un réveil, Home Assistant attend 4 secondes puis envoie une par une les commandes appuyées entre-temps.
 
-> ⚠️ Juste après son réveil, la RS90 peut encore rater une commande destinée à un appareil piloté par le réseau (ex. Kodi) quand plusieurs sont appuyées d'affilée. Les appareils infrarouges ne sont pas concernés. Laissez la RS90 sur son socle si chaque commande doit passer.
+> ⚠️ Juste après son réveil, la RS90 peut encore rater des commandes envoyées d'affilée (firmware 4.4 : 3 sur 5 passées, alors que les 5 passent quand elle est éveillée). Signalé à Haptique. Laissez la RS90 sur son socle, ou réglez **Rester prêt** sur **Toujours**, si chaque commande doit passer.
 
 > 💡 Firmware 4.4+ : le sélecteur **Rester prêt** règle la durée pendant laquelle la RS90 reste joignable avant la veille profonde. Réglez-le sur **Toujours** (ex. par une automatisation pendant un film) pour éviter les réveils, au prix de l'autonomie.
 
