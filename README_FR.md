@@ -50,6 +50,7 @@ Intégration Home Assistant pour la télécommande universelle **Haptique RS90**
 - 📱 **Boutons d'applications** : lancent n'importe quelle application installée sur la RS90 (désactivés par défaut, activez ceux qui vous intéressent)
 - 📡 **Commandes des appareils** : envoient n'importe quelle commande IR/IP d'un appareil configuré
 - 🌈 **Anneau lumineux RGB** : bouton et action pour déclencher une animation
+- ⚙️ **Réglages de la RS90** (firmware 4.4+, *nouveau en 1.9.2*) : **Affichage automatique**, **Rétroéclairage du clavier** et **Rester prêt** (5 min / 30 min / Toujours) depuis Home Assistant, synchronisés avec l'écran de la RS90 — ex. touches éclairées et télécommande toujours prête pendant un film
 
 ### Suivi
 - 📊 **Last Macro Result** : dernier résultat d'exécution avec le nom de la macro, l'action et le statut (ex. `CANAL · OFF · skipped (already_in_requested_state)`), avec une ligne dans le journal par résultat

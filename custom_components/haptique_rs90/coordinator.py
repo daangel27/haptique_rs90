@@ -599,6 +599,12 @@ class HaptiqueRS90Coordinator(DataUpdateCoordinator):
     @callback
     def _handle_keys(self, payload: str, replayed: bool = False) -> None:
         """Handle key press events (replayed = retained copy of an old press)."""
+        if not payload or not payload.strip():
+            # Firmware 4.4 no longer keeps `keys` retained and clears the old
+            # retained press with an empty message (seen every few minutes,
+            # when the RS90 reconnects). Not a key press.
+            _LOGGER.debug("Ignoring empty key payload")
+            return
         try:
             # Payload format: "button:#"
             if "button:" in payload:

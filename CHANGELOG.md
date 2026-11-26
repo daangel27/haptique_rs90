@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.9.2] - 2026-11-25
+## [1.9.2] - 2026-11-26
 
 ### 🐛 Fixes for RS90 firmware 4.4
 Firmware 4.4 changed how device commands are published: readable names (`On`, `Volume +`), grouped commands split (`POWER` → `ON` + `OFF`, `MUTE_UNMUTE` → `MUTE` + `UNMUTE`, `PLAY_PAUSE` → `PLAY` + `PAUSE`), and a technical ID (e.g. `6adf6831cd975fa9bbfbb366`) for toggle codes and for two codes with the same name.
@@ -15,6 +15,7 @@ Firmware 4.4 changed how device commands are published: readable names (`On`, `V
 - Dashboard: the **Power** section gets `On`, `Off` and the `Power` toggle again, and toggle codes such as `Mute/Unmute` get their icon and place on the remote
 - Options → dashboard commands: the list shows command names, and a selection saved with firmware 4.3 keeps working (`POWER` still selects `On`, `Off` and `Power`)
 - Activity: device commands show their name and icon (`RS90 AMPLI → Power sent`)
+- No more "Unexpected key payload format" warnings: the empty message firmware 4.4 publishes on `keys` to clear the old retained press is ignored
 - Firmware 4.3 and older work as before
 
 ### ✨ New for RS90 firmware 4.4

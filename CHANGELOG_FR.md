@@ -7,7 +7,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [1.9.2] - 2026-11-25
+## [1.9.2] - 2026-11-26
 
 ### 🐛 Corrections pour le firmware RS90 4.4
 Le firmware 4.4 publie les commandes des appareils autrement : noms lisibles (`On`, `Volume +`), commandes regroupées séparées (`POWER` → `ON` + `OFF`, `MUTE_UNMUTE` → `MUTE` + `UNMUTE`, `PLAY_PAUSE` → `PLAY` + `PAUSE`), et un ID technique (ex. `6adf6831cd975fa9bbfbb366`) pour les codes bascule et pour deux codes du même nom.
@@ -15,6 +15,7 @@ Le firmware 4.4 publie les commandes des appareils autrement : noms lisibles (`O
 - Tableau de bord : la section **Alimentation** retrouve `On`, `Off` et la bascule `Power`, et les codes bascule comme `Mute/Unmute` retrouvent leur icône et leur place sur la télécommande
 - Options → commandes du tableau de bord : la liste affiche le nom des commandes, et une sélection faite avec le firmware 4.3 reste valable (`POWER` sélectionne toujours `On`, `Off` et `Power`)
 - Activité : les commandes envoyées affichent leur nom et leur icône (`RS90 AMPLI → Power sent`)
+- Fini les avertissements « Unexpected key payload format » : le message vide que le firmware 4.4 publie sur `keys` pour effacer l'ancien appui retenu est ignoré
 - Les firmwares 4.3 et antérieurs fonctionnent comme avant
 
 ### ✨ Nouveau pour le firmware RS90 4.4

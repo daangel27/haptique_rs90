@@ -50,6 +50,7 @@ Home Assistant integration for the **Haptique RS90** universal remote via MQTT: 
 - 📱 **App buttons**: launch any app installed on the RS90 (disabled by default, enable the ones you want)
 - 📡 **Device commands**: send any IR/IP command of any configured device
 - 🌈 **RGB Ring Light**: button and action to trigger an animation
+- ⚙️ **RS90 settings** (firmware 4.4+, *new in 1.9.2*): **Autodisplay**, **Keypad backlight** and **Stay ready** (5 min / 30 min / Always) from Home Assistant, in sync with the RS90 screen — e.g. keys lit and the remote always ready during a movie
 
 ### Monitoring
 - 📊 **Last Macro Result**: last execution result with macro name, action and status (e.g. `CANAL · OFF · skipped (already_in_requested_state)`), with one logbook entry per result

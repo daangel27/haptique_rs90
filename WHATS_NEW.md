@@ -1,14 +1,34 @@
 # What's New in v1.9.2
 
-**Release date:** November 25, 2026 · **Type:** Fixes + new settings · **For:** RS90 firmware 4.4
+**Release date:** November 26, 2026 · **For:** RS90 firmware 4.4
 
-RS90 firmware 4.4 fixes duplicate commands: every code now has its own ID, so the AMPLI **Power** toggle finally works from Home Assistant. But some of these IDs are technical (`6adf6831cd975fa9bbfbb366`), and the dashboard showed them on the buttons. 1.9.2 adapts the integration:
+## ⚙️ New: your RS90 settings in Home Assistant
+
+With RS90 firmware 4.4, three settings of the remote show up on the RS90 device (Configuration section) and on the dashboard (**Settings** section):
+
+| Setting | What it does | Values |
+|---|---|---|
+| **Autodisplay** | Screen and keys light up when you pick up the remote | On / Off |
+| **Keypad backlight** | Lights the physical keys while the screen is on (back in firmware 4.4) | On / Off |
+| **Stay ready** | How long the RS90 stays reachable before deep sleep | 5 minutes / 30 minutes / Always |
+
+Change them from Home Assistant or on the RS90: both stay in sync. Ideas for automations:
+- **Movie night**: Stay ready = **Always** while a macro runs, so commands from Home Assistant never wait for a wake-up, then back to 5 minutes to save battery.
+- **Dark room**: Keypad backlight on in the evening, off during the day.
+
+## 🐛 Fixes for firmware 4.4
+
+Firmware 4.4 fixes duplicate commands: every code now has its own ID, so toggle codes such as the AMPLI **Power** finally work from Home Assistant. Some of these IDs are technical (`6adf6831cd975fa9bbfbb366`), and the dashboard showed them on the buttons:
 
 - **Buttons show the command name** (`Power`, `Mute/Unmute`, `Volume + 2`…) and the **Power** section is back with `On`, `Off` and `Power`.
 - Your **dashboard command selection** made with firmware 4.3 still works.
 - The **Activity** shows `RS90 AMPLI → Power sent` instead of the ID.
-- **New: RS90 settings in Home Assistant.** With firmware 4.4, the RS90 device gets **Autodisplay** and **Keypad backlight** switches and a **Stay ready** select (`5 minutes`, `30 minutes`, `Always`). Handy for automations: keys lit during a movie, or **Always** ready so the RS90 never needs waking up.
-- ⚠️ After updating the RS90 to 4.4, automations that send `POWER`, `MUTE_UNMUTE` or `PLAY_PAUSE` may need the new IDs (`ON`/`OFF`, `MUTE`/`UNMUTE`, `PLAY`/`PAUSE`): check the device's **Commands** sensor.
+- No more "Unexpected key payload format" warnings in the log: firmware 4.4 clears the old key press with an empty message.
+
+## ⚠️ Good to know
+
+- Automations that send `POWER`, `MUTE_UNMUTE` or `PLAY_PAUSE` may need the new IDs (`ON`/`OFF`, `MUTE`/`UNMUTE`, `PLAY`/`PAUSE`): check the device's **Commands** sensor.
+- **Macro groups** (new in firmware 4.4, set up on config.haptique.tech) only apply when a macro is started from the RS90 screen, not from Home Assistant. Reported to Haptique.
 
 Still on firmware 4.3? Nothing changes for you.
 
